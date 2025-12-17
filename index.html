@@ -1,0 +1,1089 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>競馬</title>
+
+  <style>
+    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans JP",sans-serif;margin:0;background:#f5f5f5;color:#111}
+    .wrap{max-width:980px;margin:0 auto;padding:16px}
+    h1{font-size:18px;margin:0 0 10px}
+    .hidden{display:none !important;}
+
+    button{padding:10px 12px;border-radius:10px;border:1px solid #bbb;background:#fff;cursor:pointer}
+    button:hover{background:#f7f7f7}
+    .primary{border-color:#111}
+
+    .card{border:1px solid #ddd;border-radius:12px;background:#fff;padding:14px}
+
+    /* ===== タイトル画面 ===== */
+    .titleScreen{position:fixed;inset:0;background:#fff;display:none;place-items:center;z-index:9999}
+    .titleScreen.show{display:grid}
+    .titleInner{text-align:center;padding:18px;width:min(760px, calc(100vw - 36px))}
+    .gameTitle{font-size:22px;font-weight:900;margin:0 0 18px}
+    .startBtn{border:1px solid #111;border-radius:12px;padding:12px 18px;font-size:16px;font-weight:800}
+
+    /* ===== プロローグ（文章＋画像、次へは文章欄の中央下） ===== */
+    .proGrid{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;align-items:stretch}
+    @media (max-width: 860px){ .proGrid{grid-template-columns:1fr;} }
+    .proLeft{display:flex;flex-direction:column;min-height:260px}
+    .proText{font-size:16px;line-height:1.9;white-space:pre-wrap}
+    .proLeft .spacer{flex:1}
+    .proLeft .btnRow{display:flex;justify-content:center;margin-top:12px}
+    .imgWrap{border:1px solid #e5e5e5;border-radius:10px;overflow:hidden;background:#000;min-height:220px}
+    .img{width:100%;height:100%;object-fit:contain;display:block}
+
+    /* ===== 購入UI（あなたの改良版ベース） ===== */
+    .stack{display:grid;gap:12px}
+    .win{border:1px solid #ddd;border-radius:12px;background:#fff;padding:14px}
+    .panel{border:1px solid #e5e5e5;border-radius:12px;padding:12px;background:#fafafa}
+
+    .tabsRow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap}
+    .tab{padding:10px 12px;border:1px solid #bbb;border-radius:10px;background:#fff;cursor:pointer}
+    .tab.active{border-color:#111}
+    .cashBig{font-weight:800;font-size:18px}
+
+    .hint{color:#666;font-size:12px;line-height:1.6;margin-top:8px}
+    .step{font-size:16px;font-weight:800;color:#111;margin:12px 0 8px}
+
+    .numbers{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+    @media (max-width: 820px){.numbers{grid-template-columns:repeat(6,1fr)}}
+    @media (max-width: 620px){.numbers{grid-template-columns:repeat(4,1fr)}}
+    .numBtn{padding:10px 8px;border:1px solid #bbb;border-radius:10px;background:#fff;cursor:pointer;text-align:left}
+    .numBtn.active{border-color:#111}
+    .numSmall{display:block;color:#666;font-size:11px;margin-top:3px}
+
+    /* 金額 */
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+    input[type="number"]{padding:10px 10px;border:1px solid #bbb;border-radius:10px;width:160px}
+    .amountBar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .amtBtn{padding:10px 12px;border:1px solid #bbb;border-radius:10px;background:#fff;cursor:pointer}
+    .amtBtn:active{transform:translateY(1px)}
+
+    /* 購入馬券 */
+    table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:10px;overflow:hidden}
+    th,td{padding:8px 8px;border-bottom:1px solid #eee;text-align:left;vertical-align:top}
+    th{background:#fafafa}
+    .muted{color:#777;font-size:12px}
+    .danger{color:#b00020}
+
+    .slipHead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-end}
+    .slipTotals{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+    .slipTotal{font-weight:800;font-size:16px}
+    .slipRemain{font-weight:800;font-size:16px}
+
+    .confirmBtn{
+      font-weight:800;
+      font-size:16px;
+      padding:12px 16px;
+      min-width:260px;
+      border-color:#111;
+    }
+    .confirmBtn.disabled{
+      background:#ddd;
+      color:#888;
+      border-color:#aaa;
+      cursor:not-allowed;
+    }
+
+    /* 出走表（縦横スクロール） */
+    .scrollBox{max-height:340px; overflow:auto; border:1px solid #eee; border-radius:10px; background:#fff}
+    .dataTable{min-width:900px; margin:0 auto;} /* 横スクロール出す */
+    .nowrap{white-space:nowrap;}
+
+    /* ===== 動画 ===== */
+    video{width:100%;max-height:520px;border-radius:10px;background:#000}
+    .videoCard{border:1px solid #ddd;border-radius:12px;background:#fff;padding:14px}
+
+    /* ===== 清算（明るい配色、黒背景なし） ===== */
+    .settleGrid{display:grid;grid-template-columns:1.25fr .85fr;gap:12px;align-items:start}
+    @media (max-width: 900px){ .settleGrid{grid-template-columns:1fr;} }
+
+    .panelCard{
+      border:1px solid #d9dde6;border-radius:14px;background:linear-gradient(180deg,#ffffff 0%,#f8f9fb 100%);
+      padding:14px;box-shadow: 0 10px 24px rgba(0,0,0,.06);
+    }
+    .panelTitle{font-weight:900;margin:0 0 10px;font-size:14px}
+
+    .settleTable{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e3e6ee}
+    .settleTable th,.settleTable td{padding:10px 10px;border-bottom:1px solid #eef1f6;vertical-align:top}
+    .settleTable th{background:#f3f6fb;font-weight:900;color:#223}
+
+    .badgeHit{display:inline-block;padding:2px 8px;border-radius:999px;background:#e7f7ea;border:1px solid #bfe8c6;color:#167a2c;font-size:11px;font-weight:900;margin-left:6px}
+    .badgeLose{display:inline-block;padding:2px 8px;border-radius:999px;background:#fdeaea;border:1px solid #f4bcbc;color:#b00020;font-size:11px;font-weight:900;margin-left:6px}
+
+    /* 指示：4行は同じフォントサイズ（大） */
+    .sumLine{font-size:22px;font-weight:950;letter-spacing:.2px;line-height:1.35;margin:6px 0}
+    .deltaPlus{color:#167a2c}
+    .deltaMinus{color:#b00020}
+
+    .settleImg{width:100%;border-radius:14px;border:1px solid #e3e6ee;background:#000;display:block;margin-top:10px}
+
+    .settleActions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:16px}
+    .btnGhost{background:#fff;border:1px solid #cfd5e2}
+    .btnMain{background:#111;color:#fff;border:1px solid #111}
+    .btnMain:hover{background:#222}
+
+    /* ===== GAME OVER ===== */
+    .gameOver{position:fixed;inset:0;background:#000;color:#fff;display:grid;place-items:center;z-index:10000}
+    .gameOver.show{display:grid}
+    .gameOverText{font-size:56px;font-weight:950;letter-spacing:2px}
+  
+    .rateScreen{position:fixed;inset:0;background:#fff;color:#000;display:grid;place-items:center;z-index:9998}
+
+    /* ===== 本物タイトル（黒背景・白文字、ボタンなし・任意入力で開始） ===== */
+    #screenRealTitle{background:#000;color:#fff;}
+    #screenRealTitle .gameTitle{color:#fff;}
+    #screenRealTitle .muted{color:#aaa;}
+    #screenRealTitle .titleImage{
+      width: 55%;
+      max-width: 520px;
+      height: auto;
+      display: block;
+      margin: 18px auto 0;
+      object-fit: contain;
+    }
+
+</style>
+</head>
+
+<body>
+
+
+<!-- 本物タイトル -->
+<section id="screenRealTitle" class="titleScreen show" tabindex="0" aria-label="Real Title">
+  <div class="titleInner">
+    <div class="gameTitle" style="font-size:52px;letter-spacing:0.04em">Horse racing</div>
+    <img src="data/horce.png" alt="Horse racing" class="titleImage">
+    <div class="muted" style="margin-top:18px;font-weight:700">クリック / キー入力で開始</div>
+  </div>
+</section>
+
+<!-- タイトル（話ごとに文言が変わる） -->
+<section id="screenTitle" class="titleScreen">
+  <div class="titleInner">
+    <div class="gameTitle" id="titleText">（タイトル）</div>
+    <button class="startBtn" id="btnTitleNext">次へ</button>
+  </div>
+</section>
+
+<!-- GAME OVER -->
+<section id="screenGameOver" class="gameOver hidden">
+  <div class="gameOverText">GAME OVER</div>
+</section>
+
+<!-- 音 -->
+<audio id="bgm" src="data/City_Ambi-Street02-2.mp3" loop preload="auto"></audio>
+<audio id="seCart" src="data/cart.mp3" preload="auto"></audio>
+<audio id="seChoice" src="data/choise.mp3" preload="auto"></audio>
+<audio id="seMoney" src="data/money.mp3" preload="auto"></audio>
+<audio id="taiko01" src="data/taiko01.mp3" preload="auto"></audio>
+<audio id="taiko02" src="data/taiko02.mp3" preload="auto"></audio>
+
+<div class="wrap">
+  <h1 id="headerTitle"></h1>
+
+  <!-- プロローグ -->
+  <section id="screenPrologue" class="hidden">
+    <div class="card">
+      <div class="proGrid">
+        <div class="proLeft">
+          <div class="proText" id="proText">-</div>
+          <div class="spacer"></div>
+          <div class="btnRow">
+            <button class="primary" id="btnProNext">次へ</button>
+          </div>
+        </div>
+        <div class="imgWrap">
+          <img class="img" id="proImage" src="data/01.png" alt="プロローグ画像">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 馬券購入 -->
+  <section id="screenBuy" class="hidden">
+    <div class="stack">
+
+      <!-- ① 馬券選択・購入 -->
+      <section class="win">
+        <div class="panel">
+          <div class="tabsRow">
+            <div class="tabs">
+              <div class="tab active" id="tabWin">単勝</div>
+              <div class="tab" id="tabExacta">馬単</div>
+            </div>
+            <div class="cashBig">所持金額 <span id="bankrollLabel">0</span>円</div>
+          </div>
+
+          <div id="areaWin">
+            <div class="step">馬番を選ぶ（単勝）</div>
+            <div class="numbers" id="winNums"></div>
+
+            <div class="row">
+              <div style="min-width:110px">金額（円）</div>
+              <input type="number" id="stakeWin" min="0" step="100" value="0" />
+              <button class="primary" id="btnAddWin">カートへ追加</button>
+            </div>
+
+            <div class="amountBar" id="amtBarWin"></div>
+          </div>
+
+          <div id="areaExacta" style="display:none">
+            <div class="step" id="exactaStep">1着（頭）を選ぶ</div>
+            <div class="numbers" id="headNums"></div>
+
+            <div class="step">2着（相手）を選ぶ</div>
+            <div class="numbers" id="tailNums"></div>
+
+            <div class="row">
+              <div style="min-width:110px">金額（円）</div>
+              <input type="number" id="stakeEx" min="0" step="100" value="0" />
+              <button class="primary" id="btnAddEx">カートへ追加</button>
+            </div>
+
+            <div class="amountBar" id="amtBarEx"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ② 購入馬券 -->
+      <section class="win">
+        <div class="slipHead">
+          <div>
+            <div class="muted">購入馬券（最大5点）</div>
+            <div id="selSummary">未選択</div>
+          </div>
+
+          <div class="slipTotals">
+            <div class="slipRemain">残り所持金額：<span id="remainLabel">0</span>円</div>
+            <div class="slipTotal">合計BET：<span id="sumBet">0</span>円</div>
+          </div>
+        </div>
+
+        <div class="hint" id="limitHint"></div>
+
+        <div style="margin-top:10px;border:1px solid #eee;border-radius:10px;overflow:hidden">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:70px">券種</th>
+                <th>買い目</th>
+                <th style="width:70px">ｵｯｽﾞ</th>
+                <th style="width:90px">金額</th>
+                <th style="width:120px">想定払戻</th>
+              </tr>
+            </thead>
+            <tbody id="cartRows"></tbody>
+          </table>
+        </div>
+
+        <div class="row" style="margin-top:10px;justify-content:space-between">
+          <button id="btnClear">全クリア</button>
+          <button class="confirmBtn" id="btnConfirm">購入確定（レースを見る）</button>
+          <button id="btnDeleteLast">最後を削除</button>
+        </div>
+      </section>
+
+      <!-- ③ 出走表 -->
+      <section class="win">
+        <div style="font-weight:700;margin-bottom:6px">出走表</div>
+        <div class="scrollBox">
+          <table class="dataTable">
+            <thead>
+              <tr class="nowrap">
+                <th style="width:60px">馬番</th>
+                <th style="width:220px">馬名</th>
+                <th style="width:120px">騎手</th>
+                <th style="width:70px">単勝</th>
+                <th style="width:60px">人気</th>
+</tr>
+            </thead>
+            <tbody id="oddsTable"></tbody>
+          </table>
+        </div>
+        <div class="hint">縦横スクロール対応。</div>
+      </section>
+    </div>
+  </section>
+
+  <!-- 動画 -->
+  <section id="screenVideo" class="hidden">
+    <div class="videoCard">
+      <div class="muted" id="videoCaption">レース映像</div>
+      <div style="margin-top:10px">
+        <video id="raceVideo" controls playsinline preload="metadata"></video>
+      </div>
+      <div class="row" style="margin-top:12px;justify-content:flex-end">
+        <button class="primary" id="btnToSettlement">清算へ</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 清算 -->
+  <section id="screenSettlement" class="hidden">
+    <div class="card">
+      <div class="muted" id="settleSub">清算</div>
+
+      <div class="settleGrid" style="margin-top:10px">
+        <div class="panelCard">
+          <div class="panelTitle">購入馬券と払戻</div>
+          <table class="settleTable">
+            <thead>
+              <tr>
+                <th style="width:70px">券種</th>
+                <th>買い目</th>
+                <th style="width:72px">ｵｯｽﾞ</th>
+                <th style="width:90px">金額</th>
+                <th style="width:110px">払戻</th>
+              </tr>
+            </thead>
+            <tbody id="settleRows"></tbody>
+          </table>
+        </div>
+
+        <div class="panelCard">
+          <div class="panelTitle">合計</div>
+
+          <div class="sumLine">合計払戻：<span id="settlePayout">0</span>円</div>
+          <div class="sumLine">合計BET：<span id="settleBet">0</span>円</div>
+          <div class="sumLine">差引金額：<span id="settleDelta" class="deltaPlus">+0</span>円</div>
+          <div class="sumLine">最終所持金：<span id="settleFinal">0</span>円</div>
+
+          <img id="settleImage" class="settleImg" src="data/03.png" alt="結果画像">
+        </div>
+      </div>
+
+      <div class="settleActions" id="actionsNormal">
+        <button class="btnMain" id="btnNext">次へ進む</button>
+      </div>
+
+      <div class="settleActions" id="actionsZero" style="display:none">
+        <button class="btnGhost" id="btnRestart" style="display:none">最初から</button>
+        <button class="btnMain" id="btnToilet">トイレへ行く</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+
+<!-- 達成率表示 -->
+<section id="screenRate" class="rateScreen hidden">
+  <div class="titleInner" style="text-align:center">
+    <div id="rateLine" style="font-size:56px;font-weight:800">達成率＝0％</div>
+    <div id="rateClear" style="font-size:56px;font-weight:800;margin-top:10px"></div>
+  </div>
+</section>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+
+  const bgm = $("#bgm");
+  const seCart = $("#seCart");
+  const seChoice = $("#seChoice");
+  const seMoney = $("#seMoney");
+  const taiko01 = $("#taiko01");
+  const taiko02 = $("#taiko02");
+
+  bgm.volume = 0.20;
+  seChoice.volume = 0.70;
+  seCart.volume = 0.70;
+  seMoney.volume = 0.80;
+  taiko01.volume = 0.90;
+  taiko02.volume = 0.90;
+
+  const screenRate = $("#screenRate");
+  const rateLine = $("#rateLine");
+  const rateClear = $("#rateClear");
+
+  function showRate(){
+    // 第2話終了時の達成率（所持金/1000万円、100%上限）
+    hideAllScreens();
+    $("#screenRate").classList.remove("hidden");
+    screenTitle.classList.remove("show");
+    const rt = $("#screenRealTitle");
+    rt.classList.remove("show");
+
+    const rateRaw = Math.floor((bankroll / 10000000) * 100);
+    const rate = Math.min(100, Math.max(0, rateRaw));
+
+    rateLine.textContent = `達成率＝${rate}％`;
+    rateClear.textContent = "";
+
+    // 表示
+    screenRate.classList.remove("hidden");
+    screenRate.classList.remove("hidden");
+
+    // 100%クリア時：太鼓01を鳴らす
+    if (rate === 100){
+      try{ taiko01.currentTime = 0; taiko01.play(); }catch{}
+      rateClear.textContent = "クリア！";
+    }
+  }
+
+
+  function play(a){ try{ a.currentTime = 0; a.play(); }catch{} }
+  function bgmPlay(){ try{ if (bgm.paused) bgm.play(); }catch{} }
+  function bgmStop(){ try{ bgm.pause(); bgm.currentTime=0; }catch{} }
+function stopAllAudio(){
+  [bgm,seCart,seChoice,seMoney,taiko01,taiko02].forEach(a=>{ try{ a.pause(); a.currentTime=0; }catch{} });
+  clearTaikoTimers();
+}
+  function yen(n){ return (n ?? 0).toLocaleString("ja-JP"); }
+  function f1(n){ return (Math.round(n*10)/10).toFixed(1); }
+
+  function hideAllScreens(){
+    ["#screenPrologue","#screenBuy","#screenVideo","#screenSettlement","#screenGameOver"].forEach(id => $(id).classList.add("hidden"));
+    $("#screenRate").classList.add("hidden");
+    $("#screenTitle").classList.remove("show");
+    $("#screenRealTitle").classList.remove("show");
+    $("#screenGameOver").classList.remove("show");
+  }
+
+  const TAKEOUT_R = 0.75;
+
+  const EPISODES = {
+    1: {
+      title: "1989年のマイルチャンピオンシップに転生した！",
+      prologue:
+`気がつくと、そこは京都競馬場だった。
+1989年11月19日。
+「京都競馬場、、今日はマイルチャンピオンシップか。たしか伝説のレースだよな？」
+ポケットには5万円が入っている。
+「これは勝負するしかないな。オグリとバンブーが抜けてるはずだが。
+いや、オグリは過密日程の参戦で陣営が批判を浴びていたんだっけ。う～ん。」
+あなたは馬券売り場へ向かった。
+『天の声：あなたは今から2レースにBETして資金の増加を目指します。』`,
+      video: "1989mile.mp4",
+      horses: [
+        { uma:1,  name:"オグリキャップ",       jockey:"南井克巳", win:1.3,   pop:1},
+        { uma:2,  name:"ミリオンセンプー",     jockey:"丸山勝秀", win:55.4,  pop:9},
+        { uma:3,  name:"トウショウマリオ",     jockey:"角田晃一", win:25.5,  pop:5},
+        { uma:4,  name:"バンブーメモリー",     jockey:"武豊",     win:4.0,   pop:2},
+        { uma:5,  name:"イーグルシャトー",     jockey:"田島良保", win:72.5,  pop:11},
+        { uma:6,  name:"ルイジアナピット",     jockey:"岡潤一郎", win:41.7,  pop:7},
+        { uma:7,  name:"ヒデリュウオー",       jockey:"安田隆行", win:159.7, pop:15},
+        { uma:8,  name:"カミノテンホー",       jockey:"安達昭夫", win:188.4, pop:17},
+        { uma:9,  name:"エイシンハピネス",     jockey:"菅谷正巳", win:186.4, pop:16},
+        { uma:10, name:"メイショウコブラ",     jockey:"本田優",   win:81.7,  pop:12},
+        { uma:11, name:"ホクトヘリオス",       jockey:"柴田善臣", win:15.9,  pop:3},
+        { uma:12, name:"ナルシスノワール",     jockey:"松永幹夫", win:62.8,  pop:10},
+        { uma:13, name:"グレートモンテ",       jockey:"猿橋重利", win:32.3,  pop:6},
+        { uma:14, name:"ウィニングスマイル",   jockey:"田村正光", win:55.3,  pop:8},
+        { uma:15, name:"サンキンハヤテ",       jockey:"田島信行", win:134.2, pop:14},
+        { uma:16, name:"シヨノロマン",         jockey:"河内洋",   win:16.7,  pop:4},
+        { uma:17, name:"ホリノライデン",       jockey:"村本善之", win:91.9,  pop:13},
+      ],
+      result: { win: 1, exactaHead: 1, exactaTail: 4 }
+    },
+
+    2: {
+      title: "1989年の有馬記念",
+      prologue:
+`あなたは、またしても時空を移動したようだ。
+1989年12月24日、中山競馬場。
+「今日は有馬記念か。勝負しないわけにはいかないな。
+オグリキャップ涙のラストランのレースだっけ？
+う～ん、あれ？何が勝ったんだっけ？有名な馬が多いな。」
+あなたは馬券売り場へ向かった。`,
+      video: "1989arima.mp4",
+      horses: [
+        { uma:1,  name:"オグリキャップ",       jockey:"南井克巳", win:1.8,  pop:1},
+        { uma:2,  name:"ミスターブランディ",   jockey:"津留千彰", win:79.7, pop:14},
+        { uma:3,  name:"ダイナカーペンター",   jockey:"増沢末夫", win:18.0, pop:5},
+        { uma:4,  name:"スーパークリーク",     jockey:"武豊",     win:3.1,  pop:2},
+        { uma:5,  name:"キリパワー",           jockey:"大塚栄三", win:49.0, pop:12},
+        { uma:6,  name:"ドクタースパート",     jockey:"的場均",   win:59.4, pop:13},
+        { uma:7,  name:"リアルバースデー",     jockey:"河内洋",   win:26.0, pop:7},
+        { uma:8,  name:"カシマウイング",       jockey:"東信二",   win:103.8,pop:16},
+        { uma:9,  name:"ランニングフリー",     jockey:"菅原泰夫", win:34.8, pop:9},
+        { uma:10, name:"ハワイアンコーラル",   jockey:"大崎昭一", win:90.2, pop:15},
+        { uma:11, name:"フレッシュボイス",     jockey:"郷原洋行", win:48.1, pop:11},
+        { uma:12, name:"サクラホクトオー",     jockey:"小島太",   win:12.6, pop:3},
+        { uma:13, name:"ミスターシグレノン",   jockey:"松永幹夫", win:21.8, pop:6},
+        { uma:14, name:"ヤエノムテキ",         jockey:"西浦勝一", win:34.0, pop:8},
+        { uma:15, name:"イナリワン",           jockey:"柴田政人", win:16.7, pop:4},
+        { uma:16, name:"スルーオダイナ",       jockey:"岡部幸雄", win:35.0, pop:10},
+      ],
+      result: { win: 15, exactaHead: 15, exactaTail: 4 }
+    }
+  };
+
+  let episode = 1;
+  let bankroll = 50000;
+  let episodeStartBankroll = 50000;
+  let mode = "win";
+  let selectedWinUma = null;
+  let selectedHead = null;
+  let selectedTail = null;
+  let cart = [];
+
+  let taikoTimer = null;
+
+  const screenTitle = $("#screenTitle");
+  const titleText = $("#titleText");
+  const btnTitleNext = $("#btnTitleNext");
+  function openTitle(ep){
+    episode = ep;
+    $("#screenRealTitle").classList.remove("show");
+    titleText.textContent = EPISODES[episode].title;
+    screenTitle.classList.add("show");
+  }
+
+  function openRealTitle(){
+    // 本物タイトルを表示し、第1話タイトルは非表示にする
+    screenTitle.classList.remove("show");
+    const rt = $("#screenRealTitle");
+    rt.classList.add("show");
+  }
+
+  function startFromRealTitle(){
+    // 本物タイトル → 第1話タイトル
+    play(seChoice);
+    const rt = $("#screenRealTitle");
+    rt.classList.remove("show");
+    openTitle(1);
+  }
+
+  function bindRealTitleAnyInputStart(){
+    // クリック/タップ/キー入力 いずれでも開始（1回だけ）
+    const rt = $("#screenRealTitle");
+    let started = false;
+
+    const startOnce = () => {
+      if (started) return;
+      started = true;
+      try{ document.removeEventListener("pointerdown", onPointer, true); }catch{}
+      try{ document.removeEventListener("keydown", onKey, true); }catch{}
+      startFromRealTitle();
+    };
+
+    const onPointer = (e) => {
+      // 本物タイトル表示中のみ反応
+      if (!rt.classList.contains("show")) return;
+      startOnce();
+    };
+
+    const onKey = (e) => {
+      if (!rt.classList.contains("show")) return;
+      if (e.key === "Shift" || e.key === "Control" || e.key === "Alt" || e.key === "Meta") return;
+      startOnce();
+    };
+
+    document.addEventListener("pointerdown", onPointer, true);
+    document.addEventListener("keydown", onKey, true);
+  }
+
+  btnTitleNext.addEventListener("click", async () => {
+    play(seChoice);
+    hideAllScreens();
+    // 第1話タイトル → プロローグ
+    bgmPlay();
+    showPrologue();
+  });
+
+  const headerTitle = $("#headerTitle");
+  const proText = $("#proText");
+  const btnProNext = $("#btnProNext");
+
+  function showPrologue(){
+    hideAllScreens();
+    headerTitle.textContent = EPISODES[episode].title;
+    proText.textContent = EPISODES[episode].prologue;
+    $("#screenPrologue").classList.remove("hidden");
+    bgmPlay();
+  }
+
+  btnProNext.addEventListener("click", () => {
+    play(seChoice);
+    showBuy();
+  });
+
+  function winProbs(horses){
+    const inv = horses.map(h => 1 / h.win);
+    const s = inv.reduce((a,b)=>a+b,0);
+    return new Map(horses.map((h,i)=>[h.uma, inv[i]/s]));
+  }
+
+  function exactaOdds(horses, head, tail){
+    if (head === tail) return null;
+    const p = winProbs(horses);
+    const p1 = p.get(head);
+    const p2 = p.get(tail);
+    if (!p1 || !p2) return null;
+    const prob = p1 * (p2 / (1 - p1));
+    if (prob <= 0) return null;
+    return TAKEOUT_R / prob;
+  }
+
+  const bankrollLabel = $("#bankrollLabel");
+  const remainLabel = $("#remainLabel");
+  const sumBetEl = $("#sumBet");
+  const cartRows = $("#cartRows");
+  const limitHint = $("#limitHint");
+  const selSummary = $("#selSummary");
+  const oddsTable = $("#oddsTable");
+
+  const tabWin = $("#tabWin");
+  const tabExacta = $("#tabExacta");
+  const areaWin = $("#areaWin");
+  const areaExacta = $("#areaExacta");
+
+  const winNums = $("#winNums");
+  const headNums = $("#headNums");
+  const tailNums = $("#tailNums");
+
+  const stakeWin = $("#stakeWin");
+  const stakeEx = $("#stakeEx");
+  const btnAddWin = $("#btnAddWin");
+  const btnAddEx = $("#btnAddEx");
+
+  const btnConfirm = $("#btnConfirm");
+
+  function setMode(next){
+    play(seChoice);
+    mode = next;
+    tabWin.classList.toggle("active", mode==="win");
+    tabExacta.classList.toggle("active", mode==="exacta");
+    areaWin.style.display = mode==="win" ? "" : "none";
+    areaExacta.style.display = mode==="exacta" ? "" : "none";
+    highlightSelections();
+  }
+
+  tabWin.addEventListener("click", () => setMode("win"));
+  tabExacta.addEventListener("click", () => setMode("exacta"));
+
+  function makeNumButton(h, onClick, extraText){
+    const b = document.createElement("button");
+    b.className = "numBtn";
+    b.innerHTML = `<div><b>${h.uma}</b> ${h.name}</div><span class="numSmall">${extraText}</span>`;
+    b.addEventListener("click", onClick);
+    return b;
+  }
+
+  function highlightSelections(){
+    [...winNums.querySelectorAll("button")].forEach(btn=>{
+      const m = btn.innerText.trim().match(/^(\d+)/);
+      const uma = m ? Number(m[1]) : null;
+      btn.classList.toggle("active", mode==="win" && uma===selectedWinUma);
+    });
+    [...headNums.querySelectorAll("button")].forEach(btn=>{
+      const m = btn.innerText.trim().match(/^(\d+)/);
+      const uma = m ? Number(m[1]) : null;
+      btn.classList.toggle("active", mode==="exacta" && uma===selectedHead);
+    });
+    [...tailNums.querySelectorAll("button")].forEach(btn=>{
+      const m = btn.innerText.trim().match(/^(\d+)/);
+      const uma = m ? Number(m[1]) : null;
+      btn.classList.toggle("active", mode==="exacta" && uma===selectedTail);
+    });
+  }
+
+  function renderOddsTable(){
+    const horses = EPISODES[episode].horses.slice().sort((a,b)=>a.uma-b.uma);
+    oddsTable.innerHTML = "";
+    horses.forEach(h=>{
+      const tr = document.createElement("tr");
+      tr.className = "nowrap";
+      tr.innerHTML = `<td>${h.uma}</td><td>${h.name}</td><td>${h.jockey}</td><td>${h.win}</td><td>${h.pop}</td>`;
+      oddsTable.appendChild(tr);
+    });
+  }
+
+  function renderWinNums(){
+    const horses = EPISODES[episode].horses.slice().sort((a,b)=>a.uma-b.uma);
+    winNums.innerHTML = "";
+    horses.forEach(h=>{
+      const b = makeNumButton(h, ()=>{
+        play(seChoice);
+        selectedWinUma = h.uma;
+        highlightSelections();
+        selSummary.textContent = `単勝：${h.uma} ${h.name}（${h.win}倍）`;
+      }, `単勝 ${h.win}倍`);
+      winNums.appendChild(b);
+    });
+  }
+
+  function renderExactaHeads(){
+    const horses = EPISODES[episode].horses.slice().sort((a,b)=>a.uma-b.uma);
+    headNums.innerHTML = "";
+    horses.forEach(h=>{
+      const b = makeNumButton(h, ()=>{
+        play(seChoice);
+        selectedHead = h.uma;
+        selectedTail = null;
+        $("#exactaStep").textContent = `1着（頭）：${selectedHead} を選択中 → 2着を選ぶ`;
+        renderExactaTails();
+        highlightSelections();
+        selSummary.textContent = `馬単：${selectedHead} → （未選択）`;
+      }, `参考：単勝 ${h.win}倍`);
+      headNums.appendChild(b);
+    });
+  }
+
+  function renderExactaTails(){
+    const horses = EPISODES[episode].horses.slice().sort((a,b)=>a.uma-b.uma);
+    tailNums.innerHTML = "";
+
+    horses.forEach(h=>{
+      if (selectedHead == null) {
+        const b = makeNumButton(h, ()=>{}, `頭を先に選ぶ`);
+        b.disabled = true;
+        tailNums.appendChild(b);
+        return;
+      }
+      if (h.uma === selectedHead) return;
+
+      const od = exactaOdds(EPISODES[episode].horses, selectedHead, h.uma);
+      const label = od ? `馬単 ${f1(od)}倍` : `馬単 -`;
+      const b = makeNumButton(h, ()=>{
+        play(seChoice);
+        selectedTail = h.uma;
+        highlightSelections();
+        const headH = EPISODES[episode].horses.find(x=>x.uma===selectedHead);
+        const tailH = EPISODES[episode].horses.find(x=>x.uma===selectedTail);
+        selSummary.textContent = `馬単：${headH.uma} ${headH.name} → ${tailH.uma} ${tailH.name}（馬単 ${f1(od)}倍）`;
+      }, label);
+      tailNums.appendChild(b);
+    });
+  }
+
+  function wireAmountButtons(container, input){
+    const amounts = [100,500,1000,2000,5000,10000,50000];
+    container.innerHTML = "";
+    amounts.forEach(v=>{
+      const b = document.createElement("button");
+      b.className = "amtBtn";
+      b.textContent = String(v);
+      b.addEventListener("click", ()=>{
+        play(seChoice);
+        const cur = Number(input.value || 0);
+        input.value = String(Math.max(0, cur + v));
+      });
+      container.appendChild(b);
+    });
+    const c = document.createElement("button");
+    c.className = "amtBtn";
+    c.textContent = "消去";
+    c.addEventListener("click", ()=>{
+      play(seChoice);
+      input.value = "0";
+    });
+    container.appendChild(c);
+  }
+
+  function refreshTotals(){
+    const sum = cart.reduce((a,x)=>a + (Number(x.stake)||0), 0);
+    sumBetEl.textContent = yen(sum);
+    const remain = episodeStartBankroll - sum;
+    remainLabel.textContent = yen(remain);
+
+    if (remain < 0){
+      btnConfirm.classList.add("disabled");
+    } else {
+      btnConfirm.classList.remove("disabled");
+    }
+  }
+
+  function renderCart(){
+    cartRows.innerHTML = "";
+    if (cart.length === 0){
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td colspan="5" class="muted">（まだ購入していません）</td>`;
+      cartRows.appendChild(tr);
+      refreshTotals();
+      return;
+    }
+
+    cart.forEach((c)=>{
+      const estPay = Math.round(c.stake * c.odds);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${c.type}</td>
+        <td>${c.label}<div class="muted">${c.key}</div></td>
+        <td>${f1(c.odds)}</td>
+        <td>${yen(c.stake)}</td>
+        <td>${yen(estPay)}</td>
+      `;
+      cartRows.appendChild(tr);
+    });
+
+    refreshTotals();
+  }
+
+  function addToCart(item){
+    if (cart.length >= 5){
+      limitHint.innerHTML = `<span class="danger">購入馬券は最大5点まで。</span>`;
+      return;
+    }
+    limitHint.textContent = "";
+    cart.push(item);
+    play(seCart);
+    renderCart();
+  }
+
+  function resetBuyState(){
+    mode = "win";
+    selectedWinUma = null;
+    selectedHead = null;
+    selectedTail = null;
+    cart = [];
+    limitHint.textContent = "";
+    selSummary.textContent = "未選択";
+    stakeWin.value = "0";
+    stakeEx.value = "0";
+    setMode("win");
+  }
+
+  function showBuy(){
+    hideAllScreens();
+    headerTitle.textContent = EPISODES[episode].title;
+    $("#screenBuy").classList.remove("hidden");
+
+    episodeStartBankroll = bankroll;
+
+    bankrollLabel.textContent = yen(episodeStartBankroll);
+    remainLabel.textContent = yen(episodeStartBankroll);
+
+    resetBuyState();
+    renderOddsTable();
+    renderWinNums();
+    renderExactaHeads();
+    renderExactaTails();
+    wireAmountButtons($("#amtBarWin"), stakeWin);
+    wireAmountButtons($("#amtBarEx"), stakeEx);
+    renderCart();
+    refreshTotals();
+
+    bgmPlay();
+  }
+
+  btnAddWin.addEventListener("click", ()=>{
+    const stake = Math.floor(Number(stakeWin.value || 0));
+    if (!selectedWinUma){ limitHint.innerHTML = `<span class="danger">単勝の馬番を選んでください。</span>`; return; }
+    if (!(stake > 0)){ limitHint.innerHTML = `<span class="danger">金額を入れてください。</span>`; return; }
+    const h = EPISODES[episode].horses.find(x=>x.uma===selectedWinUma);
+    addToCart({ type:"単勝", key:`WIN:${h.uma}`, label:`${h.uma} ${h.name}`, odds:Number(h.win), stake });
+    stakeWin.value = "0";
+  });
+
+  btnAddEx.addEventListener("click", ()=>{
+    const stake = Math.floor(Number(stakeEx.value || 0));
+    if (!selectedHead){ limitHint.innerHTML = `<span class="danger">馬単の1着（頭）を選んでください。</span>`; return; }
+    if (!selectedTail){ limitHint.innerHTML = `<span class="danger">馬単の2着（相手）を選んでください。</span>`; return; }
+    if (!(stake > 0)){ limitHint.innerHTML = `<span class="danger">金額を入れてください。</span>`; return; }
+
+    const od = exactaOdds(EPISODES[episode].horses, selectedHead, selectedTail);
+    if (!od){ limitHint.innerHTML = `<span class="danger">馬単オッズが計算できません。</span>`; return; }
+
+    const h1 = EPISODES[episode].horses.find(x=>x.uma===selectedHead);
+    const h2 = EPISODES[episode].horses.find(x=>x.uma===selectedTail);
+    addToCart({ type:"馬単", key:`EX:${selectedHead}>${selectedTail}`, label:`${h1.uma} ${h1.name} → ${h2.uma} ${h2.name}`, odds:Number(od), stake });
+    stakeEx.value = "0";
+  });
+
+  $("#btnClear").addEventListener("click", ()=>{
+    play(seChoice);
+    cart = [];
+    limitHint.textContent = "";
+    renderCart();
+  });
+
+  $("#btnDeleteLast").addEventListener("click", ()=>{
+    play(seChoice);
+    cart.pop();
+    limitHint.textContent = "";
+    renderCart();
+  });
+
+  const raceVideo = $("#raceVideo");
+  const btnToSettlement = $("#btnToSettlement");
+
+  btnConfirm.addEventListener("click", ()=>{
+    if (btnConfirm.classList.contains("disabled")) return;
+
+    if (cart.length === 0){
+      limitHint.innerHTML = `<span class="danger">購入馬券がありません。</span>`;
+      return;
+    }
+
+    const sum = cart.reduce((a,x)=>a + (Number(x.stake)||0), 0);
+    if (sum > episodeStartBankroll){
+      limitHint.innerHTML = `<span class="danger">所持金を超えています。</span>`;
+      return;
+    }
+
+    play(seChoice);
+
+    hideAllScreens();
+    $("#screenVideo").classList.remove("hidden");
+    $("#videoCaption").textContent = `レース映像（第${episode}話）`;
+
+    bgmStop();
+
+    raceVideo.src = EPISODES[episode].video;
+    raceVideo.load();
+  });
+
+  btnToSettlement.addEventListener("click", ()=>{
+    play(seChoice);
+    try{ raceVideo.pause(); }catch{}
+    showSettlement();
+  });
+
+  const settleRows = $("#settleRows");
+  const settleBet = $("#settleBet");
+  const settlePayout = $("#settlePayout");
+  const settleDelta = $("#settleDelta");
+  const settleFinal = $("#settleFinal");
+  const settleImage = $("#settleImage");
+
+  const actionsNormal = $("#actionsNormal");
+  const actionsZero = $("#actionsZero");
+  const btnNext = $("#btnNext");
+  const btnRestart = $("#btnRestart");
+  const btnToilet = $("#btnToilet");
+
+  function clearTaikoTimers(){
+    if (taikoTimer){ clearTimeout(taikoTimer); taikoTimer = null; }
+  }
+
+  function scheduleTaikoIfPlus(isPlus){
+    clearTaikoTimers();
+    if (!isPlus) return;
+
+    taikoTimer = setTimeout(async ()=>{
+      try{
+        taiko01.currentTime = 0;
+        await taiko01.play();
+        taiko01.onended = async ()=>{
+          try{
+            taiko02.currentTime = 0;
+            await taiko02.play();
+          }catch{}
+        };
+      }catch{}
+    }, 5000);
+  }
+
+  function isHitItem(item){
+    const r = EPISODES[episode].result;
+
+    if (item.type === "単勝"){
+      const m = String(item.key).match(/^WIN:(\d+)$/);
+      const uma = m ? Number(m[1]) : null;
+      return uma === r.win;
+    }
+    if (item.type === "馬単"){
+      const m = String(item.key).match(/^EX:(\d+)>(\d+)$/);
+      const head = m ? Number(m[1]) : null;
+      const tail = m ? Number(m[2]) : null;
+      return head === r.exactaHead && tail === r.exactaTail;
+    }
+    return false;
+  }
+
+  function showSettlement(){
+    settledEpisode = episode;
+    hideAllScreens();
+    $("#screenSettlement").classList.remove("hidden");
+    $("#settleSub").textContent = `清算（第${episode}話）`;
+    bgmPlay();
+
+    settleRows.innerHTML = "";
+
+    const totalBet = cart.reduce((a,x)=>a + (Number(x.stake)||0), 0);
+    let totalPayout = 0;
+
+    if (cart.length === 0){
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td colspan="5" class="muted">（購入がありません）</td>`;
+      settleRows.appendChild(tr);
+    } else {
+      cart.forEach(c=>{
+        const hit = isHitItem(c);
+        const payout = hit ? Math.round((Number(c.stake)||0) * (Number(c.odds)||0)) : 0;
+        totalPayout += payout;
+
+        const badge = hit ? `<span class="badgeHit">HIT</span>` : `<span class="badgeLose">LOSE</span>`;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${c.type}${badge}</td>
+          <td>${c.label}<div class="muted" style="margin-top:2px">${c.key}</div></td>
+          <td>${f1(Number(c.odds)||0)}</td>
+          <td>${yen(c.stake)}</td>
+          <td>${yen(payout)}</td>
+        `;
+        settleRows.appendChild(tr);
+      });
+    }
+
+    settleBet.textContent = yen(totalBet);
+    settlePayout.textContent = yen(totalPayout);
+
+    const delta = totalPayout - totalBet;
+    const isPlus = delta >= 0;
+
+    settleDelta.textContent = (isPlus ? "+" : "−") + yen(Math.abs(delta));
+    settleDelta.classList.toggle("deltaPlus", isPlus);
+    settleDelta.classList.toggle("deltaMinus", !isPlus);
+
+    const finalMoney = episodeStartBankroll - totalBet + totalPayout;
+    bankroll = finalMoney;
+
+    settleFinal.textContent = yen(finalMoney);
+    settleImage.src = isPlus ? "data/03.png" : "data/02.png";
+
+    play(seMoney);
+    scheduleTaikoIfPlus(isPlus);
+
+    if (finalMoney <= 0){
+      actionsNormal.style.display = "none";
+      actionsZero.style.display = "";
+      btnRestart.style.display = "none";
+      btnToilet.style.display = "";
+    } else {
+      actionsNormal.style.display = "";
+      actionsZero.style.display = "none";
+      btnRestart.style.display = "none";
+    }
+  }
+
+  btnRestart.addEventListener("click", ()=>{
+    play(seChoice);
+    location.reload();
+  });
+
+  btnToilet.addEventListener("click", ()=>{
+    // トイレへ行く → GAME OVER（全音停止）
+    play(seChoice);
+    stopAllAudio();
+    hideAllScreens();
+    const go = $("#screenGameOver");
+    go.classList.remove("hidden");
+    go.classList.add("show");
+  });
+
+  btnNext.addEventListener("click", ()=>{
+    play(seChoice);
+    clearTaikoTimers();
+    hideAllScreens();
+
+    if (settledEpisode === 1){
+      // 第1話清算 → 第2話タイトル
+      openTitle(2);
+    } else {
+      // 第2話清算 → 達成率
+      showRate();
+    }
+  });
+  openRealTitle();
+  bindRealTitleAnyInputStart();
+})();
+</script>
+
+</body>
+</html>
