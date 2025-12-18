@@ -419,7 +419,7 @@
     screenRate.classList.remove("hidden");
 
     // 100%クリア時：太鼓01を鳴らす
-    if (rate === 500){
+    if (rate === 100){
       try{ taiko01.currentTime = 0; taiko01.play(); }catch{}
       rateClear.textContent = "クリア！";
     }
