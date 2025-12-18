@@ -410,22 +410,16 @@
     const rateRaw = Math.floor((bankroll / 10000000) * 100);
     const rate = Math.min(100, Math.max(0, rateRaw));
 
-    rateLine.textContent = `達成率＝${rate}％`;
-    rateClear.textContent = "The End";
+    rateLine.textContent = `達成率＝${rate}％
+    　The End`;
+    rateClear.textContent = "";
 
     // 表示
     screenRate.classList.remove("hidden");
     screenRate.classList.remove("hidden");
 
     // 100%クリア時：太鼓01を鳴らす
-    if (rate === 200){
-      try{ taiko01.currentTime = 0; taiko01.play(); }catch{}
-      rateClear.textContent = "クリア！";
-    }
-  }
-
-    // 100%クリア時：太鼓01を鳴らす
-    if (rate === 400){
+    if (rate === 500){
       try{ taiko01.currentTime = 0; taiko01.play(); }catch{}
       rateClear.textContent = "クリア！";
     }
