@@ -411,19 +411,25 @@
     const rate = Math.min(100, Math.max(0, rateRaw));
 
     rateLine.textContent = `達成率＝${rate}％`;
-    rateClear.textContent = "";
+    rateClear.textContent = "The End";
 
     // 表示
     screenRate.classList.remove("hidden");
     screenRate.classList.remove("hidden");
 
     // 100%クリア時：太鼓01を鳴らす
-    if (rate === 100){
+    if (rate === 200){
       try{ taiko01.currentTime = 0; taiko01.play(); }catch{}
       rateClear.textContent = "クリア！";
     }
   }
 
+    // 100%クリア時：太鼓01を鳴らす
+    if (rate === 400){
+      try{ taiko01.currentTime = 0; taiko01.play(); }catch{}
+      rateClear.textContent = "クリア！";
+    }
+  }
 
   function play(a){ try{ a.currentTime = 0; a.play(); }catch{} }
   function bgmPlay(){ try{ if (bgm.paused) bgm.play(); }catch{} }
