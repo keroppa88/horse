@@ -373,6 +373,7 @@
 <section id="screenRate" class="rateScreen hidden">
   <div class="titleInner" style="text-align:center">
     <div id="rateLine" style="font-size:56px;font-weight:800">達成率＝0％</div>
+    <div id="rateLine" style="font-size:56px;font-weight:800">The End</div>
     <div id="rateClear" style="font-size:56px;font-weight:800;margin-top:10px"></div>
   </div>
 </section>
@@ -410,8 +411,7 @@
     const rateRaw = Math.floor((bankroll / 10000000) * 100);
     const rate = Math.min(100, Math.max(0, rateRaw));
 
-    rateLine.textContent = `達成率＝${rate}％
-    　The End`;
+    rateLine.textContent = `達成率＝${rate}％`;
     rateClear.textContent = "";
 
     // 表示
