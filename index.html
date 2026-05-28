@@ -22,7 +22,6 @@
        縦横比 49:87 固定
     ===================== */
     .chassis {
-      /* 幅を 490px / 100vw / 高さから逆算 の最小値に制限 */
       width: min(490px, 100vw, calc(100vh * 490 / 870));
       aspect-ratio: 490 / 870;
       background: linear-gradient(170deg, #f2e9d4 0%, #e6dbbd 60%, #ddd0a8 100%);
@@ -37,7 +36,6 @@
       gap: 0;
       position: relative;
     }
-    /* 表面テクスチャ */
     .chassis::before {
       content: '';
       position: absolute;
@@ -74,7 +72,7 @@
     }
 
     /* ---- LCD screens ---- */
-    .ls {                    /* lcd-screen base */
+    .ls {
       position: absolute;
       inset: 0;
       display: flex;
@@ -192,6 +190,12 @@
     .lcd-num-btn.active { border-color: #aaa; background: #2e2e2e; color: #fff; }
     .lcd-num-btn:disabled { color: #444; cursor: default; }
     .lcd-num-btn b { display: block; font-size: 11px; color: inherit; }
+    .lcd-num-btn.dpad-focus {
+      border-color: #6d6;
+      background: #1e3a1e;
+      color: #fff;
+      outline: 1px solid #3a9a3a;
+    }
 
     .lcd-amount-row {
       display: flex;
@@ -323,6 +327,13 @@
       letter-spacing: 2px;
       background: #0a0000;
     }
+
+    /* ---- 出走表 screen ---- */
+    #oddsContent table { border-collapse: collapse; width: 100%; }
+    #oddsContent th { background: #222; color: #888; padding: 2px 4px; font-size: 9px; border-bottom: 1px solid #333; }
+    #oddsContent td { padding: 2px 4px; border-bottom: 1px solid #1e1e1e; color: #bbb; font-size: 9px; }
+    #oddsContent tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+    #oddsContent body, #oddsContent html { background: transparent !important; color: #bbb; }
 
     /* =====================
        CONTROLS AREA
@@ -578,6 +589,15 @@
         </div>
       </div>
 
+      <!-- 出走表 -->
+      <div id="screenOdds" class="ls hidden">
+        <div class="pro-title" id="oddsTitle">出走表</div>
+        <div class="ls-scroll" id="oddsContent"></div>
+        <div class="ls-foot">
+          <button class="lcd-btn-sm" id="btnOddsBack">← 戻る</button>
+        </div>
+      </div>
+
     </div><!-- /.lcd -->
   </div><!-- /.screen-bezel -->
 
@@ -606,7 +626,7 @@
     <div class="nav-labels">
       <span>レース開始</span>
       <span>表示非表示</span>
-      <span>オッズ</span>
+      <span>出走表</span>
       <span>馬券購入</span>
       <span>新聞</span>
     </div>
@@ -623,15 +643,15 @@
           <line x1="4" y1="4" x2="20" y2="20"/>
         </svg>
       </button>
-      <!-- オッズ (bar chart) -->
-      <button class="nav-btn" id="navOdds" title="オッズ切替">
+      <!-- 出走表 (bar chart) -->
+      <button class="nav-btn" id="navOdds" title="出走表">
         <svg viewBox="0 0 24 24" fill="#2d8a2d">
           <rect x="3" y="14" width="4" height="7"/>
           <rect x="10" y="9" width="4" height="12"/>
           <rect x="17" y="4" width="4" height="17"/>
         </svg>
       </button>
-      <!-- 馬券購入 (ticket X) -->
+      <!-- 馬券購入 (ticket) -->
       <button class="nav-btn" id="navBet" title="馬券購入">
         <svg viewBox="0 0 24 24" fill="none" stroke="#2d8a2d" stroke-width="2.2" stroke-linecap="round">
           <rect x="3" y="6" width="18" height="12" rx="2"/>
@@ -678,9 +698,10 @@
   function yen(n){ return (n??0).toLocaleString("ja-JP"); }
   function f1(n){ return (Math.round(n*10)/10).toFixed(1); }
 
-  const ALL_SCREENS = ["#screenRealTitle","#screenPrologue","#screenBuy","#screenVideo","#screenSettlement","#screenGameOver","#screenRate"];
+  const ALL_SCREENS = ["#screenRealTitle","#screenPrologue","#screenBuy","#screenVideo","#screenSettlement","#screenGameOver","#screenRate","#screenOdds"];
   function hideAllScreens(){ ALL_SCREENS.forEach(id=>$(id).classList.add("hidden")); }
   function showScreen(id){ hideAllScreens(); $(id).classList.remove("hidden"); }
+  function activeScreen(){ return ALL_SCREENS.find(s=>!$(s).classList.contains("hidden")); }
 
   // ---- CSV ----
   function parseCSV(text){
@@ -709,12 +730,13 @@
       const rr=await fetch(`${base}/着順.csv`);
       if(!rr.ok) continue;
 
-      const [resultText,oddsResp,commentResp,videoTxtResp]=await Promise.all([
-        rr.text(), fetch(`${base}/オッズ.csv`), fetch(`${base}/レースコメント.txt`), fetch(`${base}/video.txt`),
+      const [resultText,oddsResp,commentResp,videoTxtResp,entryResp]=await Promise.all([
+        rr.text(), fetch(`${base}/オッズ.csv`), fetch(`${base}/レースコメント.txt`), fetch(`${base}/video.txt`), fetch(`${base}/出走表.html`),
       ]);
       const oddsText   =oddsResp.ok    ?await oddsResp.text()   :'';
       const commentText=commentResp.ok ?await commentResp.text():'';
       const videoPath  =videoTxtResp.ok?(await videoTxtResp.text()).trim():`${base}/race.mp4`;
+      const entryHtml  =entryResp.ok   ?await entryResp.text()  :'';
 
       const exactaMap=new Map(), quinellaMap=new Map(), horseSet=new Set();
       parseCSV(oddsText).forEach(row=>{
@@ -730,7 +752,7 @@
       const lines2=commentText.trim().split('\n');
       const title=lines2[0]?lines2[0].trim():`レース ${id}`;
 
-      EPISODES[epNum]={ id, title, comment:commentText, videoPath,
+      EPISODES[epNum]={ id, title, comment:commentText, videoPath, entryHtml,
         horses:[...horseSet].sort((a,b)=>a-b), exactaMap, quinellaMap, result };
       epNum++;
     }
@@ -742,6 +764,49 @@
   let episode=1, bankroll=startBankroll, episodeStartBankroll=startBankroll;
   let mode="exacta", selectedHead=null, selectedTail=null, selectedQu1=null, selectedQu2=null;
   let cart=[], settledEpisode=1, taikoTimer=null;
+  let dpFocusEl=null, oddsReturnScreen="#screenPrologue";
+
+  // ---- D-pad cell focus ----
+  function dpGetBtns(){
+    if($("#screenBuy").classList.contains("hidden")) return [];
+    const grids=mode==="exacta"
+      ?[headNums,tailNums]
+      :[quinNums1,quinNums2];
+    return grids.flatMap(g=>[...g.querySelectorAll(".lcd-num-btn:not(:disabled)")]);
+  }
+  function dpSet(el){
+    if(dpFocusEl) dpFocusEl.classList.remove("dpad-focus");
+    dpFocusEl=el;
+    if(el){ el.classList.add("dpad-focus"); el.scrollIntoView({block:"nearest",behavior:"smooth"}); }
+  }
+  function dpClear(){ dpSet(null); }
+  function dpMove(dr,dc){
+    const btns=dpGetBtns();
+    if(!btns.length){ dpClear(); return; }
+    let i=dpFocusEl?btns.indexOf(dpFocusEl):-1;
+    if(i===-1){ dpSet(btns[0]); return; }
+    const next=i+dc+dr*7;
+    dpSet(btns[Math.max(0,Math.min(btns.length-1,next))]);
+  }
+
+  // ---- 出走表 screen ----
+  function showOdds(){
+    const ep=EPISODES[episode];
+    if(!ep) return;
+    oddsReturnScreen=activeScreen()||"#screenPrologue";
+    showScreen("#screenOdds");
+    $("#oddsTitle").textContent=ep.title+"　出走表";
+    const content=$("#oddsContent");
+    if(ep.entryHtml){
+      try{
+        const doc=new DOMParser().parseFromString(ep.entryHtml,"text/html");
+        content.innerHTML=doc.body.innerHTML;
+      }catch{ content.textContent=ep.entryHtml; }
+    } else {
+      content.textContent="（出走表なし）";
+    }
+  }
+  $("#btnOddsBack").addEventListener("click",()=>{ play(seChoice); showScreen(oddsReturnScreen); });
 
   // ---- Title ----
   function openRealTitle(){
@@ -789,6 +854,7 @@
     tabQuinella.classList.toggle("active",mode==="quinella");
     areaExacta.style.display=mode==="exacta"?"":"none";
     areaQuinella.style.display=mode==="quinella"?"":"none";
+    dpClear();
     highlightSelections();
   }
   tabExacta.addEventListener("click",()=>setMode("exacta"));
@@ -814,7 +880,7 @@
       headNums.appendChild(makeNumBtn(uma,"",()=>{
         play(seChoice); selectedHead=uma; selectedTail=null;
         $("#exactaStep").textContent=`1着：${uma}選択中→2着を選ぶ`;
-        renderExactaTails(); highlightSelections();
+        dpClear(); renderExactaTails(); highlightSelections();
       }));
     });
   }
@@ -826,7 +892,6 @@
       const lbl=od?`${f1(od)}倍`:(selectedHead?"-":"");
       const b=makeNumBtn(uma,lbl,()=>{
         if(!selectedHead)return; play(seChoice); selectedTail=uma; highlightSelections();
-        const od2=ep.exactaMap.get(`${selectedHead}>${uma}`)||0;
         limitHint.textContent="";
       });
       if(!selectedHead) b.disabled=true;
@@ -839,7 +904,7 @@
       quinNums1.appendChild(makeNumBtn(uma,"",()=>{
         play(seChoice); selectedQu1=uma; selectedQu2=null;
         $("#quinStep").textContent=`1頭目：${uma}選択中→2頭目を選ぶ`;
-        renderQuinella2(); highlightSelections();
+        dpClear(); renderQuinella2(); highlightSelections();
       }));
     });
   }
@@ -895,7 +960,8 @@
   }
   function resetBuyState(){
     mode="exacta"; selectedHead=selectedTail=selectedQu1=selectedQu2=null;
-    cart=[]; limitHint.textContent=""; stakeEx.value="0"; stakeQu.value="0"; setMode("exacta");
+    cart=[]; limitHint.textContent=""; stakeEx.value="0"; stakeQu.value="0";
+    dpClear(); setMode("exacta");
   }
 
   function showBuy(){
@@ -1030,51 +1096,92 @@
     showScreen("#screenGameOver");
   });
 
-  // ---- D-pad: scroll LCD content ----
+  // ---- D-pad ----
   function scrollLcd(dir){
-    const scroll=document.getElementById("buyScroll");
-    const active=ALL_SCREENS.find(s=>!$(s).classList.contains("hidden"));
-    const el=active==="#screenBuy"?scroll:$(active)?.querySelector(".ls-scroll");
+    const active=activeScreen();
+    const el=active==="#screenBuy"?$("#buyScroll"):$(active)?.querySelector(".ls-scroll");
     if(el) el.scrollBy({top:dir*50,behavior:"smooth"});
   }
-  $("#dpUp").addEventListener("click",()=>scrollLcd(-1));
-  $("#dpDown").addEventListener("click",()=>scrollLcd(1));
-  $("#dpLeft").addEventListener("click",()=>{ if(!$(".ls#screenBuy")?.classList.contains("hidden")) setMode("exacta"); });
-  $("#dpRight").addEventListener("click",()=>{ if(!$(".ls#screenBuy")?.classList.contains("hidden")) setMode("quinella"); });
+  $("#dpUp").addEventListener("click",()=>{
+    if(!$("#screenBuy").classList.contains("hidden")) dpMove(-1,0);
+    else scrollLcd(-1);
+  });
+  $("#dpDown").addEventListener("click",()=>{
+    if(!$("#screenBuy").classList.contains("hidden")) dpMove(1,0);
+    else scrollLcd(1);
+  });
+  $("#dpLeft").addEventListener("click",()=>{
+    if(!$("#screenBuy").classList.contains("hidden")) dpMove(0,-1);
+  });
+  $("#dpRight").addEventListener("click",()=>{
+    if(!$("#screenBuy").classList.contains("hidden")) dpMove(0,1);
+  });
 
-  // ---- A/B buttons ----
+  // ---- A ボタン：決定 ----
   $("#btnA").addEventListener("click",()=>{
-    const active=ALL_SCREENS.find(s=>!$(s).classList.contains("hidden"));
+    // D-pad フォーカス中のボタンがあればそれをクリック
+    if(dpFocusEl && !$("#screenBuy").classList.contains("hidden")){
+      dpFocusEl.click(); return;
+    }
+    const active=activeScreen();
     if(active==="#screenRealTitle"){ play(seChoice); showPrologue(); }
     else if(active==="#screenPrologue"){ play(seChoice); showBuy(); }
     else if(active==="#screenBuy") confirmBet();
     else if(active==="#screenVideo"){ play(seChoice); try{raceVideo.pause();}catch{} showSettlement(); }
     else if(active==="#screenSettlement") $("#btnNext").click();
+    else if(active==="#screenOdds"){ play(seChoice); showScreen(oddsReturnScreen); }
   });
+
+  // ---- B ボタン：キャンセル ----
   $("#btnB").addEventListener("click",()=>{
-    const active=ALL_SCREENS.find(s=>!$(s).classList.contains("hidden"));
-    if(active==="#screenBuy"){ play(seChoice); cart.pop(); limitHint.textContent=""; renderCart(); }
+    const active=activeScreen();
+    if(active==="#screenOdds"){ play(seChoice); showScreen(oddsReturnScreen); return; }
+    if(active==="#screenBuy"){
+      play(seChoice);
+      // 選択中のものを順番に解除
+      if(mode==="exacta"){
+        if(selectedTail){ selectedTail=null; highlightSelections(); return; }
+        if(selectedHead){ selectedHead=null; $("#exactaStep").textContent="1着を選ぶ"; dpClear(); renderExactaTails(); highlightSelections(); return; }
+      } else {
+        if(selectedQu2){ selectedQu2=null; highlightSelections(); return; }
+        if(selectedQu1){ selectedQu1=null; $("#quinStep").textContent="1頭目を選ぶ"; dpClear(); renderQuinella2(); highlightSelections(); return; }
+      }
+      // 何も選択していなければプロローグへ戻る
+      showPrologue(); return;
+    }
   });
 
   // ---- Bottom nav ----
   $("#navStart").addEventListener("click",()=>{
-    const active=ALL_SCREENS.find(s=>!$(s).classList.contains("hidden"));
+    const active=activeScreen();
     if(active==="#screenRealTitle"){ play(seChoice); showPrologue(); }
     else if(active==="#screenPrologue"){ play(seChoice); showBuy(); }
     else if(active==="#screenBuy") confirmBet();
     else if(active==="#screenVideo"){ play(seChoice); try{raceVideo.pause();}catch{} showSettlement(); }
     else if(active==="#screenSettlement") $("#btnNext").click();
   });
+
+  // 出走表を表示
   $("#navOdds").addEventListener("click",()=>{
-    if(!$("#screenBuy").classList.contains("hidden")) setMode(mode==="exacta"?"quinella":"exacta");
+    const active=activeScreen();
+    if(active==="#screenOdds"){ play(seChoice); showScreen(oddsReturnScreen); return; }
+    play(seChoice); showOdds();
   });
+
+  // 馬券購入画面へ
   $("#navBet").addEventListener("click",()=>{
-    if(!$("#screenBuy").classList.contains("hidden")) return;
-    if(!$("#screenPrologue").classList.contains("hidden")){ play(seChoice); showBuy(); return; }
-    if(!$("#screenSettlement").classList.contains("hidden")){
-      if(settledEpisode<totalEpisodes){ episode=settledEpisode+1; play(seChoice); showBuy(); }
+    const active=activeScreen();
+    if(active==="#screenBuy") return; // 既に購入画面
+    if(active==="#screenVideo") return; // レース中は不可
+    play(seChoice);
+    if(active==="#screenSettlement"){
+      // 清算後は次のレースの購入画面へ
+      if(settledEpisode<totalEpisodes){ episode=settledEpisode+1; showBuy(); }
+      return;
     }
+    showBuy();
   });
+
   $("#navInfo").addEventListener("click",()=>{ play(seChoice); showPrologue(); });
   $("#navToggle").addEventListener("click",()=>{
     const lcd=document.querySelector(".lcd");
