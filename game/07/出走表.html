@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>1989年 菊花賞</title>
+  <style>
+    .table-wrapper { overflow-x: auto; }
+    h2 { text-align: left; margin-bottom: 10px; font-family: sans-serif; }
+    table { border-collapse: collapse; text-align: center; font-family: sans-serif; }
+    th, td { border: 1px solid #000; padding: 6px; font-weight: bold; white-space: nowrap; }
+    th { background-color: #fff; }
+    
+    /* 枠ごとの背景色と文字色 */
+    .waku-1 { background-color: #ffffff; color: #000000; }
+    .waku-2 { background-color: #000000; color: #ffffff; }
+    .waku-3 { background-color: #ff0000; color: #ffffff; }
+    .waku-4 { background-color: #00b0f0; color: #ffffff; }
+    .waku-5 { background-color: #ffff00; color: #000000; }
+    .waku-6 { background-color: #339933; color: #ffffff; }
+    .waku-7 { background-color: #ffc000; color: #000000; }
+    .waku-8 { background-color: #f2dcdb; color: #000000; }
+
+    /* ソート可能な列の見出し */
+    .sortable { cursor: pointer; text-decoration: underline; color: blue; }
+  </style>
+</head>
+<body>
+
+<h2>1989年 菊花賞</h2>
+<div class="table-wrapper">
+  <table id="raceTable">
+    <thead>
+      <tr>
+        <th>枠番</th>
+        <th class="sortable" onclick="sortTable(1)">馬番</th>
+        <th>馬名</th>
+        <th>性齢</th>
+        <th class="sortable" onclick="sortTable(4)">斤量</th>
+        <th>騎手</th>
+        <th class="sortable" onclick="sortTable(6)">単勝</th>
+        <th class="sortable" onclick="sortTable(7)">人気</th>
+        <th class="sortable" onclick="sortTable(8)">馬体重</th>
+        <th>調教師</th>
+        <th>馬主</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="waku-1">1</td><td class="waku-1">1</td><td>マルセイグレート</td><td>牡4</td><td>57</td><td>武豊</td><td>23.8</td><td>10</td><td>468(-2)</td><td>[西]伊藤修司</td><td>村上義勝</td></tr>
+      <tr><td class="waku-1">1</td><td class="waku-1">2</td><td>ドウカンホープ</td><td>牡4</td><td>57</td><td>芹沢純一</td><td>259.2</td><td>15</td><td>440(0)</td><td>[西]鹿戸明</td><td>新井興業</td></tr>
+      
+      <tr><td class="waku-2">2</td><td class="waku-2">3</td><td>レインボーアンバー</td><td>牡4</td><td>57</td><td>加用正</td><td>8.8</td><td>4</td><td>504(+10)</td><td>[東]鈴木勝太</td><td>イーデン産業</td></tr>
+      <tr><td class="waku-2">2</td><td class="waku-2">4</td><td>オースミシャダイ</td><td>牡4</td><td>57</td><td>松永昌博</td><td>165</td><td>14</td><td>460(+4)</td><td>[西]武邦彦</td><td>山路秀則</td></tr>
+      
+      <tr><td class="waku-3">3</td><td class="waku-3">5</td><td>バンブービギン</td><td>牡4</td><td>57</td><td>南井克巳</td><td>3.8</td><td>1</td><td>490(0)</td><td>[西]布施正</td><td>竹田辰一</td></tr>
+      <tr><td class="waku-3">3</td><td class="waku-3">6</td><td>ロングシンホニー</td><td>牡4</td><td>57</td><td>河内洋</td><td>10.9</td><td>6</td><td>466(-6)</td><td>[西]小林稔</td><td>中井長一</td></tr>
+      
+      <tr><td class="waku-4">4</td><td class="waku-4">7</td><td>モガミサイババ</td><td>牡4</td><td>57</td><td>松永幹夫</td><td>29.3</td><td>11</td><td>500(0)</td><td>[西]中村好夫</td><td>最上ホースクラブ</td></tr>
+      <tr><td class="waku-4">4</td><td class="waku-4">8</td><td>リアルバースデー</td><td>牡4</td><td>57</td><td>菅原泰夫</td><td>9.1</td><td>5</td><td>458(+4)</td><td>[東]佐藤林次</td><td>社台レースホース</td></tr>
+      
+      <tr><td class="waku-5">5</td><td class="waku-5">9</td><td>アテンションリバー</td><td>牡4</td><td>57</td><td>宮徹</td><td>314.6</td><td>16</td><td>470(-6)</td><td>[西]古川平</td><td>美浦商事</td></tr>
+      <tr><td class="waku-5">5</td><td class="waku-5">10</td><td>サツキオアシス</td><td>牡4</td><td>57</td><td>田原成貴</td><td>57.3</td><td>13</td><td>564(+8)</td><td>[西]谷八郎</td><td>北村政也</td></tr>
+      
+      <tr><td class="waku-6">6</td><td class="waku-6">11</td><td>ニシノサムタイム</td><td>牡4</td><td>57</td><td>増井裕</td><td>351.2</td><td>17</td><td>444(0)</td><td>[西]長浜博之</td><td>西山正行</td></tr>
+      <tr><td class="waku-6">6</td><td class="waku-6">12</td><td>スピークリーズン</td><td>牡4</td><td>57</td><td>安田富男</td><td>31.3</td><td>12</td><td>444(0)</td><td>[東]尾形充弘</td><td>竹崎満</td></tr>
+      
+      <tr><td class="waku-7">7</td><td class="waku-7">13</td><td>オサイチジョージ</td><td>牡4</td><td>57</td><td>西浦勝一</td><td>5.7</td><td>3</td><td>484(+4)</td><td>[西]土門一美</td><td>野出長一</td></tr>
+      <tr><td class="waku-7">7</td><td class="waku-7">14</td><td>ウィナーズサークル</td><td>牡4</td><td>57</td><td>郷原洋行</td><td>4.1</td><td>2</td><td>496(+16)</td><td>[東]松山康久</td><td>栗山博</td></tr>
+      <tr><td class="waku-7">7</td><td class="waku-7">15</td><td>ファストバロン</td><td>牡4</td><td>57</td><td>村本善之</td><td>21.1</td><td>9</td><td>486(+4)</td><td>[西]田中耕太</td><td>天野文甫</td></tr>
+      
+      <tr><td class="waku-8">8</td><td class="waku-8">16</td><td>スダビート</td><td>牡4</td><td>57</td><td>柴田政人</td><td>14.9</td><td>8</td><td>454(-2)</td><td>[東]嶋田功</td><td>須田松夫</td></tr>
+      <tr><td class="waku-8">8</td><td class="waku-8">17</td><td>ケージーエース</td><td>牡4</td><td>57</td><td>石橋守</td><td>453.2</td><td>18</td><td>452(+4)</td><td>[西]境直行</td><td>丸山隆雄</td></tr>
+      <tr><td class="waku-8">8</td><td class="waku-8">18</td><td>サクラホクトオー</td><td>牡4</td><td>57</td><td>小島太</td><td>11.6</td><td>7</td><td>446(+4)</td><td>[東]境勝太郎</td><td>さくらコマース</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  let sortOrder = {}; 
+
+  function sortTable(columnIndex) {
+    const table = document.getElementById("raceTable");
+    const tbody = table.querySelector("tbody");
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+
+    sortOrder[columnIndex] = !sortOrder[columnIndex];
+    const isAscending = sortOrder[columnIndex];
+
+    rows.sort((a, b) => {
+      let cellA = a.cells[columnIndex].innerText.trim();
+      let cellB = b.cells[columnIndex].innerText.trim();
+
+      const isInvalid = (val) => val === "取消" || val === "---" || val === "計不" || val === "";
+      if (isInvalid(cellA) && isInvalid(cellB)) return 0;
+      if (isInvalid(cellA)) return 1;
+      if (isInvalid(cellB)) return -1;
+
+      if (columnIndex === 8) {
+        cellA = cellA.split('(')[0];
+        cellB = cellB.split('(')[0];
+      }
+
+      const numA = parseFloat(cellA);
+      const numB = parseFloat(cellB);
+
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return isAscending ? numA - numB : numB - numA;
+      } else {
+        return isAscending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+      }
+    });
+
+    tbody.innerHTML = "";
+    rows.forEach(row => tbody.appendChild(row));
+  }
+</script>
+
+</body>
+</html>
