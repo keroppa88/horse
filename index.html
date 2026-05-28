@@ -393,7 +393,7 @@
 
       // 着順.csv の存在チェック＋取得を同時に
       const resultResp = await fetch(`${base}/着順.csv`);
-      if (!resultResp.ok) break;
+      if (!resultResp.ok) continue;
 
       const [resultText, oddsResp, commentResp, entryResp, videoTxtResp] = await Promise.all([
         resultResp.text(),
