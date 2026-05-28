@@ -251,14 +251,6 @@
         </div>
       </section>
 
-      <!-- ③ 出走表 -->
-      <section class="win">
-        <div style="font-weight:700;margin-bottom:6px">出走表</div>
-        <div class="scrollBox">
-          <div id="entryTable" style="padding:4px"></div>
-        </div>
-        <div class="hint">縦横スクロール対応。</div>
-      </section>
     </div>
   </section>
 
@@ -536,7 +528,6 @@
   const remainLabel = $("#remainLabel");
   const sumBetEl = $("#sumBet");
   const btnConfirm = $("#btnConfirm");
-  const entryTable = $("#entryTable");
 
   function setMode(next){
     play(seChoice);
@@ -731,7 +722,6 @@
     renderQuinella2();
     wireAmountButtons($("#amtBarEx"), stakeEx);
     wireAmountButtons($("#amtBarQu"), stakeQu);
-    entryTable.innerHTML = ep.entryHTML;
     renderCart();
     refreshTotals();
     bgmPlay();
