@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>1989年 ジャパンカップ</title>
+  <style>
+    .table-wrapper { overflow-x: auto; }
+    h2 { text-align: left; margin-bottom: 10px; font-family: sans-serif; }
+    table { border-collapse: collapse; text-align: center; font-family: sans-serif; }
+    th, td { border: 1px solid #000; padding: 6px; font-weight: bold; white-space: nowrap; }
+    th { background-color: #fff; }
+    
+    /* 枠ごとの背景色と文字色 */
+    .waku-1 { background-color: #ffffff; color: #000000; }
+    .waku-2 { background-color: #000000; color: #ffffff; }
+    .waku-3 { background-color: #ff0000; color: #ffffff; }
+    .waku-4 { background-color: #00b0f0; color: #ffffff; }
+    .waku-5 { background-color: #ffff00; color: #000000; }
+    .waku-6 { background-color: #339933; color: #ffffff; }
+    .waku-7 { background-color: #ffc000; color: #000000; }
+    .waku-8 { background-color: #f2dcdb; color: #000000; }
+
+    /* ソート可能な列の見出し */
+    .sortable { cursor: pointer; text-decoration: underline; color: blue; }
+  </style>
+</head>
+<body>
+
+<h2>1989年 ジャパンカップ</h2>
+<div class="table-wrapper">
+  <table id="raceTable">
+    <thead>
+      <tr>
+        <th>枠番</th>
+        <th class="sortable" onclick="sortTable(1)">馬番</th>
+        <th>馬名</th>
+        <th>性齢</th>
+        <th class="sortable" onclick="sortTable(4)">斤量</th>
+        <th>騎手</th>
+        <th class="sortable" onclick="sortTable(6)">単勝</th>
+        <th class="sortable" onclick="sortTable(7)">人気</th>
+        <th class="sortable" onclick="sortTable(8)">馬体重</th>
+        <th>調教師</th>
+        <th>馬主</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="waku-1">1</td><td class="waku-1">1</td><td>トップサンライズ</td><td>牡5</td><td>57</td><td>ヘッド</td><td>25.6</td><td>10</td><td>484(0)</td><td>[外]ファーブ</td><td>チャールズ・シュミット</td></tr>
+      
+      <tr><td class="waku-2">2</td><td class="waku-2">2</td><td>ホーリックス</td><td>牝7</td><td>55</td><td>オサリバ</td><td>19.9</td><td>9</td><td>492(0)</td><td>[外]オサリバ</td><td>Ｇ．Ｗ．ド・グルシー</td></tr>
+      <tr><td class="waku-2">2</td><td class="waku-2">3</td><td>オグリキャップ</td><td>牡5</td><td>57</td><td>南井克巳</td><td>5.3</td><td>2</td><td>496(0)</td><td>[西]瀬戸口勉</td><td>近藤俊典</td></tr>
+      
+      <tr><td class="waku-3">3</td><td class="waku-3">4</td><td>イブンベイ</td><td>牡6</td><td>57</td><td>クィン</td><td>7.3</td><td>4</td><td>522(0)</td><td>[外]コール</td><td>ファハド・サルマン</td></tr>
+      <tr><td class="waku-3">3</td><td class="waku-3">5</td><td>バンブーメモリー</td><td>牡5</td><td>57</td><td>松永昌博</td><td>48.6</td><td>13</td><td>500(0)</td><td>[西]武邦彦</td><td>竹田辰一</td></tr>
+      
+      <tr><td class="waku-4">4</td><td class="waku-4">6</td><td>スーパークリーク</td><td>牡5</td><td>57</td><td>武豊</td><td>4.6</td><td>1</td><td>524(+4)</td><td>[西]伊藤修司</td><td>木倉誠</td></tr>
+      <tr><td class="waku-4">4</td><td class="waku-4">7</td><td>ランニングフリー</td><td>牡7</td><td>57</td><td>菅原泰夫</td><td>84.6</td><td>15</td><td>452(+2)</td><td>[東]本郷一彦</td><td>藤島泰輔</td></tr>
+      
+      <tr><td class="waku-5">5</td><td class="waku-5">8</td><td>ホークスター</td><td>牡4</td><td>55</td><td>ベーズ</td><td>5.6</td><td>3</td><td>472(0)</td><td>[外]マッカナ</td><td>Ｊ．Ｓ．メレディス</td></tr>
+      <tr><td class="waku-5">5</td><td class="waku-5">9</td><td>キリパワー</td><td>牡5</td><td>57</td><td>柴田善臣</td><td>37.5</td><td>11</td><td>482(+2)</td><td>[東]清水利章</td><td>本桐牧場</td></tr>
+      
+      <tr><td class="waku-6">6</td><td class="waku-6">10</td><td>フレッシュボイス</td><td>牡7</td><td>57</td><td>的場均</td><td>62.8</td><td>14</td><td>464(-6)</td><td>[西]境直行</td><td>円城和男</td></tr>
+      <tr><td class="waku-6">6</td><td class="waku-6">11</td><td>キャロルハウス</td><td>牡5</td><td>57</td><td>キネーン</td><td>8.9</td><td>7</td><td>504(0)</td><td>[外]ジャービ</td><td>吉田善哉</td></tr>
+      
+      <tr><td class="waku-7">7</td><td class="waku-7">12</td><td>イナリワン</td><td>牡6</td><td>57</td><td>柴田政人</td><td>14</td><td>8</td><td>446(+2)</td><td>[東]鈴木清</td><td>保手浜弘規</td></tr>
+      <tr><td class="waku-7">7</td><td class="waku-7">13</td><td>ロジータ</td><td>牝4</td><td>53</td><td>野崎武司</td><td>42.9</td><td>12</td><td>456(+4)</td><td>[地]福島幸三</td><td>加藤富保</td></tr>
+      
+      <tr><td class="waku-8">8</td><td class="waku-8">14</td><td>ペイザバトラー</td><td>牡6</td><td>57</td><td>マッキャ</td><td>8.6</td><td>6</td><td>460(0)</td><td>[外]フランケ</td><td>早田光一郎</td></tr>
+      <tr><td class="waku-8">8</td><td class="waku-8">15</td><td>アサティス</td><td>牡5</td><td>57</td><td>コクレー</td><td>7.5</td><td>5</td><td>496(0)</td><td>[外]ハーウッ</td><td>原田享</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  let sortOrder = {}; 
+
+  function sortTable(columnIndex) {
+    const table = document.getElementById("raceTable");
+    const tbody = table.querySelector("tbody");
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+
+    sortOrder[columnIndex] = !sortOrder[columnIndex];
+    const isAscending = sortOrder[columnIndex];
+
+    rows.sort((a, b) => {
+      let cellA = a.cells[columnIndex].innerText.trim();
+      let cellB = b.cells[columnIndex].innerText.trim();
+
+      const isInvalid = (val) => val === "取消" || val === "---" || val === "計不" || val === "";
+      if (isInvalid(cellA) && isInvalid(cellB)) return 0;
+      if (isInvalid(cellA)) return 1;
+      if (isInvalid(cellB)) return -1;
+
+      if (columnIndex === 8) {
+        cellA = cellA.split('(')[0];
+        cellB = cellB.split('(')[0];
+      }
+
+      const numA = parseFloat(cellA);
+      const numB = parseFloat(cellB);
+
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return isAscending ? numA - numB : numB - numA;
+      } else {
+        return isAscending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+      }
+    });
+
+    tbody.innerHTML = "";
+    rows.forEach(row => tbody.appendChild(row));
+  }
+</script>
+
+</body>
+</html>
