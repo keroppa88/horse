@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>1989年 天皇賞秋</title>
+  <style>
+    .table-wrapper { overflow-x: auto; }
+    h2 { text-align: left; margin-bottom: 10px; font-family: sans-serif; }
+    table { border-collapse: collapse; text-align: center; font-family: sans-serif; }
+    th, td { border: 1px solid #000; padding: 6px; font-weight: bold; white-space: nowrap; }
+    th { background-color: #fff; }
+    
+    /* 枠ごとの背景色と文字色 */
+    .waku-1 { background-color: #ffffff; color: #000000; }
+    .waku-2 { background-color: #000000; color: #ffffff; }
+    .waku-3 { background-color: #ff0000; color: #ffffff; }
+    .waku-4 { background-color: #00b0f0; color: #ffffff; }
+    .waku-5 { background-color: #ffff00; color: #000000; }
+    .waku-6 { background-color: #339933; color: #ffffff; }
+    .waku-7 { background-color: #ffc000; color: #000000; }
+    .waku-8 { background-color: #f2dcdb; color: #000000; }
+
+    /* ソート可能な列の見出し */
+    .sortable { cursor: pointer; text-decoration: underline; color: blue; }
+  </style>
+</head>
+<body>
+
+<h2>1989年 天皇賞秋</h2>
+<div class="table-wrapper">
+  <table id="raceTable">
+    <thead>
+      <tr>
+        <th>枠番</th>
+        <th class="sortable" onclick="sortTable(1)">馬番</th>
+        <th>馬名</th>
+        <th>性齢</th>
+        <th class="sortable" onclick="sortTable(4)">斤量</th>
+        <th>騎手</th>
+        <th class="sortable" onclick="sortTable(6)">単勝</th>
+        <th class="sortable" onclick="sortTable(7)">人気</th>
+        <th class="sortable" onclick="sortTable(8)">馬体重</th>
+        <th>調教師</th>
+        <th>馬主</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="waku-1">1</td><td class="waku-1">1</td><td>カイラスアモン</td><td>牡6</td><td>58</td><td>竹原啓二</td><td>214.8</td><td>14</td><td>490(-2)</td><td>[東]松山吉三</td><td>アモン</td></tr>
+      
+      <tr><td class="waku-2">2</td><td class="waku-2">2</td><td>レジェンドテイオー</td><td>牡7</td><td>58</td><td>郷原洋行</td><td>54.7</td><td>11</td><td>518(-6)</td><td>[東]田村駿仁</td><td>貞文</td></tr>
+      <tr><td class="waku-2">2</td><td class="waku-2">3</td><td>ミスターシクレノン</td><td>牡5</td><td>58</td><td>松永幹夫</td><td>21.8</td><td>5</td><td>498(+4)</td><td>[西]小林稔</td><td>藤立啓一</td></tr>
+      
+      <tr><td class="waku-3">3</td><td class="waku-3">4</td><td>オグリキャップ</td><td>牡5</td><td>58</td><td>南井克巳</td><td>1.9</td><td>1</td><td>496(-2)</td><td>[西]瀬戸口勉</td><td>近藤俊典</td></tr>
+      
+      <tr><td class="waku-4">4</td><td class="waku-4">5</td><td>メジロアルダン</td><td>牡5</td><td>58</td><td>岡部幸雄</td><td>5.5</td><td>3</td><td>508(-4)</td><td>[東]奥平真治</td><td>メジロ牧場</td></tr>
+      <tr><td class="waku-4">4</td><td class="waku-4">6</td><td>キリパワー</td><td>牡5</td><td>58</td><td>大塚栄三</td><td>68.1</td><td>13</td><td>480(+10)</td><td>[東]清水利章</td><td>本桐牧場</td></tr>
+      
+      <tr><td class="waku-5">5</td><td class="waku-5">7</td><td>イナリワン</td><td>牡6</td><td>58</td><td>柴田政人</td><td>6.2</td><td>4</td><td>444(-2)</td><td>[東]鈴木清</td><td>保手浜弘規</td></tr>
+      <tr><td class="waku-5">5</td><td class="waku-5">8</td><td>ランニングフリー</td><td>牡7</td><td>58</td><td>菅原泰夫</td><td>47.5</td><td>10</td><td>450(0)</td><td>[東]本郷一彦</td><td>藤島泰輔</td></tr>
+      
+      <tr><td class="waku-6">6</td><td class="waku-6">9</td><td>ディクターランド</td><td>牡5</td><td>58</td><td>菅谷正巳</td><td>35.5</td><td>7</td><td>444(+10
