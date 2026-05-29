@@ -328,12 +328,8 @@
       background: #0a0000;
     }
 
-    /* ---- 出走表 screen ---- */
-    #oddsContent table { border-collapse: collapse; width: 100%; }
-    #oddsContent th { background: #222; color: #888; padding: 2px 4px; font-size: 9px; border-bottom: 1px solid #333; }
-    #oddsContent td { padding: 2px 4px; border-bottom: 1px solid #1e1e1e; color: #bbb; font-size: 9px; }
-    #oddsContent tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
-    #oddsContent body, #oddsContent html { background: transparent !important; color: #bbb; }
+    /* ---- 出走表 iframe ---- */
+    #oddsFrame { flex: 1; width: 100%; border: none; background: #fff; display: block; }
 
     /* =====================
        CONTROLS AREA
@@ -586,7 +582,7 @@
       <!-- 出走表 -->
       <div id="screenOdds" class="ls hidden">
         <div class="pro-title" id="oddsTitle">出走表</div>
-        <div class="ls-scroll" id="oddsContent"></div>
+        <iframe id="oddsFrame" sandbox="allow-same-origin allow-scripts"></iframe>
         <div class="ls-foot">
           <button class="lcd-btn-sm" id="btnOddsBack">← 戻る</button>
         </div>
@@ -790,15 +786,8 @@
     oddsReturnScreen=activeScreen()||"#screenPrologue";
     showScreen("#screenOdds");
     $("#oddsTitle").textContent=ep.title+"　出走表";
-    const content=$("#oddsContent");
-    if(ep.entryHtml){
-      try{
-        const doc=new DOMParser().parseFromString(ep.entryHtml,"text/html");
-        content.innerHTML=doc.body.innerHTML;
-      }catch{ content.textContent=ep.entryHtml; }
-    } else {
-      content.textContent="（出走表なし）";
-    }
+    const frame=$("#oddsFrame");
+    frame.srcdoc=ep.entryHtml||"<html><body><p>（出走表なし）</p></body></html>";
   }
   $("#btnOddsBack").addEventListener("click",()=>{ play(seChoice); showScreen(oddsReturnScreen); });
 
@@ -1179,6 +1168,38 @@
   $("#navToggle").addEventListener("click",()=>{
     const lcd=document.querySelector(".lcd");
     lcd.style.visibility=lcd.style.visibility==="hidden"?"visible":"hidden";
+  });
+
+  // ---- マウスドラッグスクロール ----
+  function enableDragScroll(el){
+    let down=false, sy=0, st=0;
+    el.addEventListener("pointerdown",e=>{
+      down=true; sy=e.clientY; st=el.scrollTop;
+      el.setPointerCapture(e.pointerId);
+      el.style.cursor="grabbing";
+    });
+    el.addEventListener("pointermove",e=>{
+      if(!down) return;
+      el.scrollTop=st-(e.clientY-sy);
+    });
+    const up=()=>{ down=false; el.style.cursor=""; };
+    el.addEventListener("pointerup",up);
+    el.addEventListener("pointercancel",up);
+  }
+  document.querySelectorAll(".ls-scroll").forEach(enableDragScroll);
+
+  // ---- ダブルタップで全画面トグル（常に有効）----
+  let lastTapTime=0;
+  document.querySelector(".lcd").addEventListener("click",e=>{
+    const now=Date.now();
+    if(now-lastTapTime<350){
+      if(!document.fullscreenElement){
+        (document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen||function(){}).call(document.documentElement);
+      } else {
+        (document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document);
+      }
+    }
+    lastTapTime=now;
   });
 
   openRealTitle();
