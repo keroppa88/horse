@@ -261,12 +261,16 @@
       gap: 8px;
       margin-bottom: 4px;
     }
-    .horse-row.active { border-color: #aaa; background: #2e2e2e; color: #fff; }
-    .horse-row.dpad-focus { border-color: #6d6; background: #1e3a1e; color: #fff; outline: 1px solid #3a9a3a; }
-    .hr-num { font-size: 20px; font-weight: bold; width: 32px; text-align: center; flex-shrink: 0; color: #fff; }
-    .hr-name { flex: 1; font-size: 18px; color: #ddd; font-weight: 600; }
-    .hr-odds { font-size: 17px; color: #aaa; flex-shrink: 0; }
+    .horse-row.active { border-color: #aaa; background: #2e2e2e; }
+    .horse-row.dpad-focus { border-color: #6d6; background: #1e3a1e; outline: 1px solid #3a9a3a; }
+    .horse-row.disabled { opacity: 0.35; cursor: default; }
+    .hr-num { font-size: 22px; font-weight: bold; width: 34px; text-align: center; flex-shrink: 0; color: #fff; }
+    .hr-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .hr-name { font-size: 18px; color: #ddd; font-weight: 600; }
+    .hr-jockey { font-size: 13px; color: #888; }
+    .hr-odds { font-size: 17px; color: #aaa; flex-shrink: 0; text-align: right; }
     .horse-row.active .hr-odds { color: #ddd; }
+    .horse-row.active .hr-name { color: #fff; }
     .lcd-btn-sm {
       padding: 4px 8px;
       border: 1px solid #555;
@@ -545,10 +549,10 @@
 
           <!-- 馬連エリア -->
           <div id="areaQuinella" style="display:none">
-            <div class="lcd-step" id="quinStep">1頭目を選ぶ</div>
-            <div class="lcd-nums" id="quinNums1"></div>
-            <div class="lcd-step">2頭目を選ぶ</div>
-            <div class="lcd-nums" id="quinNums2"></div>
+            <div class="lcd-step" id="quinStep">1着の馬を決める</div>
+            <div id="quinList1"></div>
+            <div class="lcd-step" id="quin2Step">2着の馬を決める</div>
+            <div id="quinList2"></div>
             <div class="lcd-amount-row">
               <input type="number" id="stakeQu" min="0" step="100" value="0" />
               <button class="lcd-btn-sm primary" id="btnAddQu">カートへ</button>
@@ -779,8 +783,8 @@
       const videoPath  =videoTxtResp.ok?(await videoTxtResp.text()).trim():`${base}/race.mp4`;
       const entryHtml  =entryResp.ok   ?await entryResp.text()  :'';
 
-      // 出走表.html から馬番→馬名マップ・単勝倍率マップを生成
-      const horseNames={}, tanshokuOdds={};
+      // 出走表.html から馬リスト（馬番・馬名・騎手・単勝倍率）を直接構築
+      const horseList=[];
       if(entryHtml){
         const doc2=new DOMParser().parseFromString(entryHtml,"text/html");
         doc2.querySelectorAll("tbody tr").forEach(tr=>{
@@ -788,11 +792,10 @@
           if(cells.length>=2){
             const num=parseInt(cells[0].textContent.trim());
             const name=cells[1].textContent.trim();
-            if(num&&name) horseNames[num]=name;
-            if(cells.length>=4){
-              const od=parseFloat(cells[3].textContent.trim());
-              if(!isNaN(od)&&od>0) tanshokuOdds[num]=od;
-            }
+            if(!num||!name) return;
+            const jockey=cells.length>=3?cells[2].textContent.trim():'';
+            const tanOdds=cells.length>=4?parseFloat(cells[3].textContent.trim()):NaN;
+            horseList.push({num, name, jockey, tanOdds:isNaN(tanOdds)?0:tanOdds});
           }
         });
       }
@@ -811,7 +814,7 @@
       const lines2=commentText.trim().split('\n');
       const title=lines2[0]?lines2[0].trim():`レース ${id}`;
 
-      EPISODES[epNum]={ id, title, comment:commentText, videoPath, entryHtml, horseNames, tanshokuOdds,
+      EPISODES[epNum]={ id, title, comment:commentText, videoPath, entryHtml, horseList,
         horses:[...horseSet].sort((a,b)=>a-b), exactaMap, quinellaMap, result };
       epNum++;
     }
@@ -829,8 +832,8 @@
   function dpGetBtns(){
     if($("#screenBuy").classList.contains("hidden")) return [];
     if(mode==="tanshoku") return [...$("#tanshokuList").querySelectorAll(".horse-row")];
-    const grids=[quinNums1,quinNums2];
-    return grids.flatMap(g=>[...g.querySelectorAll(".lcd-num-btn:not(:disabled)")]);
+    if(!selectedQu1) return [...$("#quinList1").querySelectorAll(".horse-row")];
+    return [...$("#quinList2").querySelectorAll(".horse-row:not(.disabled)")];
   }
   function dpSet(el){
     if(dpFocusEl) dpFocusEl.classList.remove("dpad-focus");
@@ -891,7 +894,6 @@
   const tabExacta=$("#tabExacta"), tabQuinella=$("#tabQuinella");
   const areaTanshoku=$("#areaTanshoku"), areaQuinella=$("#areaQuinella");
   const stakeTan=$("#stakeTan"), stakeQu=$("#stakeQu");
-  const quinNums1=$("#quinNums1"), quinNums2=$("#quinNums2");
   const cartRows=$("#cartRows"), limitHint=$("#limitHint");
   const bankrollLabel=$("#bankrollLabel"), remainLabel=$("#remainLabel"), sumBetEl=$("#sumBet");
   const btnConfirm=$("#btnConfirm");
@@ -908,59 +910,56 @@
   tabExacta.addEventListener("click",()=>setMode("tanshoku"));
   tabQuinella.addEventListener("click",()=>setMode("quinella"));
 
-  function makeNumBtn(uma,label,onClick){
-    const ep=EPISODES[episode];
-    const rawName=ep?.horseNames?.[uma]||'';
-    const name=rawName.length>5?rawName.slice(0,5)+'…':rawName;
-    const b=document.createElement("button");
-    b.className="lcd-num-btn"; b.dataset.uma=uma;
-    b.innerHTML=`<b>${uma}</b><span class="btn-name">${name}</span>${label}`;
-    b.addEventListener("click",onClick);
-    return b;
-  }
-  function highlightSelections(){
+function highlightSelections(){
     $("#tanshokuList").querySelectorAll(".horse-row").forEach(r=>r.classList.toggle("active",Number(r.dataset.uma)===selectedTan));
-    quinNums1.querySelectorAll("button").forEach(b=>b.classList.toggle("active",mode==="quinella"&&Number(b.dataset.uma)===selectedQu1));
-    quinNums2.querySelectorAll("button").forEach(b=>b.classList.toggle("active",mode==="quinella"&&Number(b.dataset.uma)===selectedQu2));
+    $("#quinList1").querySelectorAll(".horse-row").forEach(r=>r.classList.toggle("active",Number(r.dataset.uma)===selectedQu1));
+    $("#quinList2").querySelectorAll(".horse-row").forEach(r=>r.classList.toggle("active",Number(r.dataset.uma)===selectedQu2));
   }
 
+  function makeHorseRow({num, name, jockey, tanOdds}, oddsLabel, onClick, isDisabled){
+    const row=document.createElement("div");
+    row.className="horse-row"+(isDisabled?" disabled":""); row.dataset.uma=num;
+    row.innerHTML=`<span class="hr-num">${num}</span>`+
+      `<span class="hr-info"><span class="hr-name">${name}</span><span class="hr-jockey">${jockey}</span></span>`+
+      `<span class="hr-odds">${oddsLabel}</span>`;
+    if(!isDisabled) row.addEventListener("click", onClick);
+    return row;
+  }
   function renderTanshokuList(){
     const ep=EPISODES[episode];
     const list=$("#tanshokuList"); list.innerHTML="";
-    ep.horses.forEach(uma=>{
-      const name=ep.horseNames?.[uma]||'';
-      const od=ep.tanshokuOdds?.[uma]||0;
-      const row=document.createElement("div");
-      row.className="horse-row"; row.dataset.uma=uma;
-      row.innerHTML=`<span class="hr-num">${uma}</span><span class="hr-name">${name}</span><span class="hr-odds">${od?f1(od)+'倍':'-'}</span>`;
-      row.addEventListener("click",()=>{
-        play(seChoice); selectedTan=uma; highlightSelections(); limitHint.textContent="";
-      });
-      list.appendChild(row);
+    (ep.horseList||[]).forEach(h=>{
+      const lbl=h.tanOdds?f1(h.tanOdds)+'倍':'-';
+      list.appendChild(makeHorseRow(h, lbl, ()=>{
+        play(seChoice); selectedTan=h.num; highlightSelections(); limitHint.textContent="";
+      }, false));
     });
   }
-  function renderQuinella1(){
-    const ep=EPISODES[episode]; quinNums1.innerHTML="";
-    ep.horses.forEach(uma=>{
-      quinNums1.appendChild(makeNumBtn(uma,"",()=>{
-        play(seChoice); selectedQu1=uma; selectedQu2=null;
-        $("#quinStep").textContent=`1頭目：${uma}選択中→2頭目を選ぶ`;
-        dpClear(); renderQuinella2(); highlightSelections();
-      }));
+  function renderQuinellaList1(){
+    const ep=EPISODES[episode];
+    const list=$("#quinList1"); list.innerHTML="";
+    (ep.horseList||[]).forEach(h=>{
+      const lbl=h.tanOdds?f1(h.tanOdds)+'倍':'-';
+      list.appendChild(makeHorseRow(h, lbl, ()=>{
+        play(seChoice); selectedQu1=h.num; selectedQu2=null;
+        const sel=ep.horseList.find(x=>x.num===h.num);
+        $("#quinStep").textContent=`1着：${sel?sel.name:h.num} → 2着を選ぶ`;
+        dpClear(); renderQuinellaList2(); highlightSelections();
+      }, false));
     });
   }
-  function renderQuinella2(){
-    const ep=EPISODES[episode]; quinNums2.innerHTML="";
-    ep.horses.forEach(uma=>{
-      if(uma===selectedQu1) return;
-      const key=`${Math.min(selectedQu1||0,uma)}>${Math.max(selectedQu1||0,uma)}`;
-      const od=(selectedQu1&&ep.quinellaMap.get(key))||0;
-      const lbl=od?`${f1(od)}倍`:(selectedQu1?"-":"");
-      const b=makeNumBtn(uma,lbl,()=>{
-        if(!selectedQu1)return; play(seChoice); selectedQu2=uma; highlightSelections();
-      });
-      if(!selectedQu1) b.disabled=true;
-      quinNums2.appendChild(b);
+  function renderQuinellaList2(){
+    const ep=EPISODES[episode];
+    const list=$("#quinList2"); list.innerHTML="";
+    (ep.horseList||[]).forEach(h=>{
+      if(h.num===selectedQu1) return;
+      const key=`${Math.min(selectedQu1||0,h.num)}>${Math.max(selectedQu1||0,h.num)}`;
+      const quOdds=selectedQu1?(ep.quinellaMap.get(key)||0):0;
+      const lbl=quOdds?f1(quOdds)+'倍':(selectedQu1?'-':'');
+      const disabled=!selectedQu1;
+      list.appendChild(makeHorseRow(h, lbl, ()=>{
+        play(seChoice); selectedQu2=h.num; highlightSelections(); limitHint.textContent="";
+      }, disabled));
     });
   }
 
@@ -1011,7 +1010,7 @@
     episodeStartBankroll=bankroll;
     bankrollLabel.textContent=yen(episodeStartBankroll);
     resetBuyState();
-    renderTanshokuList(); renderQuinella1(); renderQuinella2();
+    renderTanshokuList(); renderQuinellaList1(); renderQuinellaList2();
     wireAmountButtons($("#amtBarTan"),stakeTan);
     wireAmountButtons($("#amtBarQu"),stakeQu);
     renderCart(); refreshTotals(); bgmPlay();
@@ -1021,9 +1020,11 @@
     const stake=Math.floor(Number(stakeTan.value||0));
     if(!selectedTan){limitHint.innerHTML=`<span class="lcd-danger">馬番を選んでください</span>`;return;}
     if(!(stake>0)){limitHint.innerHTML=`<span class="lcd-danger">金額を入れてください</span>`;return;}
-    const od=EPISODES[episode].tanshokuOdds?.[selectedTan]||0;
+    const ep=EPISODES[episode];
+    const h=ep.horseList?.find(x=>x.num===selectedTan);
+    const od=h?.tanOdds||0;
     if(!od){limitHint.innerHTML=`<span class="lcd-danger">オッズが見つかりません</span>`;return;}
-    addToCart({type:"単勝",key:`TAN:${selectedTan}`,label:`${selectedTan}番`,odds:od,stake});
+    addToCart({type:"単勝",key:`TAN:${selectedTan}`,label:`${selectedTan}番 ${h?.name||''}`,odds:od,stake});
     stakeTan.value="0";
   });
   $("#btnAddQu").addEventListener("click",()=>{
@@ -1188,7 +1189,7 @@
         if(selectedTan){ selectedTan=null; highlightSelections(); return; }
       } else {
         if(selectedQu2){ selectedQu2=null; highlightSelections(); return; }
-        if(selectedQu1){ selectedQu1=null; $("#quinStep").textContent="1頭目を選ぶ"; dpClear(); renderQuinella2(); highlightSelections(); return; }
+        if(selectedQu1){ selectedQu1=null; $("#quinStep").textContent="1着の馬を決める"; dpClear(); renderQuinellaList1(); renderQuinellaList2(); highlightSelections(); return; }
       }
       // 何も選択していなければプロローグへ戻る
       showPrologue(); return;
