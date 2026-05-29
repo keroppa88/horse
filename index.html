@@ -587,8 +587,9 @@
       </div>
 
       <!-- 動画 -->
-      <div id="screenVideo" class="ls hidden">
+      <div id="screenVideo" class="ls hidden" style="position:relative">
         <video id="raceVideo" class="lcd-video" playsinline preload="auto" style="cursor:pointer"></video>
+        <div id="videoPlayOverlay" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);color:#fff;font-size:22px;cursor:pointer">▶ タップして再生</div>
         <div class="ls-foot">
           <span id="videoCaption" style="font-size:9px;color:#666"></span>
           <button class="lcd-btn-sm primary" id="btnToSettlement">スキップ ▶</button>
@@ -1080,7 +1081,13 @@ function highlightSelections(){
     play(seChoice); showScreen("#screenVideo");
     $("#videoCaption").textContent=`レース${episode}/${totalEpisodes}`;
     bgmStop(); raceVideo.src=EPISODES[episode].videoPath;
-    raceVideo.play().catch(()=>{});
+    const overlay=document.getElementById("videoPlayOverlay");
+    overlay.style.display="none";
+    raceVideo.play().catch(()=>{
+      // autoplay blocked → show tap-to-play overlay
+      overlay.style.display="flex";
+    });
+    overlay.onclick=()=>{ overlay.style.display="none"; raceVideo.play().catch(()=>{}); };
   }
   btnConfirm.addEventListener("click",confirmBet);
   $("#btnToSettlement").addEventListener("click",()=>{ play(seChoice); try{raceVideo.pause();}catch{} showSettlement(); });
