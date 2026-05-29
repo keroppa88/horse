@@ -229,6 +229,32 @@
       font-size: 9px;
       cursor: pointer;
     }
+    /* 馬券購入 2x フォント */
+    #screenBuy .lcd-tab { font-size: 20px; padding: 5px 16px; }
+    #screenBuy .lcd-cash { font-size: 18px; }
+    #screenBuy .lcd-cash b { font-size: 20px; }
+    #screenBuy .lcd-amt-btn { font-size: 18px; padding: 5px 10px; }
+    #screenBuy .lcd-amount-row input[type="number"] { font-size: 18px; width: 120px; padding: 5px 7px; }
+    #screenBuy .ls-foot .lcd-btn-sm { font-size: 18px; padding: 6px 12px; }
+    /* 単勝 horse list */
+    .horse-row {
+      display: flex;
+      align-items: center;
+      padding: 8px 6px;
+      border: 1px solid #3a3a3a;
+      border-radius: 5px;
+      background: #1e1e1e;
+      color: #bbb;
+      cursor: pointer;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .horse-row.active { border-color: #aaa; background: #2e2e2e; color: #fff; }
+    .horse-row.dpad-focus { border-color: #6d6; background: #1e3a1e; color: #fff; outline: 1px solid #3a9a3a; }
+    .hr-num { font-size: 20px; font-weight: bold; width: 32px; text-align: center; flex-shrink: 0; }
+    .hr-name { flex: 1; font-size: 18px; }
+    .hr-odds { font-size: 18px; color: #aaa; flex-shrink: 0; }
+    .horse-row.active .hr-odds { color: #ddd; }
     .lcd-btn-sm {
       padding: 4px 8px;
       border: 1px solid #555;
@@ -495,17 +521,14 @@
 
         <div class="ls-scroll" id="buyScroll">
 
-          <!-- 馬単エリア -->
-          <div id="areaExacta">
-            <div class="lcd-step" id="exactaStep">1着を選ぶ</div>
-            <div class="lcd-nums" id="headNums"></div>
-            <div class="lcd-step">2着を選ぶ</div>
-            <div class="lcd-nums" id="tailNums"></div>
+          <!-- 単勝エリア（馬単タブ） -->
+          <div id="areaTanshoku">
+            <div id="tanshokuList"></div>
             <div class="lcd-amount-row">
-              <input type="number" id="stakeEx" min="0" step="100" value="0" />
-              <button class="lcd-btn-sm primary" id="btnAddEx">カートへ</button>
+              <input type="number" id="stakeTan" min="0" step="100" value="0" />
+              <button class="lcd-btn-sm primary" id="btnAddTan">カートへ</button>
             </div>
-            <div class="lcd-amt-btns" id="amtBarEx"></div>
+            <div class="lcd-amt-btns" id="amtBarTan"></div>
           </div>
 
           <!-- 馬連エリア -->
@@ -744,8 +767,8 @@
       const videoPath  =videoTxtResp.ok?(await videoTxtResp.text()).trim():`${base}/race.mp4`;
       const entryHtml  =entryResp.ok   ?await entryResp.text()  :'';
 
-      // 出走表.html から馬番→馬名マップを生成
-      const horseNames={};
+      // 出走表.html から馬番→馬名マップ・単勝倍率マップを生成
+      const horseNames={}, tanshokuOdds={};
       if(entryHtml){
         const doc2=new DOMParser().parseFromString(entryHtml,"text/html");
         doc2.querySelectorAll("tbody tr").forEach(tr=>{
@@ -754,6 +777,10 @@
             const num=parseInt(cells[0].textContent.trim());
             const name=cells[1].textContent.trim();
             if(num&&name) horseNames[num]=name;
+            if(cells.length>=4){
+              const od=parseFloat(cells[3].textContent.trim());
+              if(!isNaN(od)&&od>0) tanshokuOdds[num]=od;
+            }
           }
         });
       }
@@ -772,7 +799,7 @@
       const lines2=commentText.trim().split('\n');
       const title=lines2[0]?lines2[0].trim():`レース ${id}`;
 
-      EPISODES[epNum]={ id, title, comment:commentText, videoPath, entryHtml, horseNames,
+      EPISODES[epNum]={ id, title, comment:commentText, videoPath, entryHtml, horseNames, tanshokuOdds,
         horses:[...horseSet].sort((a,b)=>a-b), exactaMap, quinellaMap, result };
       epNum++;
     }
@@ -782,16 +809,15 @@
   const {EPISODES,totalEpisodes,startBankroll,goalBankroll}=await loadAllRaces();
 
   let episode=1, bankroll=startBankroll, episodeStartBankroll=startBankroll;
-  let mode="exacta", selectedHead=null, selectedTail=null, selectedQu1=null, selectedQu2=null;
+  let mode="tanshoku", selectedHead=null, selectedTail=null, selectedQu1=null, selectedQu2=null, selectedTan=null;
   let cart=[], settledEpisode=1, taikoTimer=null;
   let dpFocusEl=null, oddsReturnScreen="#screenPrologue";
 
   // ---- D-pad cell focus ----
   function dpGetBtns(){
     if($("#screenBuy").classList.contains("hidden")) return [];
-    const grids=mode==="exacta"
-      ?[headNums,tailNums]
-      :[quinNums1,quinNums2];
+    if(mode==="tanshoku") return [...$("#tanshokuList").querySelectorAll(".horse-row")];
+    const grids=[quinNums1,quinNums2];
     return grids.flatMap(g=>[...g.querySelectorAll(".lcd-num-btn:not(:disabled)")]);
   }
   function dpSet(el){
@@ -805,7 +831,8 @@
     if(!btns.length){ dpClear(); return; }
     let i=dpFocusEl?btns.indexOf(dpFocusEl):-1;
     if(i===-1){ dpSet(btns[0]); return; }
-    const next=i+dc+dr*7;
+    const cols=mode==="tanshoku"?1:7;
+    const next=i+dc+dr*cols;
     dpSet(btns[Math.max(0,Math.min(btns.length-1,next))]);
   }
 
@@ -850,9 +877,8 @@
 
   // ---- Bet tabs ----
   const tabExacta=$("#tabExacta"), tabQuinella=$("#tabQuinella");
-  const areaExacta=$("#areaExacta"), areaQuinella=$("#areaQuinella");
-  const stakeEx=$("#stakeEx"), stakeQu=$("#stakeQu");
-  const headNums=$("#headNums"), tailNums=$("#tailNums");
+  const areaTanshoku=$("#areaTanshoku"), areaQuinella=$("#areaQuinella");
+  const stakeTan=$("#stakeTan"), stakeQu=$("#stakeQu");
   const quinNums1=$("#quinNums1"), quinNums2=$("#quinNums2");
   const cartRows=$("#cartRows"), limitHint=$("#limitHint");
   const bankrollLabel=$("#bankrollLabel"), remainLabel=$("#remainLabel"), sumBetEl=$("#sumBet");
@@ -860,14 +886,14 @@
 
   function setMode(next){
     play(seChoice); mode=next;
-    tabExacta.classList.toggle("active",mode==="exacta");
+    tabExacta.classList.toggle("active",mode==="tanshoku");
     tabQuinella.classList.toggle("active",mode==="quinella");
-    areaExacta.style.display=mode==="exacta"?"":"none";
+    areaTanshoku.style.display=mode==="tanshoku"?"":"none";
     areaQuinella.style.display=mode==="quinella"?"":"none";
     dpClear();
     highlightSelections();
   }
-  tabExacta.addEventListener("click",()=>setMode("exacta"));
+  tabExacta.addEventListener("click",()=>setMode("tanshoku"));
   tabQuinella.addEventListener("click",()=>setMode("quinella"));
 
   function makeNumBtn(uma,label,onClick){
@@ -881,34 +907,24 @@
     return b;
   }
   function highlightSelections(){
-    headNums.querySelectorAll("button").forEach(b=>b.classList.toggle("active",mode==="exacta"&&Number(b.dataset.uma)===selectedHead));
-    tailNums.querySelectorAll("button").forEach(b=>b.classList.toggle("active",mode==="exacta"&&Number(b.dataset.uma)===selectedTail));
+    $("#tanshokuList").querySelectorAll(".horse-row").forEach(r=>r.classList.toggle("active",Number(r.dataset.uma)===selectedTan));
     quinNums1.querySelectorAll("button").forEach(b=>b.classList.toggle("active",mode==="quinella"&&Number(b.dataset.uma)===selectedQu1));
     quinNums2.querySelectorAll("button").forEach(b=>b.classList.toggle("active",mode==="quinella"&&Number(b.dataset.uma)===selectedQu2));
   }
 
-  function renderExactaHeads(){
-    const ep=EPISODES[episode]; headNums.innerHTML="";
+  function renderTanshokuList(){
+    const ep=EPISODES[episode];
+    const list=$("#tanshokuList"); list.innerHTML="";
     ep.horses.forEach(uma=>{
-      headNums.appendChild(makeNumBtn(uma,"",()=>{
-        play(seChoice); selectedHead=uma; selectedTail=null;
-        $("#exactaStep").textContent=`1着：${uma}選択中→2着を選ぶ`;
-        dpClear(); renderExactaTails(); highlightSelections();
-      }));
-    });
-  }
-  function renderExactaTails(){
-    const ep=EPISODES[episode]; tailNums.innerHTML="";
-    ep.horses.forEach(uma=>{
-      if(uma===selectedHead) return;
-      const od=selectedHead?(ep.exactaMap.get(`${selectedHead}>${uma}`)||0):0;
-      const lbl=od?`${f1(od)}倍`:(selectedHead?"-":"");
-      const b=makeNumBtn(uma,lbl,()=>{
-        if(!selectedHead)return; play(seChoice); selectedTail=uma; highlightSelections();
-        limitHint.textContent="";
+      const name=ep.horseNames?.[uma]||'';
+      const od=ep.tanshokuOdds?.[uma]||0;
+      const row=document.createElement("div");
+      row.className="horse-row"; row.dataset.uma=uma;
+      row.innerHTML=`<span class="hr-num">${uma}</span><span class="hr-name">${name}</span><span class="hr-odds">${od?f1(od)+'倍':'-'}</span>`;
+      row.addEventListener("click",()=>{
+        play(seChoice); selectedTan=uma; highlightSelections(); limitHint.textContent="";
       });
-      if(!selectedHead) b.disabled=true;
-      tailNums.appendChild(b);
+      list.appendChild(row);
     });
   }
   function renderQuinella1(){
@@ -972,9 +988,9 @@
     limitHint.textContent=""; cart.push(item); play(seCart); renderCart();
   }
   function resetBuyState(){
-    mode="exacta"; selectedHead=selectedTail=selectedQu1=selectedQu2=null;
-    cart=[]; limitHint.textContent=""; stakeEx.value="0"; stakeQu.value="0";
-    dpClear(); setMode("exacta");
+    mode="tanshoku"; selectedHead=selectedTail=selectedQu1=selectedQu2=selectedTan=null;
+    cart=[]; limitHint.textContent=""; stakeTan.value="0"; stakeQu.value="0";
+    dpClear(); setMode("tanshoku");
   }
 
   function showBuy(){
@@ -983,21 +999,20 @@
     episodeStartBankroll=bankroll;
     bankrollLabel.textContent=yen(episodeStartBankroll);
     resetBuyState();
-    renderExactaHeads(); renderExactaTails(); renderQuinella1(); renderQuinella2();
-    wireAmountButtons($("#amtBarEx"),stakeEx);
+    renderTanshokuList(); renderQuinella1(); renderQuinella2();
+    wireAmountButtons($("#amtBarTan"),stakeTan);
     wireAmountButtons($("#amtBarQu"),stakeQu);
     renderCart(); refreshTotals(); bgmPlay();
   }
 
-  $("#btnAddEx").addEventListener("click",()=>{
-    const stake=Math.floor(Number(stakeEx.value||0));
-    if(!selectedHead){limitHint.innerHTML=`<span class="lcd-danger">1着を選んでください</span>`;return;}
-    if(!selectedTail){limitHint.innerHTML=`<span class="lcd-danger">2着を選んでください</span>`;return;}
+  $("#btnAddTan").addEventListener("click",()=>{
+    const stake=Math.floor(Number(stakeTan.value||0));
+    if(!selectedTan){limitHint.innerHTML=`<span class="lcd-danger">馬番を選んでください</span>`;return;}
     if(!(stake>0)){limitHint.innerHTML=`<span class="lcd-danger">金額を入れてください</span>`;return;}
-    const od=EPISODES[episode].exactaMap.get(`${selectedHead}>${selectedTail}`)||0;
+    const od=EPISODES[episode].tanshokuOdds?.[selectedTan]||0;
     if(!od){limitHint.innerHTML=`<span class="lcd-danger">オッズが見つかりません</span>`;return;}
-    addToCart({type:"馬単",key:`EX:${selectedHead}>${selectedTail}`,label:`${selectedHead}→${selectedTail}`,odds:od,stake});
-    stakeEx.value="0";
+    addToCart({type:"単勝",key:`TAN:${selectedTan}`,label:`${selectedTan}番`,odds:od,stake});
+    stakeTan.value="0";
   });
   $("#btnAddQu").addEventListener("click",()=>{
     const stake=Math.floor(Number(stakeQu.value||0));
@@ -1030,6 +1045,10 @@
   // ---- Settlement ----
   function isHitItem(item){
     const r=EPISODES[episode].result;
+    if(item.type==="単勝"){
+      const m=item.key.match(/^TAN:(\d+)$/);
+      return m?Number(m[1])===r.first:false;
+    }
     if(item.type==="馬単"){
       const m=item.key.match(/^EX:(\d+)>(\d+)$/);
       return m?Number(m[1])===r.first&&Number(m[2])===r.second:false;
@@ -1153,9 +1172,8 @@
     if(active==="#screenBuy"){
       play(seChoice);
       // 選択中のものを順番に解除
-      if(mode==="exacta"){
-        if(selectedTail){ selectedTail=null; highlightSelections(); return; }
-        if(selectedHead){ selectedHead=null; $("#exactaStep").textContent="1着を選ぶ"; dpClear(); renderExactaTails(); highlightSelections(); return; }
+      if(mode==="tanshoku"){
+        if(selectedTan){ selectedTan=null; highlightSelections(); return; }
       } else {
         if(selectedQu2){ selectedQu2=null; highlightSelections(); return; }
         if(selectedQu1){ selectedQu1=null; $("#quinStep").textContent="1頭目を選ぶ"; dpClear(); renderQuinella2(); highlightSelections(); return; }
