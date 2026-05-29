@@ -595,6 +595,9 @@
         </div>
         <div class="ls-foot">
           <span id="videoCaption" style="font-size:9px;color:#666"></span>
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#aaa">
+            🔊<input type="range" id="videoVolume" min="0" max="1" step="0.05" value="1" style="width:70px;accent-color:#6d6">
+          </label>
           <button class="lcd-btn-sm primary" id="btnToSettlement">スキップ ▶</button>
         </div>
       </div>
@@ -1063,6 +1066,8 @@ function highlightSelections(){
 
   // ---- Video ----
   const raceVideo=$("#raceVideo");
+  const videoVolume=$("#videoVolume");
+  videoVolume.addEventListener("input",()=>{ raceVideo.volume=Number(videoVolume.value); });
   // シングルクリック：一時停止／再生トグル（ダブルクリック全画面はdoubleTapToggleが担う）
   let videoClickTimer=null;
   raceVideo.addEventListener("click",()=>{
