@@ -784,19 +784,35 @@
       const entryHtml  =entryResp.ok   ?await entryResp.text()  :'';
 
       // 出走表.html から馬リスト（馬番・馬名・騎手・単勝倍率）を直接構築
+      // ヘッダー行を読んで列インデックスを動的に特定（枠番など余分な列があっても対応）
       const horseList=[];
       if(entryHtml){
         const doc2=new DOMParser().parseFromString(entryHtml,"text/html");
-        doc2.querySelectorAll("tr").forEach(tr=>{
+        let ci={num:-1,name:-1,jockey:-1,odds:-1};
+        const headerRow=doc2.querySelector("thead tr, tr");
+        if(headerRow){
+          headerRow.querySelectorAll("th,td").forEach((th,i)=>{
+            const t=th.textContent.trim();
+            if(t==='馬番') ci.num=i;
+            else if(t==='馬名') ci.name=i;
+            else if(t==='騎手') ci.jockey=i;
+            else if(t==='単勝') ci.odds=i;
+          });
+        }
+        // ヘッダーで見つからなかった場合のデフォルト（枠番なし想定）
+        if(ci.num<0) ci.num=0;
+        if(ci.name<0) ci.name=1;
+        if(ci.jockey<0) ci.jockey=2;
+        if(ci.odds<0) ci.odds=3;
+        doc2.querySelectorAll("tbody tr").forEach(tr=>{
           const cells=tr.querySelectorAll("td");
-          if(cells.length>=2){
-            const num=parseInt(cells[0].textContent.trim());
-            const name=cells[1].textContent.trim();
-            if(!num||!name) return;
-            const jockey=cells.length>=3?cells[2].textContent.trim():'';
-            const tanOdds=cells.length>=4?parseFloat(cells[3].textContent.trim()):NaN;
-            horseList.push({num, name, jockey, tanOdds:isNaN(tanOdds)?0:tanOdds});
-          }
+          if(cells.length<=ci.num) return;
+          const num=parseInt(cells[ci.num]?.textContent.trim());
+          const name=(cells[ci.name]?.textContent.trim())||'';
+          if(!num||!name) return;
+          const jockey=(cells[ci.jockey]?.textContent.trim())||'';
+          const tanOdds=parseFloat(cells[ci.odds]?.textContent.trim());
+          horseList.push({num, name, jockey, tanOdds:isNaN(tanOdds)?0:tanOdds});
         });
       }
 
