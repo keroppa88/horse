@@ -12,7 +12,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
+      height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, "Noto Sans JP", sans-serif;
       overflow: hidden;
     }
@@ -22,7 +22,7 @@
        縦横比 49:87 固定
     ===================== */
     .chassis {
-      width: min(490px, 100vw, calc(100vh * 490 / 870));
+      width: min(100vw, calc(100vh * 490 / 870));
       aspect-ratio: 490 / 870;
       background: linear-gradient(170deg, #f2e9d4 0%, #e6dbbd 60%, #ddd0a8 100%);
       border-radius: 32px;
@@ -315,6 +315,16 @@
     .lcd-rate-end { font-size: 16px; font-weight: 800; color: #888; }
     .lcd-rate-clear { font-size: 20px; font-weight: 900; color: #5dba5d; }
 
+    /* ---- LCD 全画面拡大 ---- */
+    .lcd.lcd-fullscreen {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 9999 !important;
+      border-radius: 8px !important;
+      width: 100vw !important;
+      height: 100vh !important;
+    }
+
     /* ---- Game Over ---- */
     .lcd-gameover {
       flex: 1;
@@ -450,8 +460,13 @@
   <div class="screen-bezel">
     <div class="lcd">
 
+      <!-- 読み込み中 -->
+      <div id="screenLoading" class="ls" style="align-items:center;justify-content:center;gap:10px;background:#0a0a0e;">
+        <div style="color:#555;font-size:11px;letter-spacing:0.08em;">読み込み中...</div>
+      </div>
+
       <!-- タイトル -->
-      <div id="screenRealTitle" class="ls">
+      <div id="screenRealTitle" class="ls hidden">
         <img class="lcd-title-img" src="data/horce.png" alt="">
         <div class="lcd-game-title">Horse racing</div>
         <div class="lcd-hint">画面をタッチ または A ボタン</div>
@@ -688,7 +703,7 @@
   function yen(n){ return (n??0).toLocaleString("ja-JP"); }
   function f1(n){ return (Math.round(n*10)/10).toFixed(1); }
 
-  const ALL_SCREENS = ["#screenRealTitle","#screenPrologue","#screenBuy","#screenVideo","#screenSettlement","#screenGameOver","#screenRate","#screenOdds"];
+  const ALL_SCREENS = ["#screenLoading","#screenRealTitle","#screenPrologue","#screenBuy","#screenVideo","#screenSettlement","#screenGameOver","#screenRate","#screenOdds"];
   function hideAllScreens(){ ALL_SCREENS.forEach(id=>$(id).classList.add("hidden")); }
   function showScreen(id){ hideAllScreens(); $(id).classList.remove("hidden"); }
   function activeScreen(){ return ALL_SCREENS.find(s=>!$(s).classList.contains("hidden")); }
@@ -800,11 +815,10 @@
     let started=false;
     const once=()=>{
       if(started) return; started=true;
-      rt.removeEventListener("pointerdown",onP);
+      rt.removeEventListener("click",once);
       play(seChoice); showPrologue();
     };
-    const onP=()=>once();
-    rt.addEventListener("pointerdown",onP);
+    rt.addEventListener("click",once);
     // A ボタンは btnA の click ハンドラで処理済み
   }
 
@@ -1188,16 +1202,14 @@
   }
   document.querySelectorAll(".ls-scroll").forEach(enableDragScroll);
 
-  // ---- ダブルタップで全画面トグル（常に有効）----
-  let lastTapTime=0;
-  document.querySelector(".lcd").addEventListener("click",e=>{
+  // ---- LCD ダブルタップで筐体内ゲーム画面を拡大トグル ----
+  let lastTapTime=0, lcdExpanded=false;
+  const lcdEl=document.querySelector(".lcd");
+  lcdEl.addEventListener("click",()=>{
     const now=Date.now();
     if(now-lastTapTime<350){
-      if(!document.fullscreenElement){
-        (document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen||function(){}).call(document.documentElement);
-      } else {
-        (document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document);
-      }
+      lcdExpanded=!lcdExpanded;
+      lcdEl.classList.toggle("lcd-fullscreen",lcdExpanded);
     }
     lastTapTime=now;
   });
