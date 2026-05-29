@@ -589,7 +589,10 @@
       <!-- 動画 -->
       <div id="screenVideo" class="ls hidden">
         <video id="raceVideo" class="lcd-video" playsinline preload="auto" style="cursor:pointer"></video>
-        <div id="videoPlayOverlay" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);color:#fff;font-size:22px;cursor:pointer">▶ タップして再生</div>
+        <div id="videoPlayOverlay" style="display:none;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);color:#fff;font-size:22px;cursor:pointer;gap:12px">
+          <span>▶ タップして再生</span>
+          <span id="videoDebug" style="font-size:10px;color:#fa0;max-width:90%;word-break:break-all;text-align:center"></span>
+        </div>
         <div class="ls-foot">
           <span id="videoCaption" style="font-size:9px;color:#666"></span>
           <button class="lcd-btn-sm primary" id="btnToSettlement">スキップ ▶</button>
@@ -1070,8 +1073,19 @@ function highlightSelections(){
       else raceVideo.pause();
     },200);
   });
+  const overlay=document.getElementById("videoPlayOverlay");
+  const videoDebug=document.getElementById("videoDebug");
+  function showVideoOverlay(msg){
+    videoDebug.textContent=msg||"";
+    overlay.style.display="flex";
+  }
   raceVideo.addEventListener("error",()=>{
-    console.error("video error",raceVideo.error?.code, raceVideo.src);
+    const c=raceVideo.error?.code, msg=raceVideo.error?.message||"";
+    showVideoOverlay(`ERR code=${c} ${msg}\nsrc=${raceVideo.currentSrc||raceVideo.src}`);
+  });
+  overlay.addEventListener("click",()=>{
+    raceVideo.play().then(()=>{ overlay.style.display="none"; videoDebug.textContent=""; })
+      .catch(err=>{ showVideoOverlay(`${err.name}: ${err.message}\nsrc=${raceVideo.currentSrc||raceVideo.src}`); });
   });
   function confirmBet(){
     if(btnConfirm.classList.contains("danger")) return;
@@ -1080,14 +1094,13 @@ function highlightSelections(){
     if(sum>episodeStartBankroll){limitHint.innerHTML=`<span class="lcd-danger">所持金を超えています</span>`;return;}
     play(seChoice); showScreen("#screenVideo");
     $("#videoCaption").textContent=`レース${episode}/${totalEpisodes}`;
-    bgmStop(); raceVideo.src=EPISODES[episode].videoPath;
-    const overlay=document.getElementById("videoPlayOverlay");
-    overlay.style.display="none";
-    raceVideo.play().catch(()=>{
-      // autoplay blocked → show tap-to-play overlay
-      overlay.style.display="flex";
-    });
-    overlay.onclick=()=>{ overlay.style.display="none"; raceVideo.play().catch(()=>{}); };
+    bgmStop();
+    const ep=EPISODES[episode];
+    if(!ep||!ep.videoPath){ showVideoOverlay("videoPath未設定"); return; }
+    videoDebug.textContent=""; overlay.style.display="none";
+    raceVideo.src=ep.videoPath;
+    raceVideo.play().then(()=>{ overlay.style.display="none"; })
+      .catch(err=>{ showVideoOverlay(`${err.name}: ${err.message}\nsrc=${raceVideo.currentSrc||raceVideo.src} rs=${raceVideo.readyState}`); });
   }
   btnConfirm.addEventListener("click",confirmBet);
   $("#btnToSettlement").addEventListener("click",()=>{ play(seChoice); try{raceVideo.pause();}catch{} showSettlement(); });
