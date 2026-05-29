@@ -1064,9 +1064,13 @@ function highlightSelections(){
   raceVideo.addEventListener("click",()=>{
     clearTimeout(videoClickTimer);
     videoClickTimer=setTimeout(()=>{
-      if(raceVideo.paused) raceVideo.play().catch(()=>{});
+      if(raceVideo.paused||raceVideo.ended||raceVideo.readyState===0)
+        raceVideo.play().catch(()=>{});
       else raceVideo.pause();
     },200);
+  });
+  raceVideo.addEventListener("error",()=>{
+    console.error("video error",raceVideo.error?.code, raceVideo.src);
   });
   function confirmBet(){
     if(btnConfirm.classList.contains("danger")) return;
@@ -1075,7 +1079,7 @@ function highlightSelections(){
     if(sum>episodeStartBankroll){limitHint.innerHTML=`<span class="lcd-danger">所持金を超えています</span>`;return;}
     play(seChoice); showScreen("#screenVideo");
     $("#videoCaption").textContent=`レース${episode}/${totalEpisodes}`;
-    bgmStop(); raceVideo.src=EPISODES[episode].videoPath; raceVideo.load();
+    bgmStop(); raceVideo.src=EPISODES[episode].videoPath;
     raceVideo.play().catch(()=>{});
   }
   btnConfirm.addEventListener("click",confirmBet);
