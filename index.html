@@ -779,12 +779,12 @@
       const rr=await fetch(`${base}/着順.csv`);
       if(!rr.ok) continue;
 
-      const [resultText,oddsResp,commentResp,videoTxtResp,entryResp]=await Promise.all([
-        rr.text(), fetch(`${base}/オッズ.csv`), fetch(`${base}/レースコメント.txt`), fetch(`${base}/video.txt`), fetch(`${base}/出走表.html`),
+      const [resultText,oddsResp,commentResp,entryResp]=await Promise.all([
+        rr.text(), fetch(`${base}/オッズ.csv`), fetch(`${base}/レースコメント.txt`), fetch(`${base}/出走表.html`),
       ]);
       const oddsText   =oddsResp.ok    ?await oddsResp.text()   :'';
       const commentText=commentResp.ok ?await commentResp.text():'';
-      const videoPath  =videoTxtResp.ok?(await videoTxtResp.text()).trim():`${base}/race.mp4`;
+      const videoPath  =`${base}/race.mp4`;
       const entryHtml  =entryResp.ok   ?await entryResp.text()  :'';
 
       // 出走表.html から馬リスト（馬番・馬名・騎手・単勝倍率）を直接構築
