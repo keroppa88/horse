@@ -588,10 +588,10 @@
 
       <!-- 動画 -->
       <div id="screenVideo" class="ls hidden">
-        <video id="raceVideo" class="lcd-video" controls playsinline preload="metadata"></video>
+        <video id="raceVideo" class="lcd-video" playsinline preload="auto" style="cursor:pointer"></video>
         <div class="ls-foot">
           <span id="videoCaption" style="font-size:9px;color:#666"></span>
-          <button class="lcd-btn-sm primary" id="btnToSettlement">清算へ ▶</button>
+          <button class="lcd-btn-sm primary" id="btnToSettlement">スキップ ▶</button>
         </div>
       </div>
 
@@ -1059,6 +1059,15 @@ function highlightSelections(){
 
   // ---- Video ----
   const raceVideo=$("#raceVideo");
+  // シングルクリック：一時停止／再生トグル（ダブルクリック全画面はdoubleTapToggleが担う）
+  let videoClickTimer=null;
+  raceVideo.addEventListener("click",()=>{
+    clearTimeout(videoClickTimer);
+    videoClickTimer=setTimeout(()=>{
+      if(raceVideo.paused) raceVideo.play().catch(()=>{});
+      else raceVideo.pause();
+    },200);
+  });
   function confirmBet(){
     if(btnConfirm.classList.contains("danger")) return;
     if(cart.length===0){limitHint.innerHTML=`<span class="lcd-danger">馬券がありません</span>`;return;}
@@ -1067,6 +1076,7 @@ function highlightSelections(){
     play(seChoice); showScreen("#screenVideo");
     $("#videoCaption").textContent=`レース${episode}/${totalEpisodes}`;
     bgmStop(); raceVideo.src=EPISODES[episode].videoPath; raceVideo.load();
+    raceVideo.play().catch(()=>{});
   }
   btnConfirm.addEventListener("click",confirmBet);
   $("#btnToSettlement").addEventListener("click",()=>{ play(seChoice); try{raceVideo.pause();}catch{} showSettlement(); });
@@ -1276,6 +1286,8 @@ function highlightSelections(){
     if(e && e.target && e.target.closest && e.target.closest("button,a,input,select")) return;
     const now=Date.now();
     if(now-lastTapTime<350){
+      // ダブルクリック：動画上なら一時停止タイマーをキャンセルして全画面のみ実行
+      clearTimeout(videoClickTimer);
       lcdExpanded=!lcdExpanded;
       lcdEl.classList.toggle("lcd-fullscreen",lcdExpanded);
     }
