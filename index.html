@@ -464,7 +464,7 @@
       <div id="screenRealTitle" class="ls">
         <img class="lcd-title-img" src="data/horce.png" alt="">
         <div class="lcd-game-title">Horse racing</div>
-        <div class="lcd-hint">クリック / キー で開始</div>
+        <div class="lcd-hint">画面をタッチ または A ボタン</div>
       </div>
 
       <!-- プロローグ -->
@@ -817,14 +817,12 @@
     let started=false;
     const once=()=>{
       if(started) return; started=true;
-      document.removeEventListener("pointerdown",onP,true);
-      document.removeEventListener("keydown",onK,true);
+      rt.removeEventListener("pointerdown",onP);
       play(seChoice); showPrologue();
     };
-    const onP=()=>{ if(!rt.classList.contains("hidden"))once(); };
-    const onK=(e)=>{ if(rt.classList.contains("hidden"))return; if(["Shift","Control","Alt","Meta"].includes(e.key))return; once(); };
-    document.addEventListener("pointerdown",onP,true);
-    document.addEventListener("keydown",onK,true);
+    const onP=()=>once();
+    rt.addEventListener("pointerdown",onP);
+    // A ボタンは btnA の click ハンドラで処理済み
   }
 
   // ---- Prologue ----
