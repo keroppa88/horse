@@ -965,8 +965,8 @@ function highlightSelections(){
 
   function wireAmountButtons(container,input){
     container.innerHTML="";
-    [1000,10000,50000,100000].forEach(v=>{
-      const b=document.createElement("button"); b.className="lcd-amt-btn"; b.textContent=String(v);
+    [[100000,"+10万"],[50000,"+5万"],[10000,"+1万"],[1000,"+1000"],[500,"+500"]].forEach(([v,lbl])=>{
+      const b=document.createElement("button"); b.className="lcd-amt-btn"; b.textContent=lbl;
       b.addEventListener("click",()=>{ play(seChoice); input.value=String(Math.max(0,Number(input.value||0)+v)); });
       container.appendChild(b);
     });
