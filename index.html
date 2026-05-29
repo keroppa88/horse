@@ -233,9 +233,21 @@
     #screenBuy .lcd-tab { font-size: 20px; padding: 5px 16px; }
     #screenBuy .lcd-cash { font-size: 18px; }
     #screenBuy .lcd-cash b { font-size: 20px; }
+    #screenBuy .lcd-step { font-size: 20px; padding: 6px 0 3px; }
+    #screenBuy .lcd-num-btn { font-size: 16px; padding: 6px 4px; }
+    #screenBuy .lcd-num-btn b { font-size: 20px; }
+    #screenBuy .lcd-num-btn .btn-name { font-size: 13px; }
     #screenBuy .lcd-amt-btn { font-size: 18px; padding: 5px 10px; }
     #screenBuy .lcd-amount-row input[type="number"] { font-size: 18px; width: 120px; padding: 5px 7px; }
     #screenBuy .ls-foot .lcd-btn-sm { font-size: 18px; padding: 6px 12px; }
+    #screenBuy .lcd-totals { font-size: 18px; padding: 4px 0; }
+    #screenBuy .lcd-totals b { font-size: 20px; }
+    #screenBuy .lcd-hint { font-size: 16px; padding: 3px 0; }
+    #screenBuy .lcd-danger { font-size: 16px; }
+    #screenBuy .lcd-table { font-size: 15px; }
+    #screenBuy .lcd-table th { font-size: 15px; padding: 5px 6px; }
+    #screenBuy .lcd-table td { font-size: 15px; padding: 5px 6px; }
+    #screenBuy .lcd-subtxt { font-size: 13px; }
     /* 単勝 horse list */
     .horse-row {
       display: flex;
@@ -251,9 +263,9 @@
     }
     .horse-row.active { border-color: #aaa; background: #2e2e2e; color: #fff; }
     .horse-row.dpad-focus { border-color: #6d6; background: #1e3a1e; color: #fff; outline: 1px solid #3a9a3a; }
-    .hr-num { font-size: 20px; font-weight: bold; width: 32px; text-align: center; flex-shrink: 0; }
-    .hr-name { flex: 1; font-size: 18px; }
-    .hr-odds { font-size: 18px; color: #aaa; flex-shrink: 0; }
+    .hr-num { font-size: 20px; font-weight: bold; width: 32px; text-align: center; flex-shrink: 0; color: #fff; }
+    .hr-name { flex: 1; font-size: 18px; color: #ddd; font-weight: 600; }
+    .hr-odds { font-size: 17px; color: #aaa; flex-shrink: 0; }
     .horse-row.active .hr-odds { color: #ddd; }
     .lcd-btn-sm {
       padding: 4px 8px;
@@ -1238,17 +1250,24 @@
   }
   document.querySelectorAll(".ls-scroll").forEach(enableDragScroll);
 
-  // ---- LCD ダブルタップで筐体内ゲーム画面を拡大トグル ----
+  // ---- ゲーム画面：どこでもダブルタップで全画面トグル ----
   let lastTapTime=0, lcdExpanded=false;
   const lcdEl=document.querySelector(".lcd");
-  lcdEl.addEventListener("click",(e)=>{
-    if(e.target.closest("button,a,input,select,iframe")) return;
+  function doubleTapToggle(e){
+    if(e && e.target && e.target.closest && e.target.closest("button,a,input,select")) return;
     const now=Date.now();
     if(now-lastTapTime<350){
       lcdExpanded=!lcdExpanded;
       lcdEl.classList.toggle("lcd-fullscreen",lcdExpanded);
     }
     lastTapTime=now;
+  }
+  // 画面全体（筐体外含む）に適用
+  document.addEventListener("click", doubleTapToggle);
+  // 出走表 iframe 内のクリックにも適用
+  const oddsFrameEl=document.getElementById("oddsFrame");
+  oddsFrameEl.addEventListener("load",()=>{
+    try{ oddsFrameEl.contentDocument.addEventListener("click", doubleTapToggle); }catch(e){}
   });
 
   openRealTitle();
