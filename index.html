@@ -255,6 +255,7 @@
     #screenBuy .buy-cart-header { font-size: 18px; }
     #screenBuy .lcd-amt-btn { font-size: 18px; padding: 5px 10px; background: #f5f5f5; color: #333; border-color: #ccc; }
     #screenBuy .lcd-amount-row input[type="number"] { font-size: 18px; width: 120px; padding: 5px 7px; background: #fff; color: #111; border-color: #bbb; }
+    #screenBuy .lcd-amount-row .lcd-btn-sm { font-size: 20px; padding: 5px 14px; }
     #screenBuy .ls-foot { background: #fff; border-top: 2px solid #ddd; }
     #screenBuy .ls-foot .lcd-btn-sm { font-size: 18px; padding: 6px 12px; background: #f0f0f0; color: #333; border-color: #ccc; }
     #screenBuy .ls-foot .lcd-btn-sm.primary { background: #333; color: #fff; border-color: #333; }
@@ -1064,10 +1065,18 @@
       cartRows.innerHTML=`<tr><td colspan="5" class="lcd-subtxt">（未購入）</td></tr>`;
     } else {
       cart.forEach((c,i)=>{
+        const isSelected=i===selectedCartIdx;
         const tr=document.createElement("tr");
-        tr.className="cart-row-sel"+(i===selectedCartIdx?" selected":"");
-        tr.innerHTML=`<td>${c.type}</td><td>${c.label}</td><td>${f1(c.odds)}</td><td>${yen(c.stake)}</td><td>${yen(Math.round(c.stake*c.odds))}</td>`;
-        tr.addEventListener("click",()=>{ play(seChoice); selectedCartIdx=(selectedCartIdx===i)?-1:i; renderCart(); });
+        tr.className="cart-row-sel"+(isSelected?" selected":"");
+        tr.style.cssText="cursor:pointer;"+(isSelected?"background:#e8f0fe;":"");
+        const handler=()=>{ play(seChoice); selectedCartIdx=(selectedCartIdx===i)?-1:i; renderCart(); };
+        const cells=[c.type, c.label, f1(c.odds), yen(c.stake), yen(Math.round(c.stake*c.odds))];
+        cells.forEach(txt=>{
+          const td=document.createElement("td");
+          td.textContent=txt; td.style.cssText=isSelected?"background:#e8f0fe;":"";
+          td.addEventListener("click", handler);
+          tr.appendChild(td);
+        });
         cartRows.appendChild(tr);
       });
     }
