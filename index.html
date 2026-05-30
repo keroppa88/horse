@@ -248,29 +248,37 @@
     #screenBuy .lcd-table th { font-size: 15px; padding: 5px 6px; }
     #screenBuy .lcd-table td { font-size: 15px; padding: 5px 6px; }
     #screenBuy .lcd-subtxt { font-size: 13px; }
-    /* 単勝 horse list */
+    /* 馬券購入 horse list - 出走表スタイル（白背景） */
     .horse-row {
-      display: flex;
-      align-items: center;
-      padding: 8px 6px;
-      border: 1px solid #3a3a3a;
-      border-radius: 5px;
-      background: #1e1e1e;
-      color: #bbb;
-      cursor: pointer;
-      gap: 8px;
-      margin-bottom: 4px;
+      display: flex; align-items: center; padding: 7px 8px;
+      border-bottom: 1px solid #ddd;
+      background: #fff; color: #111; cursor: pointer; gap: 8px;
     }
-    .horse-row.active { border-color: #aaa; background: #2e2e2e; }
-    .horse-row.dpad-focus { border-color: #6d6; background: #1e3a1e; outline: 1px solid #3a9a3a; }
-    .horse-row.disabled { opacity: 0.35; cursor: default; }
-    .hr-num { font-size: 22px; font-weight: bold; width: 34px; text-align: center; flex-shrink: 0; color: #fff; }
-    .hr-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-    .hr-name { font-size: 18px; color: #ddd; font-weight: 600; }
-    .hr-jockey { font-size: 13px; color: #888; }
-    .hr-odds { font-size: 17px; color: #aaa; flex-shrink: 0; text-align: right; }
-    .horse-row.active .hr-odds { color: #ddd; }
-    .horse-row.active .hr-name { color: #fff; }
+    .horse-row:last-child { border-bottom: none; }
+    .horse-row.active { background: #e8f0fe; box-shadow: inset 0 0 0 2px #3366cc; }
+    .horse-row.qu1-selected { background: #fff3e0; box-shadow: inset 0 0 0 2px #ff8800; }
+    .horse-row.dpad-focus { box-shadow: inset 0 0 0 2px #33aa33; background: #f0fff0; }
+    .horse-row.disabled { opacity: 0.4; cursor: default; }
+    /* 馬番丸（枠番カラー） */
+    .hr-num {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: bold; flex-shrink: 0;
+      background: #888; color: #fff;
+    }
+    .hr-num.waku-c1 { background: #fff; color: #000; border: 1px solid #aaa; }
+    .hr-num.waku-c2 { background: #111; color: #fff; }
+    .hr-num.waku-c3 { background: #e63333; color: #fff; }
+    .hr-num.waku-c4 { background: #3366cc; color: #fff; }
+    .hr-num.waku-c5 { background: #f5c800; color: #000; }
+    .hr-num.waku-c6 { background: #339933; color: #fff; }
+    .hr-num.waku-c7 { background: #ff8800; color: #fff; }
+    .hr-num.waku-c8 { background: #ff66aa; color: #fff; }
+    .hr-info { flex: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .hr-name { font-size: 16px; color: #000; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hr-jockey { font-size: 12px; color: #555; }
+    .hr-odds { font-size: 16px; color: #222; flex-shrink: 0; text-align: right; white-space: nowrap; }
+    #tanshokuList, #quinList1 { border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 6px; background: #fff; }
     .lcd-btn-sm {
       padding: 4px 8px;
       border: 1px solid #555;
@@ -551,8 +559,6 @@
           <div id="areaQuinella" style="display:none">
             <div class="lcd-step" id="quinStep">1着の馬を決める</div>
             <div id="quinList1"></div>
-            <div class="lcd-step" id="quin2Step">2着の馬を決める</div>
-            <div id="quinList2"></div>
             <div class="lcd-amount-row">
               <input type="number" id="stakeQu" min="0" step="100" value="0" />
               <button class="lcd-btn-sm primary" id="btnAddQu">カートへ</button>
@@ -822,7 +828,8 @@
           if(!num||!name) return;
           const jockey=(cells[ci.jockey]?.textContent.trim())||'';
           const tanOdds=parseFloat(cells[ci.odds]?.textContent.trim());
-          horseList.push({num, name, jockey, tanOdds:isNaN(tanOdds)?0:tanOdds});
+          const waku=ci.num>0?parseInt(cells[0]?.textContent.trim())||0:0;
+          horseList.push({num, name, jockey, tanOdds:isNaN(tanOdds)?0:tanOdds, waku});
         });
       }
 
@@ -870,8 +877,7 @@
   function dpGetBtns(){
     if($("#screenBuy").classList.contains("hidden")) return [];
     if(mode==="tanshoku") return [...$("#tanshokuList").querySelectorAll(".horse-row")];
-    if(!selectedQu1) return [...$("#quinList1").querySelectorAll(".horse-row")];
-    return [...$("#quinList2").querySelectorAll(".horse-row:not(.disabled)")];
+    return [...$("#quinList1").querySelectorAll(".horse-row")];
   }
   function dpSet(el){
     if(dpFocusEl) dpFocusEl.classList.remove("dpad-focus");
@@ -948,16 +954,20 @@
   tabExacta.addEventListener("click",()=>setMode("tanshoku"));
   tabQuinella.addEventListener("click",()=>setMode("quinella"));
 
-function highlightSelections(){
+  function highlightSelections(){
     $("#tanshokuList").querySelectorAll(".horse-row").forEach(r=>r.classList.toggle("active",Number(r.dataset.uma)===selectedTan));
-    $("#quinList1").querySelectorAll(".horse-row").forEach(r=>r.classList.toggle("active",Number(r.dataset.uma)===selectedQu1));
-    $("#quinList2").querySelectorAll(".horse-row").forEach(r=>r.classList.toggle("active",Number(r.dataset.uma)===selectedQu2));
+    $("#quinList1").querySelectorAll(".horse-row").forEach(r=>{
+      const uma=Number(r.dataset.uma);
+      r.classList.toggle("qu1-selected", uma===selectedQu1);
+      r.classList.toggle("active", uma===selectedQu2);
+    });
   }
 
-  function makeHorseRow({num, name, jockey, tanOdds}, oddsLabel, onClick, isDisabled){
+  function makeHorseRow({num, name, jockey, tanOdds, waku}, oddsLabel, onClick, isDisabled){
     const row=document.createElement("div");
     row.className="horse-row"+(isDisabled?" disabled":""); row.dataset.uma=num;
-    row.innerHTML=`<span class="hr-num">${num}</span>`+
+    const wc=waku?`waku-c${waku}`:"";
+    row.innerHTML=`<span class="hr-num ${wc}">${num}</span>`+
       `<span class="hr-info"><span class="hr-name">${name}</span><span class="hr-jockey">${jockey}</span></span>`+
       `<span class="hr-odds">${oddsLabel}</span>`;
     if(!isDisabled) row.addEventListener("click", onClick);
@@ -973,31 +983,35 @@ function highlightSelections(){
       }, false));
     });
   }
-  function renderQuinellaList1(){
+  function renderQuinellaList(){
     const ep=EPISODES[episode];
     const list=$("#quinList1"); list.innerHTML="";
     (ep.horseList||[]).forEach(h=>{
-      const lbl=h.tanOdds?f1(h.tanOdds)+'倍':'-';
+      let lbl;
+      if(!selectedQu1){
+        lbl=h.tanOdds?f1(h.tanOdds)+'倍':'-';
+      } else if(selectedQu1===h.num){
+        lbl='← 1着';
+      } else {
+        const key=`${Math.min(selectedQu1,h.num)}>${Math.max(selectedQu1,h.num)}`;
+        const od=ep.quinellaMap.get(key)||0;
+        lbl=od?f1(od)+'倍':'-';
+      }
       list.appendChild(makeHorseRow(h, lbl, ()=>{
-        play(seChoice); selectedQu1=h.num; selectedQu2=null;
-        const sel=ep.horseList.find(x=>x.num===h.num);
-        $("#quinStep").textContent=`1着：${sel?sel.name:h.num} → 2着を選ぶ`;
-        dpClear(); renderQuinellaList2(); highlightSelections();
+        play(seChoice);
+        if(!selectedQu1){
+          selectedQu1=h.num; selectedQu2=null;
+          $("#quinStep").textContent=`1着：${h.name} → 2着を選ぶ`;
+        } else if(selectedQu1===h.num){
+          selectedQu1=null; selectedQu2=null;
+          $("#quinStep").textContent="1着の馬を決める";
+        } else {
+          selectedQu2=h.num;
+          const sel1=ep.horseList.find(x=>x.num===selectedQu1);
+          $("#quinStep").textContent=`${sel1?.name||selectedQu1} ↔ ${h.name}`;
+        }
+        dpClear(); renderQuinellaList(); highlightSelections(); limitHint.textContent="";
       }, false));
-    });
-  }
-  function renderQuinellaList2(){
-    const ep=EPISODES[episode];
-    const list=$("#quinList2"); list.innerHTML="";
-    (ep.horseList||[]).forEach(h=>{
-      if(h.num===selectedQu1) return;
-      const key=`${Math.min(selectedQu1||0,h.num)}>${Math.max(selectedQu1||0,h.num)}`;
-      const quOdds=selectedQu1?(ep.quinellaMap.get(key)||0):0;
-      const lbl=quOdds?f1(quOdds)+'倍':(selectedQu1?'-':'');
-      const disabled=!selectedQu1;
-      list.appendChild(makeHorseRow(h, lbl, ()=>{
-        play(seChoice); selectedQu2=h.num; highlightSelections(); limitHint.textContent="";
-      }, disabled));
     });
   }
 
@@ -1048,7 +1062,7 @@ function highlightSelections(){
     episodeStartBankroll=bankroll;
     bankrollLabel.textContent=yen(episodeStartBankroll);
     resetBuyState();
-    renderTanshokuList(); renderQuinellaList1(); renderQuinellaList2();
+    renderTanshokuList(); renderQuinellaList();
     wireAmountButtons($("#amtBarTan"),stakeTan);
     wireAmountButtons($("#amtBarQu"),stakeQu);
     renderCart(); refreshTotals(); bgmPlay();
@@ -1293,7 +1307,7 @@ function highlightSelections(){
         if(selectedTan){ selectedTan=null; highlightSelections(); return; }
       } else {
         if(selectedQu2){ selectedQu2=null; highlightSelections(); return; }
-        if(selectedQu1){ selectedQu1=null; $("#quinStep").textContent="1着の馬を決める"; dpClear(); renderQuinellaList1(); renderQuinellaList2(); highlightSelections(); return; }
+        if(selectedQu1){ selectedQu1=null; selectedQu2=null; $("#quinStep").textContent="1着の馬を決める"; dpClear(); renderQuinellaList(); highlightSelections(); return; }
       }
       // 何も選択していなければプロローグへ戻る
       showPrologue(); return;
