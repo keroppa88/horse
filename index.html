@@ -773,12 +773,13 @@
     }catch{}
 
     const EPISODES={};
-    let epNum=1;
+    let epNum=1, miss=0;
     for(let i=1;i<=99;i++){
       const id=String(i).padStart(2,'0');
       const base=`game/${id}`;
       const rr=await fetch(`${base}/着順.csv`);
-      if(!rr.ok) continue;
+      if(!rr.ok){ if(++miss>=2) break; continue; }
+      miss=0;
 
       const [resultText,oddsResp,commentResp,entryResp]=await Promise.all([
         rr.text(), fetch(`${base}/オッズ.csv`), fetch(`${base}/レースコメント.txt`), fetch(`${base}/出走表.html`),
