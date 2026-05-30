@@ -1203,17 +1203,31 @@ function highlightSelections(){
     if(el) el.scrollBy({top:dir*50,behavior:"smooth"});
   }
   $("#dpUp").addEventListener("click",()=>{
+    if(!$("#screenVideo").classList.contains("hidden")){
+      const v=Math.min(1, raceVideo.volume+0.1);
+      raceVideo.volume=v; videoVolume.value=v; return;
+    }
     if(!$("#screenBuy").classList.contains("hidden")) dpMove(-1,0);
     else scrollLcd(-1);
   });
   $("#dpDown").addEventListener("click",()=>{
+    if(!$("#screenVideo").classList.contains("hidden")){
+      const v=Math.max(0, raceVideo.volume-0.1);
+      raceVideo.volume=v; videoVolume.value=v; return;
+    }
     if(!$("#screenBuy").classList.contains("hidden")) dpMove(1,0);
     else scrollLcd(1);
   });
   $("#dpLeft").addEventListener("click",()=>{
+    if(!$("#screenVideo").classList.contains("hidden")){
+      raceVideo.currentTime=Math.max(0, raceVideo.currentTime-10); return;
+    }
     if(!$("#screenBuy").classList.contains("hidden")) dpMove(0,-1);
   });
   $("#dpRight").addEventListener("click",()=>{
+    if(!$("#screenVideo").classList.contains("hidden")){
+      raceVideo.currentTime=Math.min(raceVideo.duration||Infinity, raceVideo.currentTime+10); return;
+    }
     if(!$("#screenBuy").classList.contains("hidden")) dpMove(0,1);
   });
   $("#dpCenter").addEventListener("click",()=>{ $("#btnA").click(); });
