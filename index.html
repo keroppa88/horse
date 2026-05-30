@@ -593,12 +593,10 @@
           <span>▶ タップして再生</span>
           <span id="videoDebug" style="font-size:10px;color:#fa0;max-width:90%;word-break:break-all;text-align:center"></span>
         </div>
+        <div id="volIndicator" style="display:none;position:absolute;bottom:36px;right:8px;display:flex;align-items:flex-end;gap:2px;height:40px;opacity:0;transition:opacity 0.3s"></div>
         <div class="ls-foot">
-          <span id="videoCaption" style="font-size:9px;color:#666"></span>
-          <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#aaa">
-            🔊<input type="range" id="videoVolume" min="0" max="1" step="0.05" value="1" style="width:70px;accent-color:#6d6">
-          </label>
-          <button class="lcd-btn-sm primary" id="btnToSettlement">スキップ ▶</button>
+          <span id="videoCaption" style="font-size:12px;color:#ccc;flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
+          <button class="lcd-btn-sm primary" id="btnToSettlement">次へ ▶</button>
         </div>
       </div>
 
@@ -793,8 +791,10 @@
       // 出走表.html から馬リスト（馬番・馬名・騎手・単勝倍率）を直接構築
       // ヘッダー行を読んで列インデックスを動的に特定（枠番など余分な列があっても対応）
       const horseList=[];
+      let raceTitle=`レース ${id}`;
       if(entryHtml){
         const doc2=new DOMParser().parseFromString(entryHtml,"text/html");
+        if(doc2.title) raceTitle=doc2.title.trim();
         let ci={num:-1,name:-1,jockey:-1,odds:-1};
         const headerRow=doc2.querySelector("thead tr, tr");
         if(headerRow){
@@ -837,7 +837,7 @@
       const lines2=commentText.trim().split('\n');
       const title=lines2[0]?lines2[0].trim():`レース ${id}`;
 
-      EPISODES[epNum]={ id, title, comment:commentText, videoPath, entryHtml, horseList,
+      EPISODES[epNum]={ id, title, raceTitle, comment:commentText, videoPath, entryHtml, horseList,
         horses:[...horseSet].sort((a,b)=>a-b), exactaMap, quinellaMap, result };
       epNum++;
     }
@@ -1066,8 +1066,6 @@ function highlightSelections(){
 
   // ---- Video ----
   const raceVideo=$("#raceVideo");
-  const videoVolume=$("#videoVolume");
-  videoVolume.addEventListener("input",()=>{ raceVideo.volume=Number(videoVolume.value); });
   // シングルクリック：一時停止／再生トグル（ダブルクリック全画面はdoubleTapToggleが担う）
   let videoClickTimer=null;
   raceVideo.addEventListener("click",()=>{
@@ -1098,7 +1096,7 @@ function highlightSelections(){
     const sum=cart.reduce((a,x)=>a+(Number(x.stake)||0),0);
     if(sum>episodeStartBankroll){limitHint.innerHTML=`<span class="lcd-danger">所持金を超えています</span>`;return;}
     play(seChoice); showScreen("#screenVideo");
-    $("#videoCaption").textContent=`レース${episode}/${totalEpisodes}`;
+    $("#videoCaption").textContent=EPISODES[episode].raceTitle||`レース${episode}`;
     bgmStop();
     const ep=EPISODES[episode];
     if(!ep||!ep.videoPath){ showVideoOverlay("videoPath未設定"); return; }
@@ -1202,18 +1200,40 @@ function highlightSelections(){
     const el=active==="#screenBuy"?$("#buyScroll"):$(active)?.querySelector(".ls-scroll");
     if(el) el.scrollBy({top:dir*50,behavior:"smooth"});
   }
+  // 音量インジケーター（縦棒グラフ）
+  const volIndicator=$("#volIndicator");
+  (()=>{
+    for(let i=0;i<10;i++){
+      const b=document.createElement("div");
+      b.style.cssText=`width:4px;background:#fff;border-radius:1px;`;
+      volIndicator.appendChild(b);
+    }
+  })();
+  let volHideTimer=null;
+  function showVolIndicator(vol){
+    const bars=volIndicator.children;
+    const filled=Math.round(vol*10);
+    for(let i=0;i<10;i++){
+      const h=4+(i*3.5);
+      bars[i].style.height=h+"px";
+      bars[i].style.opacity=(i<filled)?"1":"0.2";
+    }
+    volIndicator.style.opacity="1";
+    clearTimeout(volHideTimer);
+    volHideTimer=setTimeout(()=>{ volIndicator.style.opacity="0"; },1200);
+  }
   $("#dpUp").addEventListener("click",()=>{
     if(!$("#screenVideo").classList.contains("hidden")){
-      const v=Math.min(1, raceVideo.volume+0.1);
-      raceVideo.volume=v; videoVolume.value=v; return;
+      raceVideo.volume=Math.min(1, Math.round((raceVideo.volume+0.1)*10)/10);
+      showVolIndicator(raceVideo.volume); return;
     }
     if(!$("#screenBuy").classList.contains("hidden")) dpMove(-1,0);
     else scrollLcd(-1);
   });
   $("#dpDown").addEventListener("click",()=>{
     if(!$("#screenVideo").classList.contains("hidden")){
-      const v=Math.max(0, raceVideo.volume-0.1);
-      raceVideo.volume=v; videoVolume.value=v; return;
+      raceVideo.volume=Math.max(0, Math.round((raceVideo.volume-0.1)*10)/10);
+      showVolIndicator(raceVideo.volume); return;
     }
     if(!$("#screenBuy").classList.contains("hidden")) dpMove(1,0);
     else scrollLcd(1);
