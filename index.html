@@ -229,25 +229,42 @@
       font-size: 9px;
       cursor: pointer;
     }
-    /* 馬券購入 2x フォント */
-    #screenBuy .lcd-tab { font-size: 20px; padding: 5px 16px; }
-    #screenBuy .lcd-cash { font-size: 18px; }
-    #screenBuy .lcd-cash b { font-size: 20px; }
-    #screenBuy .lcd-step { font-size: 20px; padding: 6px 0 3px; }
-    #screenBuy .lcd-num-btn { font-size: 16px; padding: 6px 4px; }
-    #screenBuy .lcd-num-btn b { font-size: 20px; }
-    #screenBuy .lcd-num-btn .btn-name { font-size: 13px; }
-    #screenBuy .lcd-amt-btn { font-size: 18px; padding: 5px 10px; }
-    #screenBuy .lcd-amount-row input[type="number"] { font-size: 18px; width: 120px; padding: 5px 7px; }
-    #screenBuy .ls-foot .lcd-btn-sm { font-size: 18px; padding: 6px 12px; }
-    #screenBuy .lcd-totals { font-size: 18px; padding: 4px 0; }
-    #screenBuy .lcd-totals b { font-size: 20px; }
-    #screenBuy .lcd-hint { font-size: 16px; padding: 3px 0; }
+    /* 馬券購入 - 白背景 */
+    #screenBuy { background: #fff; }
+    #screenBuy .ls-scroll { background: #fff; }
+    .buy-top-bar {
+      display: flex; align-items: flex-end; padding: 5px 6px 0;
+      border-bottom: 1px solid #ddd; flex-shrink: 0; background: #fff;
+    }
+    .buy-top-bar .lcd-tabs { padding: 0; flex: 1; border: none; }
+    .buy-bankroll { font-size: 12px; color: #555; padding: 0 4px 6px; white-space: nowrap; flex-shrink: 0; }
+    .buy-bankroll b { color: #111; }
+    .buy-sel-label { font-size: 14px; font-weight: 700; color: #333; padding: 6px 8px 3px 2px; }
+    .buy-cart-section { border-top: 2px solid #333; margin-top: 8px; padding-top: 4px; }
+    .buy-cart-header { font-size: 14px; font-weight: 700; color: #111; padding: 2px 0 4px; }
+    .cart-row-sel { cursor: pointer; }
+    .cart-row-sel:hover td { background: #f5f5f5 !important; }
+    .cart-row-sel.selected td { background: #e8f0fe !important; }
+    /* 馬券購入 タブ */
+    #screenBuy .lcd-tab { font-size: 20px; padding: 5px 16px; background: #f0f0f0; color: #666; border-color: #ccc; }
+    #screenBuy .lcd-tab.active { background: #fff; color: #111; border-color: #999; border-bottom-color: #fff; }
+    /* フォント 2x */
+    #screenBuy .buy-bankroll { font-size: 16px; }
+    #screenBuy .buy-bankroll b { font-size: 18px; }
+    #screenBuy .buy-sel-label { font-size: 20px; }
+    #screenBuy .buy-cart-header { font-size: 18px; }
+    #screenBuy .lcd-amt-btn { font-size: 18px; padding: 5px 10px; background: #f5f5f5; color: #333; border-color: #ccc; }
+    #screenBuy .lcd-amount-row input[type="number"] { font-size: 18px; width: 120px; padding: 5px 7px; background: #fff; color: #111; border-color: #bbb; }
+    #screenBuy .ls-foot { background: #fff; border-top: 2px solid #ddd; }
+    #screenBuy .ls-foot .lcd-btn-sm { font-size: 18px; padding: 6px 12px; background: #f0f0f0; color: #333; border-color: #ccc; }
+    #screenBuy .ls-foot .lcd-btn-sm.primary { background: #333; color: #fff; border-color: #333; }
+    #screenBuy .ls-foot .lcd-btn-sm.danger { background: #fff0f0; color: #cc0000; border-color: #e08080; }
+    #screenBuy .lcd-hint { font-size: 16px; padding: 3px 0; color: #333; }
     #screenBuy .lcd-danger { font-size: 16px; }
     #screenBuy .lcd-table { font-size: 15px; }
-    #screenBuy .lcd-table th { font-size: 15px; padding: 5px 6px; }
-    #screenBuy .lcd-table td { font-size: 15px; padding: 5px 6px; }
-    #screenBuy .lcd-subtxt { font-size: 13px; }
+    #screenBuy .lcd-table th { font-size: 15px; padding: 5px 6px; background: #f0f0f0; color: #555; border-bottom: 1px solid #ccc; }
+    #screenBuy .lcd-table td { font-size: 15px; padding: 5px 6px; color: #111; border-bottom: 1px solid #eee; background: #fff; }
+    #screenBuy .lcd-subtxt { font-size: 13px; color: #888; }
     /* 馬券購入 horse list - 出走表スタイル（白背景） */
     .horse-row {
       display: flex; align-items: center; padding: 7px 8px;
@@ -537,48 +554,45 @@
 
       <!-- 馬券購入 -->
       <div id="screenBuy" class="ls hidden">
-        <div class="lcd-tabs">
-          <div class="lcd-tab active" id="tabExacta">馬単</div>
-          <div class="lcd-tab" id="tabQuinella">馬連</div>
+        <div class="buy-top-bar">
+          <div class="lcd-tabs">
+            <div class="lcd-tab active" id="tabExacta">馬単</div>
+            <div class="lcd-tab" id="tabQuinella">馬連</div>
+          </div>
+          <div class="buy-bankroll">所持金 <b><span id="bankrollLabel">0</span>円</b></div>
         </div>
-        <div class="lcd-cash">所持金 <b><span id="bankrollLabel">0</span>円</b></div>
 
         <div class="ls-scroll" id="buyScroll">
 
           <!-- 単勝エリア（馬単タブ） -->
           <div id="areaTanshoku">
             <div id="tanshokuList"></div>
+            <div class="buy-sel-label" id="selLabelTan">馬を選んでください</div>
             <div class="lcd-amount-row">
               <input type="number" id="stakeTan" min="0" step="100" value="0" />
-              <button class="lcd-btn-sm primary" id="btnAddTan">カートへ</button>
+              <button class="lcd-btn-sm primary" id="btnAddTan">カートへ入れる</button>
             </div>
             <div class="lcd-amt-btns" id="amtBarTan"></div>
           </div>
 
           <!-- 馬連エリア -->
           <div id="areaQuinella" style="display:none">
-            <div class="lcd-step" id="quinStep">1着の馬を決める</div>
             <div id="quinList1"></div>
+            <div class="buy-sel-label" id="quinStep">1着の馬を決める</div>
             <div class="lcd-amount-row">
               <input type="number" id="stakeQu" min="0" step="100" value="0" />
-              <button class="lcd-btn-sm primary" id="btnAddQu">カートへ</button>
+              <button class="lcd-btn-sm primary" id="btnAddQu">カートへ入れる</button>
             </div>
             <div class="lcd-amt-btns" id="amtBarQu"></div>
           </div>
 
           <!-- カート -->
-          <div style="margin-top:6px;border-top:1px solid #2a2a2a;padding-top:4px">
-            <div class="lcd-totals">
-              <span>BET <b><span id="sumBet">0</span>円</b></span>
-              <span>残 <b><span id="remainLabel">0</span>円</b></span>
-            </div>
+          <div class="buy-cart-section">
+            <div class="buy-cart-header">カート</div>
             <div class="lcd-hint" id="limitHint"></div>
             <table class="lcd-table">
               <thead>
-                <tr>
-                  <th>券種</th><th>買い目</th>
-                  <th>倍</th><th>金額</th><th>想定払戻</th>
-                </tr>
+                <tr><th>券種</th><th>買い目</th><th>倍</th><th>金額</th><th>想定払戻</th></tr>
               </thead>
               <tbody id="cartRows"></tbody>
             </table>
@@ -586,8 +600,7 @@
         </div>
 
         <div class="ls-foot">
-          <button class="lcd-btn-sm" id="btnDeleteLast">カート最後列クリア</button>
-          <button class="lcd-btn-sm danger" id="btnClear">カート全クリア</button>
+          <button class="lcd-btn-sm danger" id="btnCancelCart">取消</button>
           <button class="lcd-btn-sm primary" id="btnConfirm">決定</button>
         </div>
       </div>
@@ -944,8 +957,9 @@
   const areaTanshoku=$("#areaTanshoku"), areaQuinella=$("#areaQuinella");
   const stakeTan=$("#stakeTan"), stakeQu=$("#stakeQu");
   const cartRows=$("#cartRows"), limitHint=$("#limitHint");
-  const bankrollLabel=$("#bankrollLabel"), remainLabel=$("#remainLabel"), sumBetEl=$("#sumBet");
+  const bankrollLabel=$("#bankrollLabel");
   const btnConfirm=$("#btnConfirm");
+  let selectedCartIdx=-1;
 
   function setMode(next){
     play(seChoice); mode=next;
@@ -966,6 +980,7 @@
       r.classList.toggle("qu1-selected", uma===selectedQu1);
       r.classList.toggle("active", uma===selectedQu2);
     });
+    updateTanSelLabel();
   }
 
   function makeHorseRow({num, name, jockey, tanOdds, waku}, oddsLabel, onClick, isDisabled){
@@ -978,15 +993,21 @@
     if(!isDisabled) row.addEventListener("click", onClick);
     return row;
   }
+  function updateTanSelLabel(){
+    const ep=EPISODES[episode]; const el=$("#selLabelTan"); if(!el) return;
+    if(selectedTan){ const h=ep.horseList?.find(x=>x.num===selectedTan); el.textContent=`選択中：${selectedTan}番 ${h?.name||''}`; }
+    else { el.textContent="馬を選んでください"; }
+  }
   function renderTanshokuList(){
     const ep=EPISODES[episode];
     const list=$("#tanshokuList"); list.innerHTML="";
     (ep.horseList||[]).forEach(h=>{
       const lbl=h.tanOdds?f1(h.tanOdds)+'倍':'-';
       list.appendChild(makeHorseRow(h, lbl, ()=>{
-        play(seChoice); selectedTan=h.num; highlightSelections(); limitHint.textContent="";
+        play(seChoice); selectedTan=h.num; highlightSelections(); limitHint.textContent=""; updateTanSelLabel();
       }, false));
     });
+    updateTanSelLabel();
   }
   function renderQuinellaList(){
     const ep=EPISODES[episode];
@@ -1034,18 +1055,19 @@
 
   function refreshTotals(){
     const sum=cart.reduce((a,x)=>a+(Number(x.stake)||0),0);
-    sumBetEl.textContent=yen(sum);
-    remainLabel.textContent=yen(episodeStartBankroll-sum);
     btnConfirm.classList.toggle("danger",episodeStartBankroll-sum<0);
   }
   function renderCart(){
     cartRows.innerHTML="";
     if(cart.length===0){
+      selectedCartIdx=-1;
       cartRows.innerHTML=`<tr><td colspan="5" class="lcd-subtxt">（未購入）</td></tr>`;
     } else {
-      cart.forEach(c=>{
+      cart.forEach((c,i)=>{
         const tr=document.createElement("tr");
-        tr.innerHTML=`<td>${c.type}</td><td>${c.label}<div class="lcd-subtxt">${c.key}</div></td><td>${f1(c.odds)}</td><td>${yen(c.stake)}</td><td>${yen(Math.round(c.stake*c.odds))}</td>`;
+        tr.className="cart-row-sel"+(i===selectedCartIdx?" selected":"");
+        tr.innerHTML=`<td>${c.type}</td><td>${c.label}</td><td>${f1(c.odds)}</td><td>${yen(c.stake)}</td><td>${yen(Math.round(c.stake*c.odds))}</td>`;
+        tr.addEventListener("click",()=>{ play(seChoice); selectedCartIdx=(selectedCartIdx===i)?-1:i; renderCart(); });
         cartRows.appendChild(tr);
       });
     }
@@ -1057,7 +1079,7 @@
   }
   function resetBuyState(){
     mode="tanshoku"; selectedHead=selectedTail=selectedQu1=selectedQu2=selectedTan=null;
-    cart=[]; limitHint.textContent=""; stakeTan.value="0"; stakeQu.value="0";
+    cart=[]; selectedCartIdx=-1; limitHint.textContent=""; stakeTan.value="0"; stakeQu.value="0";
     dpClear(); setMode("tanshoku");
   }
 
@@ -1095,8 +1117,10 @@
     addToCart({type:"馬連",key:`QU:${key}`,label:`${selectedQu1}↔${selectedQu2}`,odds:od,stake});
     stakeQu.value="0";
   });
-  $("#btnClear").addEventListener("click",()=>{ play(seChoice); cart=[]; limitHint.textContent=""; renderCart(); });
-  $("#btnDeleteLast").addEventListener("click",()=>{ play(seChoice); cart.pop(); limitHint.textContent=""; renderCart(); });
+  $("#btnCancelCart").addEventListener("click",()=>{
+    if(selectedCartIdx<0){ limitHint.innerHTML=`<span class="lcd-danger">取消す馬券を選んでください</span>`; return; }
+    play(seChoice); cart.splice(selectedCartIdx,1); selectedCartIdx=-1; limitHint.textContent=""; renderCart();
+  });
 
   // ---- Video ----
   const raceVideo=$("#raceVideo");
