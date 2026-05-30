@@ -846,13 +846,15 @@
         if(!isNaN(qu))   quinellaMap.set(`${Math.min(u1,u2)}>${Math.max(u1,u2)}`,qu);
       });
 
-      // 着順.csv: 3行ヘッダー(順,枠,馬,…/,番,番,…/空行)、データ行はcol[0]=順位 col[2]=馬番
+      // 着順.csv: col[0]=順位(数値)、col[2]=馬番。ヘッダー行はparseIntがNaNになるのでスキップ
       let first=0, second=0;
-      resultText.trim().split('\n').slice(3).forEach(line=>{
+      resultText.trim().split('\n').forEach(line=>{
         const cols=line.split(',').map(s=>s.trim());
-        const rank=parseInt(cols[0]), horse=parseInt(cols[2]);
-        if(rank===1) first=horse;
-        if(rank===2) second=horse;
+        const rank=parseInt(cols[0]);
+        if(isNaN(rank)||rank<1) return;
+        const horse=parseInt(cols[2]);
+        if(rank===1&&horse) first=horse;
+        if(rank===2&&horse) second=horse;
       });
       const result={first, second};
 
