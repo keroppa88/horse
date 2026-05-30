@@ -1,3 +1,4 @@
+HTML
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -58,4 +59,57 @@
       <tr><td class="waku-5">5</td><td class="waku-5">7</td><td>イナリワン</td><td>牡6</td><td>58</td><td>柴田政人</td><td>6.2</td><td>4</td><td>444(-2)</td><td>[東]鈴木清</td><td>保手浜弘規</td></tr>
       <tr><td class="waku-5">5</td><td class="waku-5">8</td><td>ランニングフリー</td><td>牡7</td><td>58</td><td>菅原泰夫</td><td>47.5</td><td>10</td><td>450(0)</td><td>[東]本郷一彦</td><td>藤島泰輔</td></tr>
       
-      <tr><td class="waku-6">6</td><td class="waku-6">9</td><td>ディクターランド</td><td>牡5</td><td>58</td><td>菅谷正巳</td><td>35.5</td><td>7</td><td>444(+10
+      <tr><td class="waku-6">6</td><td class="waku-6">9</td><td>ディクターランド</td><td>牡5</td><td>58</td><td>菅谷正巳</td><td>35.5</td><td>7</td><td>444(+10)</td><td>[西]菅谷禎高</td><td>社台レースホース</td></tr>
+      <tr><td class="waku-6">6</td><td class="waku-6">10</td><td>ウインドミル</td><td>牡5</td><td>58</td><td>蛯沢誠治</td><td>40.5</td><td>8</td><td>472(0)</td><td>[東]久保田敏</td><td>齊藤宣勝</td></tr>
+      
+      <tr><td class="waku-7">7</td><td class="waku-7">11</td><td>ヤエノムテキ</td><td>牡5</td><td>58</td><td>西浦勝一</td><td>22.8</td><td>6</td><td>496(-2)</td><td>[西]荻野光男</td><td>富士</td></tr>
+      <tr><td class="waku-7">7</td><td class="waku-7">12</td><td>フレッシュボイス</td><td>牡7</td><td>58</td><td>田原成貴</td><td>55.4</td><td>12</td><td>470(+14)</td><td>[西]境直行</td><td>円城和男</td></tr>
+      
+      <tr><td class="waku-8">8</td><td class="waku-8">13</td><td>ダイゴウシュール</td><td>牡5</td><td>58</td><td>大崎昭一</td><td>45</td><td>9</td><td>452(-6)</td><td>[東]柴田寛</td><td>金田至弘</td></tr>
+      <tr><td class="waku-8">8</td><td class="waku-8">14</td><td>スーパークリーク</td><td>牡5</td><td>58</td><td>武豊</td><td>4.5</td><td>2</td><td>520(+6)</td><td>[西]伊藤修司</td><td>木倉誠</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  let sortOrder = {}; 
+
+  function sortTable(columnIndex) {
+    const table = document.getElementById("raceTable");
+    const tbody = table.querySelector("tbody");
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+
+    sortOrder[columnIndex] = !sortOrder[columnIndex];
+    const isAscending = sortOrder[columnIndex];
+
+    rows.sort((a, b) => {
+      let cellA = a.cells[columnIndex].innerText.trim();
+      let cellB = b.cells[columnIndex].innerText.trim();
+
+      const isInvalid = (val) => val === "取消" || val === "---" || val === "計不" || val === "";
+      if (isInvalid(cellA) && isInvalid(cellB)) return 0;
+      if (isInvalid(cellA)) return 1;
+      if (isInvalid(cellB)) return -1;
+
+      if (columnIndex === 8) {
+        cellA = cellA.split('(')[0];
+        cellB = cellB.split('(')[0];
+      }
+
+      const numA = parseFloat(cellA);
+      const numB = parseFloat(cellB);
+
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return isAscending ? numA - numB : numB - numA;
+      } else {
+        return isAscending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+      }
+    });
+
+    tbody.innerHTML = "";
+    rows.forEach(row => tbody.appendChild(row));
+  }
+</script>
+
+</body>
+</html>
