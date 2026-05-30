@@ -622,6 +622,9 @@
             <div class="settle-sum-line">差引：<span id="settleDelta" class="delta-plus">+0</span>円</div>
             <div class="settle-sum-line">所持金：<span id="settleFinal">0</span>円</div>
           </div>
+          <div style="text-align:center;padding:4px 0">
+            <img id="settleImg" src="" alt="" style="max-width:100%;display:none">
+          </div>
         </div>
         <div class="ls-foot" id="actionsNormal">
           <button class="lcd-btn-sm primary" id="btnNext">次へ ▶</button>
@@ -1199,6 +1202,16 @@
     const finalMoney=episodeStartBankroll-totalBet+totalPayout;
     bankroll=finalMoney;
     $("#settleFinal").textContent=yen(finalMoney);
+    const settleImg=$("#settleImg");
+    if(delta!==0){
+      const imgName=delta>0?"精算プラス.png":"精算マイナス.png";
+      settleImg.style.display="none";
+      settleImg.onerror=()=>{ settleImg.style.display="none"; };
+      settleImg.onload=()=>{ settleImg.style.display=""; };
+      settleImg.src=`game/${EPISODES[episode].id}/${imgName}`;
+    } else {
+      settleImg.style.display="none"; settleImg.src="";
+    }
     play(seMoney); scheduleTaikoIfPlus(isPlus);
     if(finalMoney<=0){
       $("#actionsNormal").style.display="none"; $("#actionsZero").style.display="";
