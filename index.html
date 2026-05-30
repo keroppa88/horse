@@ -601,8 +601,18 @@
         </div>
 
         <div class="ls-foot">
+          <button class="lcd-btn-sm" id="btnShinbun">新聞</button>
           <button class="lcd-btn-sm danger" id="btnCancelCart">取消</button>
           <button class="lcd-btn-sm primary" id="btnConfirm">決定</button>
+        </div>
+
+        <!-- 新聞モーダル -->
+        <div id="shinbunModal" style="display:none;position:absolute;inset:0;background:#fff;z-index:20;flex-direction:column">
+          <div style="padding:8px 10px;border-bottom:2px solid #333;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+            <span style="font-size:20px;font-weight:700;color:#111">新聞</span>
+            <button class="lcd-btn-sm" id="btnShinbunClose" style="font-size:18px;padding:5px 12px">閉じる</button>
+          </div>
+          <div id="shinbunContent" style="flex:1;overflow-y:auto;padding:10px 12px;white-space:pre-wrap;font-size:16px;line-height:1.8;color:#111"></div>
         </div>
       </div>
 
@@ -805,12 +815,13 @@
       if(!rr.ok){ if(++miss>=2) break; continue; }
       miss=0;
 
-      const [resultBuf,oddsResp,commentResp,entryResp]=await Promise.all([
-        rr.arrayBuffer(), fetch(`${base}/オッズ.csv`), fetch(`${base}/レースコメント.txt`), fetch(`${base}/出走表.html`),
+      const [resultBuf,oddsResp,commentResp,entryResp,shinbunResp]=await Promise.all([
+        rr.arrayBuffer(), fetch(`${base}/オッズ.csv`), fetch(`${base}/レースコメント.txt`), fetch(`${base}/出走表.html`), fetch(`${base}/新聞.txt`),
       ]);
       const resultText =sjis(resultBuf);
       const oddsText   =oddsResp.ok    ?sjis(await oddsResp.arrayBuffer())   :'';
       const commentText=commentResp.ok ?await commentResp.text():'';
+      const shinbunText=shinbunResp.ok ?await shinbunResp.text()             :'';
       const videoPath  =`${base}/race.mp4`;
       const entryHtml  =entryResp.ok   ?await entryResp.text()  :'';
 
@@ -879,7 +890,7 @@
       const title=lines2[0]?lines2[0].trim():`レース ${id}`;
 
       EPISODES[epNum]={ id, title, raceTitle, comment:commentText, videoPath, entryHtml, horseList,
-        horses:[...horseSet].sort((a,b)=>a-b), exactaMap, quinellaMap, result };
+        horses:[...horseSet].sort((a,b)=>a-b), exactaMap, quinellaMap, result, shinbun:shinbunText };
       epNum++;
     }
     return { EPISODES, totalEpisodes:epNum-1, startBankroll, goalBankroll };
@@ -1130,6 +1141,17 @@
     if(selectedCartIdx<0){ limitHint.innerHTML=`<span class="lcd-danger">取消す馬券を選んでください</span>`; return; }
     play(seChoice); cart.splice(selectedCartIdx,1); selectedCartIdx=-1; limitHint.textContent=""; renderCart();
   });
+  const shinbunModal=$("#shinbunModal");
+  $("#btnShinbun").addEventListener("click",()=>{
+    const ep=EPISODES[episode];
+    if(!ep.shinbun){ limitHint.innerHTML=`<span class="lcd-danger">新聞はありません</span>`; return; }
+    if(episodeStartBankroll<1000){ limitHint.innerHTML=`<span class="lcd-danger">所持金が足りません（新聞代1,000円）</span>`; return; }
+    play(seChoice);
+    episodeStartBankroll-=1000; bankrollLabel.textContent=yen(episodeStartBankroll); refreshTotals();
+    $("#shinbunContent").textContent=ep.shinbun;
+    shinbunModal.style.display="flex";
+  });
+  $("#btnShinbunClose").addEventListener("click",()=>{ play(seChoice); shinbunModal.style.display="none"; });
 
   // ---- Video ----
   const raceVideo=$("#raceVideo");
