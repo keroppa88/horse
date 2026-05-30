@@ -774,6 +774,7 @@
 
     const EPISODES={};
     let epNum=1, miss=0;
+    const sjis=b=>new TextDecoder('shift-jis').decode(b);
     for(let i=1;i<=99;i++){
       const id=String(i).padStart(2,'0');
       const base=`game/${id}`;
@@ -781,10 +782,11 @@
       if(!rr.ok){ if(++miss>=2) break; continue; }
       miss=0;
 
-      const [resultText,oddsResp,commentResp,entryResp]=await Promise.all([
-        rr.text(), fetch(`${base}/オッズ.csv`), fetch(`${base}/レースコメント.txt`), fetch(`${base}/出走表.html`),
+      const [resultBuf,oddsResp,commentResp,entryResp]=await Promise.all([
+        rr.arrayBuffer(), fetch(`${base}/オッズ.csv`), fetch(`${base}/レースコメント.txt`), fetch(`${base}/出走表.html`),
       ]);
-      const oddsText   =oddsResp.ok    ?await oddsResp.text()   :'';
+      const resultText =sjis(resultBuf);
+      const oddsText   =oddsResp.ok    ?sjis(await oddsResp.arrayBuffer())   :'';
       const commentText=commentResp.ok ?await commentResp.text():'';
       const videoPath  =`${base}/race.mp4`;
       const entryHtml  =entryResp.ok   ?await entryResp.text()  :'';
@@ -824,17 +826,29 @@
         });
       }
 
+      // オッズ.csv: 馬番1,馬番2,馬単(1→2),馬単(2→1),馬連
       const exactaMap=new Map(), quinellaMap=new Map(), horseSet=new Set();
-      parseCSV(oddsText).forEach(row=>{
-        const type=row['種別']||'';
-        const u1=Number(row['1着']||0), u2=Number(row['2着']||0), od=Number(row['オッズ']||0);
-        if(u1>0) horseSet.add(u1); if(u2>0) horseSet.add(u2);
-        if(type==='馬単') exactaMap.set(`${u1}>${u2}`,od);
-        if(type==='馬連') quinellaMap.set(`${Math.min(u1,u2)}>${Math.max(u1,u2)}`,od);
+      oddsText.trim().split('\n').slice(1).forEach(line=>{
+        const cols=line.split(',').map(s=>s.trim());
+        const u1=Number(cols[0]), u2=Number(cols[1]);
+        if(!u1||!u2) return;
+        horseSet.add(u1); horseSet.add(u2);
+        const ex12=parseFloat(cols[2]), ex21=parseFloat(cols[3]), qu=parseFloat(cols[4]);
+        if(!isNaN(ex12)) exactaMap.set(`${u1}>${u2}`,ex12);
+        if(!isNaN(ex21)) exactaMap.set(`${u2}>${u1}`,ex21);
+        if(!isNaN(qu))   quinellaMap.set(`${Math.min(u1,u2)}>${Math.max(u1,u2)}`,qu);
       });
 
-      const r=parseCSV(resultText)[0]||{};
-      const result={first:Number(r['1着']||0), second:Number(r['2着']||0)};
+      // 着順.csv: 3行ヘッダー(順,枠,馬,…/,番,番,…/空行)、データ行はcol[0]=順位 col[2]=馬番
+      let first=0, second=0;
+      resultText.trim().split('\n').slice(3).forEach(line=>{
+        const cols=line.split(',').map(s=>s.trim());
+        const rank=parseInt(cols[0]), horse=parseInt(cols[2]);
+        if(rank===1) first=horse;
+        if(rank===2) second=horse;
+      });
+      const result={first, second};
+
       const lines2=commentText.trim().split('\n');
       const title=lines2[0]?lines2[0].trim():`レース ${id}`;
 
