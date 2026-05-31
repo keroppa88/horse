@@ -1143,22 +1143,23 @@
   });
   const shinbunModal=$("#shinbunModal");
   $("#btnShinbun").addEventListener("click",async()=>{
-    const ep=EPISODES[episode];
-    if(episodeStartBankroll<1000){
-      $("#shinbunContent").textContent="所持金が足りません（新聞代1,000円）";
-      shinbunModal.style.display="flex"; return;
-    }
+    const modal=document.getElementById("shinbunModal");
+    const content=document.getElementById("shinbunContent");
+    if(!modal||!content){ return; }
     play(seChoice);
-    const path=`game/${ep.id}/新聞.txt`;
+    if(episodeStartBankroll<1000){
+      content.textContent="所持金が足りません（新聞代1,000円）";
+      modal.style.display="flex"; return;
+    }
+    const ep=EPISODES[episode];
+    const id=ep&&ep.id?ep.id:String(episode).padStart(2,"0");
+    const path=`game/${id}/新聞.txt`;
     let text="";
-    try{
-      const r=await fetch(path);
-      if(r.ok) text=(await r.text()).trim();
-    }catch{}
-    shinbunModal.style.display="flex";
-    if(!text){ $("#shinbunContent").textContent="（このレースの新聞はありません）"; return; }
+    try{ const r=await fetch(path); if(r.ok) text=(await r.text()).trim(); }catch{}
+    modal.style.display="flex";
+    if(!text){ content.textContent="（このレースの新聞はありません）"; return; }
     episodeStartBankroll-=1000; bankrollLabel.textContent=yen(episodeStartBankroll); refreshTotals();
-    $("#shinbunContent").textContent=text;
+    content.textContent=text;
   });
   $("#btnShinbunClose").addEventListener("click",()=>{ play(seChoice); shinbunModal.style.display="none"; });
 
