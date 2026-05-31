@@ -606,14 +606,6 @@
           <button class="lcd-btn-sm primary" id="btnConfirm">決定</button>
         </div>
 
-        <!-- 新聞モーダル -->
-        <div id="shinbunModal" style="display:none;position:absolute;inset:0;background:#fff;z-index:20;flex-direction:column">
-          <div style="padding:8px 10px;border-bottom:2px solid #333;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-            <span style="font-size:20px;font-weight:700;color:#111">新聞</span>
-            <button class="lcd-btn-sm" id="btnShinbunClose" style="font-size:18px;padding:5px 12px">閉じる</button>
-          </div>
-          <div id="shinbunContent" style="flex:1;overflow-y:auto;padding:10px 12px;white-space:pre-wrap;font-size:16px;line-height:1.8;color:#111"></div>
-        </div>
       </div>
 
       <!-- 動画 -->
@@ -678,6 +670,17 @@
         <iframe id="oddsFrame" sandbox="allow-same-origin allow-scripts"></iframe>
         <div class="ls-foot">
           <button class="lcd-btn-sm" id="btnOddsBack">← 戻る</button>
+        </div>
+      </div>
+
+      <!-- 新聞 -->
+      <div id="screenShinbun" class="ls hidden" style="background:#fff;color:#111">
+        <div class="pro-title" style="background:#fff;color:#111;border-bottom:2px solid #333">新聞</div>
+        <div class="ls-scroll" style="background:#fff">
+          <div id="shinbunContent" style="white-space:pre-wrap;font-size:16px;line-height:1.8;color:#111;padding:4px 0"></div>
+        </div>
+        <div class="ls-foot" style="background:#fff;border-top:1px solid #ddd">
+          <button class="lcd-btn-sm" id="btnShinbunClose">← 戻る</button>
         </div>
       </div>
 
@@ -781,7 +784,7 @@
   function yen(n){ return (n??0).toLocaleString("ja-JP"); }
   function f1(n){ return (Math.round(n*10)/10).toFixed(1); }
 
-  const ALL_SCREENS = ["#screenLoading","#screenRealTitle","#screenPrologue","#screenBuy","#screenVideo","#screenSettlement","#screenGameOver","#screenRate","#screenOdds"];
+  const ALL_SCREENS = ["#screenLoading","#screenRealTitle","#screenPrologue","#screenBuy","#screenVideo","#screenSettlement","#screenGameOver","#screenRate","#screenOdds","#screenShinbun"];
   function hideAllScreens(){ ALL_SCREENS.forEach(id=>$(id).classList.add("hidden")); }
   function showScreen(id){ hideAllScreens(); $(id).classList.remove("hidden"); }
   function activeScreen(){ return ALL_SCREENS.find(s=>!$(s).classList.contains("hidden")); }
@@ -1141,27 +1144,7 @@
     if(selectedCartIdx<0){ limitHint.innerHTML=`<span class="lcd-danger">取消す馬券を選んでください</span>`; return; }
     play(seChoice); cart.splice(selectedCartIdx,1); selectedCartIdx=-1; limitHint.textContent=""; renderCart();
   });
-  const shinbunModal=$("#shinbunModal");
-  $("#btnShinbun").addEventListener("click",async()=>{
-    const modal=document.getElementById("shinbunModal");
-    const content=document.getElementById("shinbunContent");
-    if(!modal||!content){ return; }
-    play(seChoice);
-    if(episodeStartBankroll<1000){
-      content.textContent="所持金が足りません（新聞代1,000円）";
-      modal.style.display="flex"; return;
-    }
-    const ep=EPISODES[episode];
-    const id=ep&&ep.id?ep.id:String(episode).padStart(2,"0");
-    const path=`game/${id}/新聞.txt`;
-    let text="";
-    try{ const r=await fetch(path); if(r.ok) text=(await r.text()).trim(); }catch{}
-    modal.style.display="flex";
-    if(!text){ content.textContent="（このレースの新聞はありません）"; return; }
-    episodeStartBankroll-=1000; bankrollLabel.textContent=yen(episodeStartBankroll); refreshTotals();
-    content.textContent=text;
-  });
-  $("#btnShinbunClose").addEventListener("click",()=>{ play(seChoice); shinbunModal.style.display="none"; });
+  $("#btnShinbun").addEventListener("click",showShinbun);
 
   // ---- Video ----
   const raceVideo=$("#raceVideo");
@@ -1421,7 +1404,27 @@
     showBuy();
   });
 
-  $("#navInfo").addEventListener("click",()=>{ play(seChoice); showPrologue(); });
+  let shinbunReturnScreen="#screenPrologue";
+  function showShinbun(){
+    if(bankroll<1000){ return; }
+    play(seChoice);
+    shinbunReturnScreen=activeScreen()||"#screenPrologue";
+    const id=EPISODES[episode]?.id||String(episode).padStart(2,"0");
+    fetch(`game/${id}/新聞.txt`).then(r=>r.ok?r.text():"").catch(()=>"").then(text=>{
+      const content=document.getElementById("shinbunContent");
+      if(!content) return;
+      if(!text.trim()){ content.textContent="（このレースの新聞はありません）"; }
+      else{
+        bankroll-=1000;
+        episodeStartBankroll=Math.min(episodeStartBankroll,bankroll);
+        bankrollLabel.textContent=yen(episodeStartBankroll); refreshTotals();
+        content.textContent=text.trim();
+      }
+      showScreen("#screenShinbun");
+    });
+  }
+  $("#navInfo").addEventListener("click",showShinbun);
+  $("#btnShinbunClose").addEventListener("click",()=>{ play(seChoice); showScreen(shinbunReturnScreen); });
   $("#navToggle").addEventListener("click",()=>{
     const lcd=document.querySelector(".lcd");
     lcd.style.visibility=lcd.style.visibility==="hidden"?"visible":"hidden";
