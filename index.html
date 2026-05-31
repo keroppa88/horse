@@ -115,8 +115,8 @@
       text-align: center;
     }
     .lcd-title-img {
-      width: 55%;
-      max-height: 40%;
+      width: 88%;
+      max-height: 72%;
       object-fit: contain;
     }
     .lcd-hint { font-size: 9px; color: #555; margin-top: 4px; }
@@ -472,6 +472,8 @@
     }
     .ab-btn:hover { background: #252523; }
     .ab-btn:active { transform: translateY(2px); box-shadow: 0 1px 4px rgba(0,0,0,0.6); }
+    .ab-btn-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .ab-label { font-size: 9px; color: #8a7d5a; text-align: center; min-height: 12px; letter-spacing: -0.01em; }
 
     /* =====================
        BOTTOM NAV
@@ -487,7 +489,8 @@
     .nav-labels {
       display: flex;
       justify-content: space-around;
-      font-size: 18px;
+      font-size: 15px;
+      font-weight: bold;
       color: #8a7d5a;
       letter-spacing: -0.02em;
     }
@@ -685,8 +688,14 @@
 
     <!-- A/B ボタン -->
     <div class="ab-area">
-      <button class="ab-btn" id="btnB">B</button>
-      <button class="ab-btn" id="btnA">A</button>
+      <div class="ab-btn-wrap">
+        <div class="ab-label" id="labelB"></div>
+        <button class="ab-btn" id="btnB">B</button>
+      </div>
+      <div class="ab-btn-wrap">
+        <div class="ab-label" id="labelA"></div>
+        <button class="ab-btn" id="btnA">A</button>
+      </div>
     </div>
   </div>
 
@@ -696,7 +705,7 @@
       <span>メニュー</span>
       <span>新聞</span>
       <span>出走表</span>
-      <span>馬券購入</span>
+      <span>馬券</span>
       <span>レース開始</span>
     </div>
     <div class="nav-btns">
@@ -769,7 +778,7 @@
 
   const ALL_SCREENS = ["#screenLoading","#screenRealTitle","#screenPrologue","#screenBuy","#screenVideo","#screenSettlement","#screenGameOver","#screenRate","#screenOdds","#screenShinbun"];
   function hideAllScreens(){ ALL_SCREENS.forEach(id=>$(id).classList.add("hidden")); }
-  function showScreen(id){ hideAllScreens(); $(id).classList.remove("hidden"); }
+  function showScreen(id){ hideAllScreens(); $(id).classList.remove("hidden"); updateABLabels(); }
   function activeScreen(){ return ALL_SCREENS.find(s=>!$(s).classList.contains("hidden")); }
 
   // ---- CSV ----
@@ -1158,6 +1167,13 @@
     if(cart.length===0){limitHint.innerHTML=`<span class="lcd-danger">馬券がありません</span>`;return;}
     const sum=cart.reduce((a,x)=>a+(Number(x.stake)||0),0);
     if(sum>episodeStartBankroll){limitHint.innerHTML=`<span class="lcd-danger">所持金を超えています</span>`;return;}
+    play(seChoice);
+    limitHint.innerHTML=`<span style="color:#2a8a2a">馬券を確定しました</span>`;
+  }
+  function startRaceFromBuy(){
+    if(cart.length===0){limitHint.innerHTML=`<span class="lcd-danger">馬券がありません</span>`;return;}
+    const sum=cart.reduce((a,x)=>a+(Number(x.stake)||0),0);
+    if(sum>episodeStartBankroll){limitHint.innerHTML=`<span class="lcd-danger">所持金を超えています</span>`;return;}
     play(seChoice); showScreen("#screenVideo");
     bgmStop();
     const ep=EPISODES[episode];
@@ -1326,7 +1342,11 @@
     if(active==="#screenRealTitle"){ play(seChoice); showPrologue(); }
     else if(active==="#screenPrologue"){ play(seChoice); showBuy(); }
     else if(active==="#screenBuy") confirmBet();
-    else if(active==="#screenVideo"){ play(seChoice); try{raceVideo.pause();}catch{} showSettlement(); }
+    else if(active==="#screenVideo"){
+      if(raceVideo.paused||raceVideo.ended) raceVideo.play().catch(()=>{});
+      else raceVideo.pause();
+      updateABLabels();
+    }
     else if(active==="#screenSettlement") advanceFromSettlement();
     else if(active==="#screenOdds"){ play(seChoice); showScreen(oddsReturnScreen); }
   });
@@ -1334,6 +1354,7 @@
   // ---- B ボタン：キャンセル ----
   $("#btnB").addEventListener("click",()=>{
     const active=activeScreen();
+    if(active==="#screenVideo"){ play(seChoice); try{raceVideo.pause(); raceVideo.src="";}catch{} clearTaikoTimers(); showSettlement(); return; }
     if(active==="#screenOdds"){ play(seChoice); showScreen(oddsReturnScreen); return; }
     if(active==="#screenShinbun"){ play(seChoice); showScreen(shinbunReturnScreen); return; }
     if(active==="#screenBuy"){
@@ -1355,8 +1376,7 @@
     const active=activeScreen();
     if(active==="#screenRealTitle"){ play(seChoice); showPrologue(); }
     else if(active==="#screenPrologue"){ play(seChoice); showBuy(); }
-    else if(active==="#screenBuy") confirmBet();
-    else if(active==="#screenVideo"){ play(seChoice); try{raceVideo.pause();}catch{} showSettlement(); }
+    else if(active==="#screenBuy") startRaceFromBuy();
     else if(active==="#screenSettlement") advanceFromSettlement();
   });
 
@@ -1444,6 +1464,39 @@
   oddsFrameEl.addEventListener("load",()=>{
     try{ oddsFrameEl.contentDocument.addEventListener("click", doubleTapToggle); }catch(e){}
   });
+
+  function updateABLabels(){
+    const active=activeScreen();
+    const isPaused=raceVideo.paused||raceVideo.ended||raceVideo.readyState===0;
+    const aMap={
+      "#screenRealTitle":"開始",
+      "#screenPrologue":"馬券購入",
+      "#screenBuy":"決定",
+      "#screenVideo":isPaused?"再生":"一時停止",
+      "#screenSettlement":"次へ",
+      "#screenOdds":"閉じる",
+      "#screenShinbun":"",
+      "#screenGameOver":"",
+      "#screenRate":"",
+      "#screenLoading":"",
+    };
+    const bMap={
+      "#screenRealTitle":"",
+      "#screenPrologue":"",
+      "#screenBuy":"選択解除",
+      "#screenVideo":"スキップ",
+      "#screenSettlement":"",
+      "#screenOdds":"閉じる",
+      "#screenShinbun":"閉じる",
+      "#screenGameOver":"",
+      "#screenRate":"",
+      "#screenLoading":"",
+    };
+    const la=document.getElementById("labelA");
+    const lb=document.getElementById("labelB");
+    if(la) la.textContent=aMap[active]??"";
+    if(lb) lb.textContent=bMap[active]??"";
+  }
 
   openRealTitle();
   bindRealTitleStart();
