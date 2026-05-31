@@ -547,10 +547,6 @@
         <div class="ls-scroll">
           <div class="pro-body" id="proText"></div>
         </div>
-        <div class="ls-foot">
-          <span id="headerTitle" style="font-size:9px;color:#666"></span>
-          <button class="lcd-btn-sm primary" id="btnProNext">馬券購入へ ▶</button>
-        </div>
       </div>
 
       <!-- 馬券購入 -->
@@ -616,10 +612,6 @@
           <span id="videoDebug" style="font-size:10px;color:#fa0;max-width:90%;word-break:break-all;text-align:center"></span>
         </div>
         <div id="volIndicator" style="position:absolute;bottom:36px;right:8px;display:flex;flex-direction:column-reverse;gap:2px;opacity:0;transition:opacity 0.3s"></div>
-        <div class="ls-foot">
-          <span id="videoCaption" style="font-size:12px;color:#ccc;flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
-          <button class="lcd-btn-sm primary" id="btnToSettlement">次へ ▶</button>
-        </div>
       </div>
 
       <!-- 清算 -->
@@ -642,11 +634,8 @@
             <img id="settleImg" src="" alt="" style="max-width:100%;display:none">
           </div>
         </div>
-        <div class="ls-foot" id="actionsNormal">
-          <button class="lcd-btn-sm primary" id="btnNext">次へ ▶</button>
-        </div>
-        <div class="ls-foot" id="actionsZero" style="display:none">
-          <button class="lcd-btn-sm danger" id="btnToilet">トイレへ</button>
+        <div id="actionsNormal" style="display:none"></div>
+        <div id="actionsZero" style="display:none">
         </div>
       </div>
 
@@ -956,10 +945,8 @@
     const ep=EPISODES[episode];
     $("#proTitle").textContent=ep.title;
     $("#proText").textContent=ep.comment;
-    $("#headerTitle").textContent=`レース${episode}/${totalEpisodes}`;
     bgmPlay();
   }
-  $("#btnProNext").addEventListener("click",()=>{ play(seChoice); showBuy(); });
 
   // ---- Bet tabs ----
   const tabExacta=$("#tabExacta"), tabQuinella=$("#tabQuinella");
@@ -1172,7 +1159,6 @@
     const sum=cart.reduce((a,x)=>a+(Number(x.stake)||0),0);
     if(sum>episodeStartBankroll){limitHint.innerHTML=`<span class="lcd-danger">所持金を超えています</span>`;return;}
     play(seChoice); showScreen("#screenVideo");
-    $("#videoCaption").textContent=EPISODES[episode].raceTitle||`レース${episode}`;
     bgmStop();
     const ep=EPISODES[episode];
     if(!ep||!ep.videoPath){ showVideoOverlay("videoPath未設定"); return; }
@@ -1182,7 +1168,6 @@
       .catch(err=>{ showVideoOverlay(`${err.name}: ${err.message}\nsrc=${raceVideo.currentSrc||raceVideo.src} rs=${raceVideo.readyState}`); });
   }
   btnConfirm.addEventListener("click",confirmBet);
-  $("#btnToSettlement").addEventListener("click",()=>{ play(seChoice); try{raceVideo.pause();}catch{} showSettlement(); });
 
   // ---- Settlement ----
   function isHitItem(item){
@@ -1270,15 +1255,12 @@
     if(rate===100){ try{taiko01.currentTime=0;taiko01.play();}catch{} }
   }
 
-  $("#btnNext").addEventListener("click",()=>{
+  function advanceFromSettlement(){
     play(seChoice); clearTaikoTimers();
+    if(bankroll<=0){ stopAllAudio(); showScreen("#screenGameOver"); return; }
     if(settledEpisode<totalEpisodes){ episode=settledEpisode+1; showPrologue(); }
     else showRate();
-  });
-  $("#btnToilet").addEventListener("click",()=>{
-    play(seChoice); stopAllAudio();
-    showScreen("#screenGameOver");
-  });
+  }
 
   // ---- D-pad ----
   function scrollLcd(dir){
@@ -1345,7 +1327,7 @@
     else if(active==="#screenPrologue"){ play(seChoice); showBuy(); }
     else if(active==="#screenBuy") confirmBet();
     else if(active==="#screenVideo"){ play(seChoice); try{raceVideo.pause();}catch{} showSettlement(); }
-    else if(active==="#screenSettlement") $("#btnNext").click();
+    else if(active==="#screenSettlement") advanceFromSettlement();
     else if(active==="#screenOdds"){ play(seChoice); showScreen(oddsReturnScreen); }
   });
 
@@ -1375,7 +1357,7 @@
     else if(active==="#screenPrologue"){ play(seChoice); showBuy(); }
     else if(active==="#screenBuy") confirmBet();
     else if(active==="#screenVideo"){ play(seChoice); try{raceVideo.pause();}catch{} showSettlement(); }
-    else if(active==="#screenSettlement") $("#btnNext").click();
+    else if(active==="#screenSettlement") advanceFromSettlement();
   });
 
   // 出走表を表示
