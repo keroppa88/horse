@@ -390,7 +390,6 @@
 
   <!-- 出走表 -->
   <div id="screenOdds" class="ls hidden">
-    <div class="pro-title" id="oddsTitle">出走表</div>
     <iframe id="oddsFrame" sandbox="allow-same-origin allow-scripts"></iframe>
   </div>
 
@@ -567,7 +566,6 @@
     if(!ep) return;
     oddsReturnScreen=activeScreen()||"#screenPrologue";
     showScreen("#screenOdds");
-    $("#oddsTitle").textContent=ep.title+"　出走表";
     const frame=$("#oddsFrame");
     frame.srcdoc=ep.entryHtml||"<html><body><p>（出走表なし）</p></body></html>";
   }
