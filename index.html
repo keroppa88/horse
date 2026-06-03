@@ -111,6 +111,8 @@
     .lcd-amt-btns { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 3px; }
     .lcd-amt-btn { padding: 3px 6px; border: 1px solid #3a3a3a; border-radius: 4px; background: #1e1e1e; color: #aaa; font-size: 9px; cursor: pointer; }
 
+    #screenPrologue .ls-scroll { padding-left: 0; padding-right: 0; }
+    #screenPrologue .pro-body { font-size: 17px; padding: 0 8px; }
     #screenBuy { background: #fff; }
     #screenBuy .ls-scroll { background: #fff; }
     .buy-top-bar { display: flex; align-items: flex-end; padding: 5px 6px 0; border-bottom: 1px solid #ddd; flex-shrink: 0; background: #fff; }
@@ -175,6 +177,31 @@
     .lcd-danger { color: #f77; font-size: 9px; }
 
     .lcd-video { width: 100%; display: block; background: #000; flex: 1; object-fit: contain; }
+
+    .video-controls {
+      flex: 0 0 54px;
+      display: flex;
+      background: #0a0a0a;
+      border-top: 1px solid #252523;
+    }
+    .video-ctrl-btn {
+      flex: 1;
+      height: 54px;
+      background: transparent;
+      border: none;
+      border-right: 1px solid #252523;
+      color: #8a7d5a;
+      font-size: 22px;
+      font-weight: bold;
+      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans JP", sans-serif;
+      cursor: pointer;
+      text-align: center;
+      line-height: 54px;
+      padding: 0;
+    }
+    .video-ctrl-btn:last-child { border-right: none; }
+    .video-ctrl-btn:active { background: #252522; color: #b0a070; }
+    .video-ctrl-skip { font-size: 16px; }
 
     .settle-sum-line { font-size: 13px; font-weight: 800; color: #fff; padding: 2px 0; }
     .delta-plus { color: #5dba5d; }
@@ -350,6 +377,12 @@
     <div id="videoPlayOverlay" style="display:none;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);color:#fff;font-size:22px;cursor:pointer;gap:12px">
       <span>▶ タップして再生</span>
       <span id="videoDebug" style="font-size:10px;color:#fa0;max-width:90%;word-break:break-all;text-align:center"></span>
+    </div>
+    <div class="video-controls">
+      <button class="video-ctrl-btn" id="btnVidRewind">◁◁</button>
+      <button class="video-ctrl-btn" id="btnVidPlayPause">▶</button>
+      <button class="video-ctrl-btn" id="btnVidForward">▷▷</button>
+      <button class="video-ctrl-btn video-ctrl-skip" id="btnVidSkip">スキップ</button>
     </div>
   </div>
 
@@ -552,10 +585,17 @@
   const shinbunPaid=new Set();
 
   // ---- Top bar ----
+  const RACE_DATES=["","1989年4月16日","1989年4月30日","1989年5月14日","1989年5月28日","1989年6月11日","1989年10月29日","1989年11月5日","1989年11月19日","1989年11月26日","1989年12月24日"];
+
   function updateTopBar(){
+    const active=activeScreen();
+    if(active==="#screenRealTitle"||active==="#screenLoading"){
+      document.getElementById("topRaceName").textContent="";
+      document.getElementById("topBankroll").textContent="";
+      return;
+    }
     const ep=EPISODES[episode];
-    const now=new Date();
-    const dateStr=`${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
+    const dateStr=RACE_DATES[episode]||"";
     document.getElementById("topRaceName").textContent=ep?`${dateStr}　${ep.title}`:"";
     document.getElementById("topBankroll").textContent=ep?`所持金 ${yen(bankroll)}円`:"";
   }
@@ -814,6 +854,31 @@
   overlay.addEventListener("click",()=>{
     raceVideo.play().then(()=>{ overlay.style.display="none"; videoDebug.textContent=""; })
       .catch(err=>{ showVideoOverlay(`${err.name}: ${err.message}\nsrc=${raceVideo.currentSrc||raceVideo.src}`); });
+  });
+
+  // ---- Video controls ----
+  const btnVidPlayPause=$("#btnVidPlayPause");
+  function syncPlayPauseBtn(){
+    btnVidPlayPause.textContent=raceVideo.paused||raceVideo.ended?"▶":"⏸";
+  }
+  raceVideo.addEventListener("play", syncPlayPauseBtn);
+  raceVideo.addEventListener("pause", syncPlayPauseBtn);
+  raceVideo.addEventListener("ended", syncPlayPauseBtn);
+  $("#btnVidRewind").addEventListener("click",()=>{
+    raceVideo.currentTime=Math.max(0,raceVideo.currentTime-10);
+  });
+  btnVidPlayPause.addEventListener("click",()=>{
+    if(raceVideo.paused||raceVideo.ended||raceVideo.readyState===0)
+      raceVideo.play().then(()=>{ overlay.style.display="none"; }).catch(()=>{});
+    else raceVideo.pause();
+  });
+  $("#btnVidForward").addEventListener("click",()=>{
+    if(raceVideo.duration) raceVideo.currentTime=Math.min(raceVideo.duration,raceVideo.currentTime+10);
+  });
+  $("#btnVidSkip").addEventListener("click",()=>{
+    play(seChoice);
+    try{ raceVideo.pause(); raceVideo.src=""; }catch{}
+    clearTaikoTimers(); showSettlement();
   });
 
   function confirmBet(){
