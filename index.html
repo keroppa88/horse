@@ -321,8 +321,8 @@
 
   <!-- プロローグ -->
   <div id="screenPrologue" class="ls hidden">
-    <img id="proImage" src="" alt="" style="width:100%;max-height:55%;display:block;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'" onload="this.style.display='block'">
-    <div class="ls-scroll">
+    <img id="proImage" src="" alt="" style="width:100%;max-height:55%;display:none;object-fit:contain;flex-shrink:0;">
+    <div class="ls-scroll" id="proScroll">
       <div class="pro-body" id="proText"></div>
     </div>
   </div>
@@ -630,7 +630,25 @@
     showScreen("#screenPrologue");
     const ep=EPISODES[episode];
     const img=$("#proImage");
+    const scroll=$("#proScroll");
     img.style.display="none";
+    scroll.style.width="";
+    scroll.style.marginLeft="";
+    scroll.style.marginRight="";
+    img.onload=()=>{
+      img.style.display="block";
+      const ew=img.offsetWidth, eh=img.offsetHeight;
+      const nw=img.naturalWidth, nh=img.naturalHeight;
+      if(nw>0&&nh>0){
+        const renderW=(ew/eh>=nw/nh)?eh*(nw/nh):ew;
+        if(renderW<ew-1){
+          scroll.style.width=renderW+"px";
+          scroll.style.marginLeft="auto";
+          scroll.style.marginRight="auto";
+        }
+      }
+    };
+    img.onerror=()=>{ img.style.display="none"; };
     img.src=`game/${ep.id}/open.png`;
     $("#proText").textContent=ep.comment;
     bgmPlay();
