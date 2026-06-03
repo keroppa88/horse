@@ -548,7 +548,7 @@
 
   let episode=1, bankroll=startBankroll, episodeStartBankroll=startBankroll;
   let mode="tanshoku", selectedQu1=null, selectedQu2=null, selectedTan=null;
-  let cart=[], settledEpisode=1, taikoTimer=null;
+  let cart=[], purchasedTickets=[], settledEpisode=1, taikoTimer=null;
   let oddsReturnScreen="#screenPrologue";
   const shinbunPaid=new Set();
 
@@ -697,7 +697,7 @@
 
   function refreshTotals(){
     const sum=cart.reduce((a,x)=>a+(Number(x.stake)||0),0);
-    btnConfirm.classList.toggle("danger",episodeStartBankroll-sum<0);
+    btnConfirm.classList.toggle("danger",bankroll-sum<0);
   }
   function renderCart(){
     cartRows.innerHTML="";
@@ -729,14 +729,14 @@
   }
   function resetBuyState(){
     mode="tanshoku"; selectedQu1=selectedQu2=selectedTan=null;
-    cart=[]; selectedCartIdx=-1; limitHint.textContent=""; stakeTan.value="0"; stakeQu.value="0";
+    cart=[]; purchasedTickets=[]; selectedCartIdx=-1; limitHint.textContent=""; stakeTan.value="0"; stakeQu.value="0";
     setMode("tanshoku");
   }
 
   function showBuy(){
     showScreen("#screenBuy");
     episodeStartBankroll=bankroll;
-    bankrollLabel.textContent=yen(episodeStartBankroll);
+    bankrollLabel.textContent=yen(bankroll);
     resetBuyState();
     renderTanshokuList(); renderQuinellaList();
     wireAmountButtons($("#amtBarTan"),stakeTan);
@@ -779,10 +779,10 @@
   document.getElementById("btnViewCart").addEventListener("click",()=>{
     play(seChoice);
     const content=document.getElementById("cartPopupContent");
-    if(cart.length===0){
+    if(purchasedTickets.length===0){
       content.innerHTML=`<div class="cart-popup-empty">購入した馬券はありません</div>`;
     } else {
-      content.innerHTML=cart.map(c=>
+      content.innerHTML=purchasedTickets.map(c=>
         `<div class="cart-popup-item">${c.type}　${c.label}<br>¥${yen(c.stake)} → 想定払戻 ¥${yen(Math.round(c.stake*c.odds))}</div>`
       ).join("");
     }
@@ -816,17 +816,20 @@
   });
 
   function confirmBet(){
-    if(btnConfirm.classList.contains("danger")) return;
     if(cart.length===0){limitHint.innerHTML=`<span class="lcd-danger">馬券がありません</span>`;return;}
     const sum=cart.reduce((a,x)=>a+(Number(x.stake)||0),0);
-    if(sum>episodeStartBankroll){limitHint.innerHTML=`<span class="lcd-danger">所持金を超えています</span>`;return;}
+    if(sum>bankroll){limitHint.innerHTML=`<span class="lcd-danger">所持金が不足しています</span>`;return;}
     play(seChoice);
-    limitHint.innerHTML=`<span style="color:#2a8a2a">馬券を確定しました</span>`;
+    bankroll-=sum;
+    purchasedTickets.push(...cart);
+    cart=[]; selectedCartIdx=-1;
+    bankrollLabel.textContent=yen(bankroll);
+    updateTopBar();
+    renderCart();
+    limitHint.innerHTML=`<span style="color:#2a8a2a">購入しました（${yen(sum)}円）</span>`;
   }
   function startRaceFromBuy(){
-    if(cart.length===0){limitHint.innerHTML=`<span class="lcd-danger">馬券がありません</span>`;return;}
-    const sum=cart.reduce((a,x)=>a+(Number(x.stake)||0),0);
-    if(sum>episodeStartBankroll){limitHint.innerHTML=`<span class="lcd-danger">所持金を超えています</span>`;return;}
+    if(purchasedTickets.length===0){limitHint.innerHTML=`<span class="lcd-danger">馬券がありません（決定ボタンで購入してください）</span>`;return;}
     play(seChoice); showScreen("#screenVideo");
     bgmStop();
     const ep=EPISODES[episode];
@@ -874,12 +877,12 @@
     bgmPlay();
     const settleRows=$("#settleRows");
     settleRows.innerHTML="";
-    const totalBet=cart.reduce((a,x)=>a+(Number(x.stake)||0),0);
+    const totalBet=purchasedTickets.reduce((a,x)=>a+(Number(x.stake)||0),0);
     let totalPayout=0;
-    if(cart.length===0){
+    if(purchasedTickets.length===0){
       settleRows.innerHTML=`<tr><td colspan="5" class="lcd-subtxt">（購入なし）</td></tr>`;
     } else {
-      cart.forEach(c=>{
+      purchasedTickets.forEach(c=>{
         const hit=isHitItem(c);
         const payout=hit?Math.round((c.stake||0)*(c.odds||0)):0;
         totalPayout+=payout;
@@ -895,7 +898,7 @@
     const sd=$("#settleDelta");
     sd.textContent=(isPlus?"+":"−")+yen(Math.abs(delta));
     sd.className=isPlus?"delta-plus":"delta-minus";
-    const finalMoney=episodeStartBankroll-totalBet+totalPayout;
+    const finalMoney=bankroll+totalPayout;
     bankroll=finalMoney;
     $("#settleFinal").textContent=yen(finalMoney);
     const settleImg=$("#settleImg");
@@ -963,8 +966,7 @@
       } else {
         if(!alreadyPaid){
           bankroll-=1000;
-          episodeStartBankroll=Math.min(episodeStartBankroll,bankroll);
-          bankrollLabel.textContent=yen(episodeStartBankroll);
+          bankrollLabel.textContent=yen(bankroll);
           refreshTotals();
           shinbunPaid.add(episode);
           updateTopBar();
