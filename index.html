@@ -113,6 +113,17 @@
 
     #screenPrologue .ls-scroll { padding-left: 0; padding-right: 0; }
     #screenPrologue .pro-body { font-size: 17px; padding: 0 8px; }
+
+    /* ---- メニュー画面 ---- */
+    .menu-section { padding: 18px 14px; border-bottom: 1px solid #2a2a28; }
+    .menu-section-title { font-size: 18px; font-weight: bold; color: #b0a070; margin-bottom: 12px; }
+    .menu-password { font-size: 34px; font-weight: bold; color: #fff; font-family: monospace; letter-spacing: 6px; text-align: center; padding: 14px 0; background: #111; border-radius: 8px; user-select: all; }
+    .menu-hint { font-size: 13px; color: #666; margin-top: 8px; }
+    .menu-input-row { display: flex; gap: 8px; margin-top: 10px; }
+    .menu-input-row input { flex: 1; font-size: 20px; padding: 10px 8px; border: 1px solid #444; background: #111; color: #fff; border-radius: 6px; font-family: monospace; }
+    .menu-input-row button { padding: 10px 18px; background: #1a3a1a; color: #7df07d; border: 1px solid #3a7a3a; border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; }
+    .menu-pw-result { font-size: 14px; margin-top: 8px; }
+
     #screenBuy { background: #fff; }
     #screenBuy .ls-scroll { background: #fff; }
     .buy-top-bar { display: flex; align-items: flex-end; padding: 5px 6px 0; border-bottom: 1px solid #ddd; flex-shrink: 0; background: #fff; }
@@ -408,6 +419,25 @@
     <div id="actionsZero" style="display:none"></div>
   </div>
 
+  <!-- メニュー -->
+  <div id="screenMenu" class="ls hidden">
+    <div class="ls-scroll">
+      <div class="menu-section">
+        <div class="menu-section-title">復活の呪文</div>
+        <div class="menu-password" id="menuPassword">------</div>
+        <div class="menu-hint">この数字を記録しておくと次回から途中で再開できます</div>
+      </div>
+      <div class="menu-section">
+        <div class="menu-section-title">呪文の入力</div>
+        <div class="menu-input-row">
+          <input type="text" inputmode="numeric" id="menuPwInput" placeholder="呪文を入力" maxlength="12" />
+          <button id="menuPwSubmit">開始</button>
+        </div>
+        <div class="menu-pw-result" id="menuPwResult"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ゲームオーバー -->
   <div id="screenGameOver" class="ls hidden">
     <div class="lcd-gameover">GAME OVER</div>
@@ -477,7 +507,7 @@
   function yen(n){ return (n??0).toLocaleString("ja-JP"); }
   function f1(n){ return (Math.round(n*10)/10).toFixed(1); }
 
-  const ALL_SCREENS = ["#screenLoading","#screenRealTitle","#screenPrologue","#screenBuy","#screenVideo","#screenSettlement","#screenGameOver","#screenRate","#screenOdds","#screenShinbun"];
+  const ALL_SCREENS = ["#screenLoading","#screenRealTitle","#screenPrologue","#screenBuy","#screenVideo","#screenSettlement","#screenGameOver","#screenRate","#screenOdds","#screenShinbun","#screenMenu"];
   function hideAllScreens(){ ALL_SCREENS.forEach(id=>$(id).classList.add("hidden")); }
   function showScreen(id){ hideAllScreens(); $(id).classList.remove("hidden"); updateTopBar(); }
   function activeScreen(){ return ALL_SCREENS.find(s=>!$(s).classList.contains("hidden")); }
@@ -1035,6 +1065,34 @@
 
   // ---- Nav buttons ----
   let shinbunReturnScreen="#screenPrologue";
+  let menuReturnScreen="#screenPrologue";
+
+  function showMenu(){
+    const active=activeScreen();
+    if(active==="#screenVideo"||active==="#screenLoading"||active==="#screenRealTitle") return;
+    menuReturnScreen=active||"#screenPrologue";
+    const ep=EPISODES[episode];
+    document.getElementById("menuPassword").textContent=ep?ep.id+String(bankroll):"------";
+    document.getElementById("menuPwInput").value="";
+    document.getElementById("menuPwResult").textContent="";
+    showScreen("#screenMenu");
+  }
+
+  document.getElementById("menuPwSubmit").addEventListener("click",()=>{
+    const pw=document.getElementById("menuPwInput").value.trim();
+    const result=document.getElementById("menuPwResult");
+    if(pw.length<3){ result.style.color="#f77"; result.textContent="呪文が短すぎます"; return; }
+    const id=pw.slice(0,2);
+    const money=parseInt(pw.slice(2),10);
+    const epNum=parseInt(id,10);
+    if(!epNum||!EPISODES[epNum]||isNaN(money)||money<0){
+      result.style.color="#f77"; result.textContent="呪文が正しくありません"; return;
+    }
+    play(seChoice);
+    episode=epNum; bankroll=money;
+    shinbunPaid.clear();
+    showBuy(true);
+  });
 
   function showShinbun(){
     const alreadyPaid=shinbunPaid.has(episode);
@@ -1061,7 +1119,11 @@
     });
   }
 
-  $("#navToggle").addEventListener("click",()=>{ /* メニュー：未実装 */ });
+  $("#navToggle").addEventListener("click",()=>{
+    const active=activeScreen();
+    if(active==="#screenMenu"){ play(seChoice); showScreen(menuReturnScreen); return; }
+    play(seChoice); showMenu();
+  });
 
   $("#navInfo").addEventListener("click",()=>{
     const active=activeScreen();
