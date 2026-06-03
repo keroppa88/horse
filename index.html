@@ -18,7 +18,7 @@
     }
 
     /* =====================
-       GAME AREA (上半分)
+       GAME AREA
     ===================== */
     .game-area {
       flex: 1;
@@ -36,23 +36,22 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      padding: 6px 10px;
+      padding: 7px 12px;
       z-index: 20;
       pointer-events: none;
       background: linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, transparent 100%);
     }
     .hud.hud-hidden { display: none; }
     .hud-left {
-      font-size: 11px;
-      font-weight: 700;
+      font-size: 15px;
+      font-weight: bold;
       color: #ccc;
       max-width: 55%;
       line-height: 1.3;
     }
     .hud-right { text-align: right; max-width: 44%; }
-    .hud-bankroll { font-size: 11px; color: #aaa; }
-    .hud-bankroll b { color: #fff; font-size: 13px; }
-    .hud-tickets { margin-top: 2px; font-size: 9px; color: #999; line-height: 1.5; }
+    .hud-bankroll { font-size: 15px; font-weight: bold; color: #fff; }
+    .hud-tickets { margin-top: 3px; font-size: 12px; color: #999; line-height: 1.5; }
 
     /* ---- LCD screens ---- */
     .ls {
@@ -95,28 +94,17 @@
     .lcd-hint { font-size: 9px; color: #555; margin-top: 4px; }
 
     /* ---- Prologue ---- */
-    .pro-title {
-      font-size: 12px; font-weight: 700; color: #ccc;
-      padding: 6px 8px 3px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
+    .pro-title { font-size: 12px; font-weight: 700; color: #ccc; padding: 6px 8px 3px; border-bottom: 1px solid rgba(255,255,255,0.1); }
     .pro-body { font-size: 11px; line-height: 1.7; white-space: pre-wrap; color: #bbb; }
 
     /* ---- Buy screen ---- */
     .lcd-tabs { display: flex; gap: 4px; padding: 5px 6px 0; flex-shrink: 0; }
     .lcd-tab { padding: 3px 10px; border: 1px solid #444; border-radius: 5px 5px 0 0; background: #1a1a1a; color: #888; font-size: 10px; cursor: pointer; }
     .lcd-tab.active { border-color: #777; color: #ddd; background: #2a2a2a; }
-    .lcd-cash { text-align: right; padding: 4px 8px; font-size: 10px; color: #aaa; flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
-    .lcd-cash b { color: #fff; font-size: 11px; }
     .lcd-amount-row { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
     .lcd-amount-row input[type="number"] { width: 80px; padding: 4px 5px; border: 1px solid #444; border-radius: 5px; background: #1a1a1a; color: #ddd; font-size: 10px; }
     .lcd-amt-btns { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 3px; }
     .lcd-amt-btn { padding: 3px 6px; border: 1px solid #3a3a3a; border-radius: 4px; background: #1e1e1e; color: #aaa; font-size: 9px; cursor: pointer; }
-    .lcd-num-btn { border: 1px solid #3a3a3a; border-radius: 5px; background: #1e1e1e; color: #bbb; font-size: 9px; padding: 4px 2px; text-align: center; cursor: pointer; line-height: 1.3; }
-    .lcd-num-btn.active { border-color: #aaa; background: #2e2e2e; color: #fff; }
-    .lcd-num-btn:disabled { color: #444; cursor: default; }
-    .lcd-num-btn b { display: block; font-size: 11px; color: inherit; }
-    .lcd-num-btn.dpad-focus { border-color: #6d6; background: #1e3a1e; color: #fff; outline: 1px solid #3a9a3a; }
 
     #screenBuy { background: #fff; }
     #screenBuy .ls-scroll { background: #fff; }
@@ -154,7 +142,6 @@
     .horse-row:last-child { border-bottom: none; }
     .horse-row.active { background: #e8f0fe; box-shadow: inset 0 0 0 2px #3366cc; }
     .horse-row.qu1-selected { background: #fff3e0; box-shadow: inset 0 0 0 2px #ff8800; }
-    .horse-row.dpad-focus { box-shadow: inset 0 0 0 2px #33aa33; background: #f0fff0; }
     .horse-row.disabled { opacity: 0.4; cursor: default; }
     .hr-num { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; flex-shrink: 0; background: #888; color: #fff; }
     .hr-num.waku-c1 { background: #fff; color: #000; border: 1px solid #aaa; }
@@ -179,8 +166,6 @@
     .lcd-table th { background: #222; color: #888; padding: 3px 4px; border-bottom: 1px solid #333; text-align: left; }
     .lcd-table td { padding: 3px 4px; border-bottom: 1px solid #222; vertical-align: top; color: #bbb; }
     .lcd-subtxt { font-size: 8px; color: #666; }
-    .lcd-totals { display: flex; justify-content: space-between; padding: 3px 0; font-size: 10px; color: #aaa; flex-shrink: 0; }
-    .lcd-totals b { color: #ddd; }
     .lcd-hint { font-size: 9px; color: #555; padding: 2px 0; }
     .lcd-danger { color: #f77; font-size: 9px; }
 
@@ -194,7 +179,7 @@
     .badge-hit { display: inline-block; padding: 0 5px; border-radius: 99px; background: #1a4a1a; border: 1px solid #3a7a3a; color: #7df07d; font-size: 8px; margin-left: 3px; }
     .badge-lose { display: inline-block; padding: 0 5px; border-radius: 99px; background: #4a1a1a; border: 1px solid #7a3a3a; color: #f07d7d; font-size: 8px; margin-left: 3px; }
 
-    /* ---- Rate / End screen ---- */
+    /* ---- Rate / End ---- */
     .lcd-rate { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
     .lcd-rate-num { font-size: 28px; font-weight: 900; color: #fff; }
     .lcd-rate-end { font-size: 16px; font-weight: 800; color: #888; }
@@ -207,71 +192,34 @@
     #oddsFrame { flex: 1; width: 100%; border: none; background: #fff; display: block; }
 
     /* =====================
-       CONTROLS (下半分)
+       NAV BAR (5 rectangle buttons)
     ===================== */
-    .controls-bottom {
-      flex: 0 0 50vh;
-      background: #141412;
+    .nav-bar {
+      flex: 0 0 auto;
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-evenly;
-      padding: 6px 5% 4px;
+      background: #0e0e0c;
+      border-top: 1px solid #2a2a28;
     }
-
-    /* D-pad + A/B row */
-    .controls-main-row {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 4%;
+    .nav-rect-btn {
+      flex: 1;
+      padding: 10px 2px;
+      background: transparent;
+      border: none;
+      border-right: 1px solid #2a2a28;
+      color: #8a7d5a;
+      font-size: 15px;
+      font-weight: bold;
+      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans JP", sans-serif;
+      cursor: pointer;
+      text-align: center;
+      line-height: 1.25;
+      transition: background 0.08s, color 0.08s;
+      white-space: normal;
+      word-break: keep-all;
     }
-
-    /* D-pad */
-    .dpad { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-    .dpad-row { display: flex; align-items: center; gap: 4px; }
-    .dp {
-      width: 46px; height: 46px;
-      background-color: #1a1a18;
-      border: none; border-radius: 7px; color: #4a4a48; font-size: 13px;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
-      transition: transform 0.08s;
-    }
-    .dp:hover { background-color: #222220; }
-    .dp:active { transform: translateY(1px); box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
-    .dp-center { border-radius: 4px; }
-
-    /* A/B buttons */
-    .ab-area { display: flex; gap: 18px; padding: 8px 14px; border-radius: 22px; background: rgba(26,26,20,0.6); }
-    .ab-btn {
-      width: 56px; height: 56px; border-radius: 50%;
-      background: linear-gradient(160deg, #222220, #151513);
-      border: none; color: #2d8a2d; font-size: 18px; font-weight: 900;
-      font-family: "Courier New", monospace; cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
-      transition: transform 0.08s; display: flex; align-items: center; justify-content: center;
-    }
-    .ab-btn:hover { background: #252523; }
-    .ab-btn:active { transform: translateY(2px); box-shadow: 0 1px 4px rgba(0,0,0,0.6); }
-    .ab-btn-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-    .ab-label { font-size: 9px; color: #8a7d5a; text-align: center; min-height: 12px; letter-spacing: -0.01em; }
-
-    /* Nav section */
-    .nav-section { width: 100%; }
-    .nav-labels { display: flex; justify-content: space-around; font-size: 15px; font-weight: bold; color: #8a7d5a; letter-spacing: -0.02em; }
-    .nav-btns { display: flex; justify-content: space-around; align-items: center; margin-top: 4px; }
-    .nav-btn {
-      width: 51px; height: 51px; border-radius: 50%;
-      background: linear-gradient(160deg, #222220, #151513);
-      border: none; cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05);
-      display: flex; align-items: center; justify-content: center; transition: transform 0.08s;
-    }
-    .nav-btn:hover { background: #252523; }
-    .nav-btn:active { transform: translateY(2px); box-shadow: 0 1px 4px rgba(0,0,0,0.5); }
-    .nav-btn svg { width: 22px; height: 22px; }
+    .nav-rect-btn:last-child { border-right: none; }
+    .nav-rect-btn:hover { background: #1a1a18; }
+    .nav-rect-btn:active { background: #252522; color: #b0a070; }
 
   </style>
 </head>
@@ -292,7 +240,7 @@
   <div class="hud hud-hidden" id="hud">
     <div class="hud-left" id="hudRaceName"></div>
     <div class="hud-right">
-      <div class="hud-bankroll">所持金 <b><span id="hudBankroll">0</span>円</b></div>
+      <div class="hud-bankroll">所持金 <span id="hudBankroll">0</span>円</div>
       <div class="hud-tickets" id="hudTickets"></div>
     </div>
   </div>
@@ -306,7 +254,7 @@
   <div id="screenRealTitle" class="ls hidden">
     <img class="lcd-title-img" src="data/horce.png" alt="">
     <div class="lcd-game-title">Horse racing</div>
-    <div class="lcd-hint">画面をタッチ または A ボタン</div>
+    <div class="lcd-hint">画面をタッチ または レース開始 ボタン</div>
   </div>
 
   <!-- プロローグ -->
@@ -326,10 +274,7 @@
       </div>
       <div class="buy-bankroll">所持金 <b><span id="bankrollLabel">0</span>円</b></div>
     </div>
-
     <div class="ls-scroll" id="buyScroll">
-
-      <!-- 単勝エリア（馬単タブ） -->
       <div id="areaTanshoku">
         <div id="tanshokuList"></div>
         <div class="buy-sel-label" id="selLabelTan">馬を選んでください</div>
@@ -339,8 +284,6 @@
         </div>
         <div class="lcd-amt-btns" id="amtBarTan"></div>
       </div>
-
-      <!-- 馬連エリア -->
       <div id="areaQuinella" style="display:none">
         <div id="quinList1"></div>
         <div class="buy-sel-label" id="quinStep">1着の馬を決める</div>
@@ -350,26 +293,20 @@
         </div>
         <div class="lcd-amt-btns" id="amtBarQu"></div>
       </div>
-
-      <!-- カート -->
       <div class="buy-cart-section">
         <div class="buy-cart-header">カート</div>
         <div class="lcd-hint" id="limitHint"></div>
         <table class="lcd-table">
-          <thead>
-            <tr><th>券種</th><th>買い目</th><th>倍</th><th>金額</th><th>想定払戻</th></tr>
-          </thead>
+          <thead><tr><th>券種</th><th>買い目</th><th>倍</th><th>金額</th><th>想定払戻</th></tr></thead>
           <tbody id="cartRows"></tbody>
         </table>
       </div>
     </div>
-
     <div class="ls-foot">
       <button class="lcd-btn-sm" id="btnShinbun">新聞</button>
       <button class="lcd-btn-sm danger" id="btnCancelCart">取消</button>
       <button class="lcd-btn-sm primary" id="btnConfirm">決定</button>
     </div>
-
   </div>
 
   <!-- 動画 -->
@@ -379,7 +316,6 @@
       <span>▶ タップして再生</span>
       <span id="videoDebug" style="font-size:10px;color:#fa0;max-width:90%;word-break:break-all;text-align:center"></span>
     </div>
-    <div id="volIndicator" style="position:absolute;bottom:36px;right:8px;display:flex;flex-direction:column-reverse;gap:2px;opacity:0;transition:opacity 0.3s"></div>
   </div>
 
   <!-- 清算 -->
@@ -387,9 +323,7 @@
     <div class="pro-title" id="settleSub">清算</div>
     <div class="ls-scroll">
       <table class="lcd-table">
-        <thead>
-          <tr><th>券種</th><th>買い目</th><th>倍</th><th>金額</th><th>想定払戻</th></tr>
-        </thead>
+        <thead><tr><th>券種</th><th>買い目</th><th>倍</th><th>金額</th><th>想定払戻</th></tr></thead>
         <tbody id="settleRows"></tbody>
       </table>
       <div style="padding:6px 0 2px">
@@ -403,8 +337,7 @@
       </div>
     </div>
     <div id="actionsNormal" style="display:none"></div>
-    <div id="actionsZero" style="display:none">
-    </div>
+    <div id="actionsZero" style="display:none"></div>
   </div>
 
   <!-- ゲームオーバー -->
@@ -437,80 +370,14 @@
 
 </div><!-- /.game-area -->
 
-<!-- ========== CONTROLS (下半分) ========== -->
-<div class="controls-bottom">
-
-  <!-- D-pad + A/B row -->
-  <div class="controls-main-row">
-    <div class="dpad">
-      <button class="dp" id="dpUp">▲</button>
-      <div class="dpad-row">
-        <button class="dp" id="dpLeft">◀</button>
-        <button class="dp dp-center" id="dpCenter"></button>
-        <button class="dp" id="dpRight">▶</button>
-      </div>
-      <button class="dp" id="dpDown">▼</button>
-    </div>
-
-    <div class="ab-area">
-      <div class="ab-btn-wrap">
-        <div class="ab-label" id="labelB"></div>
-        <button class="ab-btn" id="btnB">B</button>
-      </div>
-      <div class="ab-btn-wrap">
-        <div class="ab-label" id="labelA"></div>
-        <button class="ab-btn" id="btnA">A</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Nav section -->
-  <div class="nav-section">
-    <div class="nav-labels">
-      <span>メニュー</span>
-      <span>新聞</span>
-      <span>出走表</span>
-      <span>馬券</span>
-      <span>レース開始</span>
-    </div>
-    <div class="nav-btns">
-      <button class="nav-btn" id="navToggle" title="メニュー">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#2d8a2d" stroke-width="2.2" stroke-linecap="round">
-          <line x1="4" y1="7" x2="20" y2="7"/>
-          <line x1="4" y1="12" x2="20" y2="12"/>
-          <line x1="4" y1="17" x2="20" y2="17"/>
-        </svg>
-      </button>
-      <button class="nav-btn" id="navInfo" title="新聞">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#2d8a2d" stroke-width="2" stroke-linecap="round">
-          <rect x="3" y="4" width="18" height="17" rx="2"/>
-          <line x1="7" y1="9" x2="17" y2="9"/>
-          <line x1="7" y1="13" x2="17" y2="13"/>
-          <line x1="7" y1="17" x2="13" y2="17"/>
-        </svg>
-      </button>
-      <button class="nav-btn" id="navOdds" title="出走表">
-        <svg viewBox="0 0 24 24" fill="#2d8a2d">
-          <rect x="3" y="14" width="4" height="7"/>
-          <rect x="10" y="9" width="4" height="12"/>
-          <rect x="17" y="4" width="4" height="17"/>
-        </svg>
-      </button>
-      <button class="nav-btn" id="navBet" title="馬券">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#2d8a2d" stroke-width="2.2" stroke-linecap="round">
-          <rect x="3" y="6" width="18" height="12" rx="2"/>
-          <line x1="9" y1="6" x2="9" y2="18"/>
-          <line x1="9" y1="10" x2="15" y2="10"/>
-          <line x1="9" y1="14" x2="15" y2="14"/>
-        </svg>
-      </button>
-      <button class="nav-btn" id="navStart" title="レース開始">
-        <svg viewBox="0 0 24 24" fill="#2d8a2d"><polygon points="7,4 7,20 20,12"/></svg>
-      </button>
-    </div>
-  </div>
-
-</div><!-- /.controls-bottom -->
+<!-- ========== NAV BAR ========== -->
+<div class="nav-bar">
+  <button class="nav-rect-btn" id="navToggle">メニュー</button>
+  <button class="nav-rect-btn" id="navInfo">新聞</button>
+  <button class="nav-rect-btn" id="navOdds">出走表</button>
+  <button class="nav-rect-btn" id="navBet">馬券購入</button>
+  <button class="nav-rect-btn" id="navStart">レース開始</button>
+</div>
 
 <script>
 (async () => {
@@ -538,7 +405,7 @@
 
   const ALL_SCREENS = ["#screenLoading","#screenRealTitle","#screenPrologue","#screenBuy","#screenVideo","#screenSettlement","#screenGameOver","#screenRate","#screenOdds","#screenShinbun"];
   function hideAllScreens(){ ALL_SCREENS.forEach(id=>$(id).classList.add("hidden")); }
-  function showScreen(id){ hideAllScreens(); $(id).classList.remove("hidden"); updateABLabels(); updateHUD(); }
+  function showScreen(id){ hideAllScreens(); $(id).classList.remove("hidden"); updateHUD(); }
   function activeScreen(){ return ALL_SCREENS.find(s=>!$(s).classList.contains("hidden")); }
 
   // ---- CSV ----
@@ -649,33 +516,11 @@
   const {EPISODES,totalEpisodes,startBankroll,goalBankroll}=await loadAllRaces();
 
   let episode=1, bankroll=startBankroll, episodeStartBankroll=startBankroll;
-  let mode="tanshoku", selectedHead=null, selectedTail=null, selectedQu1=null, selectedQu2=null, selectedTan=null;
+  let mode="tanshoku", selectedQu1=null, selectedQu2=null, selectedTan=null;
   let cart=[], settledEpisode=1, taikoTimer=null;
-  let dpFocusEl=null, oddsReturnScreen="#screenPrologue";
+  let oddsReturnScreen="#screenPrologue";
 
-  // ---- D-pad cell focus ----
-  function dpGetBtns(){
-    if($("#screenBuy").classList.contains("hidden")) return [];
-    if(mode==="tanshoku") return [...$("#tanshokuList").querySelectorAll(".horse-row")];
-    return [...$("#quinList1").querySelectorAll(".horse-row")];
-  }
-  function dpSet(el){
-    if(dpFocusEl) dpFocusEl.classList.remove("dpad-focus");
-    dpFocusEl=el;
-    if(el){ el.classList.add("dpad-focus"); el.scrollIntoView({block:"nearest",behavior:"smooth"}); }
-  }
-  function dpClear(){ dpSet(null); }
-  function dpMove(dr,dc){
-    const btns=dpGetBtns();
-    if(!btns.length){ dpClear(); return; }
-    let i=dpFocusEl?btns.indexOf(dpFocusEl):-1;
-    if(i===-1){ dpSet(btns[0]); return; }
-    const cols=mode==="tanshoku"?1:7;
-    const next=i+dc+dr*cols;
-    dpSet(btns[Math.max(0,Math.min(btns.length-1,next))]);
-  }
-
-  // ---- 出走表 screen ----
+  // ---- 出走表 ----
   function showOdds(){
     const ep=EPISODES[episode];
     if(!ep) return;
@@ -725,7 +570,6 @@
     tabQuinella.classList.toggle("active",mode==="quinella");
     areaTanshoku.style.display=mode==="tanshoku"?"":"none";
     areaQuinella.style.display=mode==="quinella"?"":"none";
-    dpClear();
     highlightSelections();
   }
   tabExacta.addEventListener("click",()=>setMode("tanshoku"));
@@ -794,7 +638,7 @@
           const sel1=ep.horseList.find(x=>x.num===selectedQu1);
           $("#quinStep").textContent=`${sel1?.name||selectedQu1} ↔ ${h.name}`;
         }
-        dpClear(); renderQuinellaList(); highlightSelections(); limitHint.textContent="";
+        renderQuinellaList(); highlightSelections(); limitHint.textContent="";
       }, false));
     });
   }
@@ -845,14 +689,13 @@
     limitHint.textContent=""; cart.push(item); play(seCart); renderCart();
   }
   function resetBuyState(){
-    mode="tanshoku"; selectedHead=selectedTail=selectedQu1=selectedQu2=selectedTan=null;
+    mode="tanshoku"; selectedQu1=selectedQu2=selectedTan=null;
     cart=[]; selectedCartIdx=-1; limitHint.textContent=""; stakeTan.value="0"; stakeQu.value="0";
-    dpClear(); setMode("tanshoku");
+    setMode("tanshoku");
   }
 
   function showBuy(){
     showScreen("#screenBuy");
-    const ep=EPISODES[episode];
     episodeStartBankroll=bankroll;
     bankrollLabel.textContent=yen(episodeStartBankroll);
     resetBuyState();
@@ -1010,11 +853,6 @@
       settleImg.style.display="none"; settleImg.src="";
     }
     play(seMoney); scheduleTaikoIfPlus(isPlus);
-    if(finalMoney<=0){
-      $("#actionsNormal").style.display="none"; $("#actionsZero").style.display="";
-    } else {
-      $("#actionsNormal").style.display=""; $("#actionsZero").style.display="none";
-    }
     updateHUD();
   }
 
@@ -1032,144 +870,6 @@
     if(settledEpisode<totalEpisodes){ episode=settledEpisode+1; showPrologue(); }
     else showRate();
   }
-
-  // ---- D-pad ----
-  function scrollLcd(dir){
-    const active=activeScreen();
-    const el=active==="#screenBuy"?$("#buyScroll"):$(active)?.querySelector(".ls-scroll");
-    if(el) el.scrollBy({top:dir*50,behavior:"smooth"});
-  }
-  const volIndicator=$("#volIndicator");
-  (()=>{
-    for(let i=0;i<10;i++){
-      const b=document.createElement("div");
-      b.style.cssText="width:25px;height:4px;background:#fff;border-radius:1px;opacity:0.2;";
-      volIndicator.appendChild(b);
-    }
-  })();
-  let volHideTimer=null;
-  function showVolIndicator(vol){
-    const bars=volIndicator.children;
-    const filled=Math.round(vol*10);
-    for(let i=0;i<10;i++) bars[i].style.opacity=(i<filled)?"1":"0.2";
-    volIndicator.style.opacity="1";
-    clearTimeout(volHideTimer);
-    volHideTimer=setTimeout(()=>{ volIndicator.style.opacity="0"; },1200);
-  }
-  $("#dpUp").addEventListener("click",()=>{
-    if(!$("#screenVideo").classList.contains("hidden")){
-      raceVideo.volume=Math.min(1, Math.round((raceVideo.volume+0.1)*10)/10);
-      showVolIndicator(raceVideo.volume); return;
-    }
-    if(!$("#screenBuy").classList.contains("hidden")) dpMove(-1,0);
-    else scrollLcd(-1);
-  });
-  $("#dpDown").addEventListener("click",()=>{
-    if(!$("#screenVideo").classList.contains("hidden")){
-      raceVideo.volume=Math.max(0, Math.round((raceVideo.volume-0.1)*10)/10);
-      showVolIndicator(raceVideo.volume); return;
-    }
-    if(!$("#screenBuy").classList.contains("hidden")) dpMove(1,0);
-    else scrollLcd(1);
-  });
-  $("#dpLeft").addEventListener("click",()=>{
-    if(!$("#screenVideo").classList.contains("hidden")){
-      raceVideo.currentTime=Math.max(0, raceVideo.currentTime-10); return;
-    }
-    if(!$("#screenBuy").classList.contains("hidden")) dpMove(0,-1);
-  });
-  $("#dpRight").addEventListener("click",()=>{
-    if(!$("#screenVideo").classList.contains("hidden")){
-      raceVideo.currentTime=Math.min(raceVideo.duration||Infinity, raceVideo.currentTime+10); return;
-    }
-    if(!$("#screenBuy").classList.contains("hidden")) dpMove(0,1);
-  });
-  $("#dpCenter").addEventListener("click",()=>{ $("#btnA").click(); });
-
-  // ---- A ボタン ----
-  $("#btnA").addEventListener("click",()=>{
-    if(dpFocusEl && !$("#screenBuy").classList.contains("hidden")){
-      dpFocusEl.click(); return;
-    }
-    const active=activeScreen();
-    if(active==="#screenRealTitle"){ play(seChoice); showPrologue(); }
-    else if(active==="#screenPrologue"){ play(seChoice); showBuy(); }
-    else if(active==="#screenBuy") confirmBet();
-    else if(active==="#screenVideo"){
-      if(raceVideo.paused||raceVideo.ended) raceVideo.play().catch(()=>{});
-      else raceVideo.pause();
-      updateABLabels();
-    }
-    else if(active==="#screenSettlement") advanceFromSettlement();
-    else if(active==="#screenOdds"){ play(seChoice); showScreen(oddsReturnScreen); }
-  });
-
-  // ---- B ボタン ----
-  $("#btnB").addEventListener("click",()=>{
-    const active=activeScreen();
-    if(active==="#screenVideo"){ play(seChoice); try{raceVideo.pause(); raceVideo.src="";}catch{} clearTaikoTimers(); showSettlement(); return; }
-    if(active==="#screenOdds"){ play(seChoice); showScreen(oddsReturnScreen); return; }
-    if(active==="#screenShinbun"){ play(seChoice); showScreen(shinbunReturnScreen); return; }
-    if(active==="#screenBuy"){
-      play(seChoice);
-      if(mode==="tanshoku"){
-        if(selectedTan){ selectedTan=null; highlightSelections(); return; }
-      } else {
-        if(selectedQu2){ selectedQu2=null; highlightSelections(); return; }
-        if(selectedQu1){ selectedQu1=null; selectedQu2=null; $("#quinStep").textContent="1着の馬を決める"; dpClear(); renderQuinellaList(); highlightSelections(); return; }
-      }
-      showPrologue(); return;
-    }
-  });
-
-  // ---- Bottom nav ----
-  $("#navStart").addEventListener("click",()=>{
-    const active=activeScreen();
-    if(active==="#screenRealTitle"){ play(seChoice); showPrologue(); }
-    else if(active==="#screenPrologue"){ play(seChoice); showBuy(); }
-    else if(active==="#screenBuy") startRaceFromBuy();
-    else if(active==="#screenSettlement") advanceFromSettlement();
-  });
-
-  $("#navOdds").addEventListener("click",()=>{
-    const active=activeScreen();
-    if(active==="#screenOdds"){ play(seChoice); showScreen(oddsReturnScreen); return; }
-    play(seChoice); showOdds();
-  });
-
-  $("#navBet").addEventListener("click",()=>{
-    const active=activeScreen();
-    if(active==="#screenBuy") return;
-    if(active==="#screenVideo") return;
-    play(seChoice);
-    if(active==="#screenSettlement"){
-      if(settledEpisode<totalEpisodes){ episode=settledEpisode+1; showBuy(); }
-      return;
-    }
-    showBuy();
-  });
-
-  let shinbunReturnScreen="#screenPrologue";
-  function showShinbun(){
-    if(bankroll<1000){ return; }
-    play(seChoice);
-    shinbunReturnScreen=activeScreen()||"#screenPrologue";
-    const id=EPISODES[episode]?.id||String(episode).padStart(2,"0");
-    fetch(`game/${id}/新聞.txt`).then(r=>r.ok?r.text():"").catch(()=>"").then(text=>{
-      const content=document.getElementById("shinbunContent");
-      if(!content) return;
-      if(!text.trim()){ content.textContent="（このレースの新聞はありません）"; }
-      else{
-        bankroll-=1000;
-        episodeStartBankroll=Math.min(episodeStartBankroll,bankroll);
-        bankrollLabel.textContent=yen(episodeStartBankroll); refreshTotals();
-        content.textContent=text.trim();
-      }
-      showScreen("#screenShinbun");
-    });
-  }
-  $("#navInfo").addEventListener("click",showShinbun);
-  $("#navToggle").addEventListener("click",()=>{ /* メニュー：未実装 */ });
 
   // ---- マウスドラッグスクロール ----
   function enableDragScroll(el){
@@ -1190,6 +890,63 @@
   }
   document.querySelectorAll(".ls-scroll").forEach(enableDragScroll);
 
+  // ---- Nav buttons ----
+  let shinbunReturnScreen="#screenPrologue";
+
+  function showShinbun(){
+    if(bankroll<1000){ return; }
+    play(seChoice);
+    shinbunReturnScreen=activeScreen()||"#screenPrologue";
+    const id=EPISODES[episode]?.id||String(episode).padStart(2,"0");
+    fetch(`game/${id}/新聞.txt`).then(r=>r.ok?r.text():"").catch(()=>"").then(text=>{
+      const content=document.getElementById("shinbunContent");
+      if(!content) return;
+      if(!text.trim()){ content.textContent="（このレースの新聞はありません）"; }
+      else{
+        bankroll-=1000;
+        episodeStartBankroll=Math.min(episodeStartBankroll,bankroll);
+        bankrollLabel.textContent=yen(episodeStartBankroll); refreshTotals();
+        content.textContent=text.trim();
+      }
+      showScreen("#screenShinbun");
+    });
+  }
+
+  $("#navToggle").addEventListener("click",()=>{ /* メニュー：未実装 */ });
+
+  $("#navInfo").addEventListener("click",()=>{
+    const active=activeScreen();
+    if(active==="#screenShinbun"){ play(seChoice); showScreen(shinbunReturnScreen); return; }
+    showShinbun();
+  });
+
+  $("#navOdds").addEventListener("click",()=>{
+    const active=activeScreen();
+    if(active==="#screenOdds"){ play(seChoice); showScreen(oddsReturnScreen); return; }
+    play(seChoice); showOdds();
+  });
+
+  $("#navBet").addEventListener("click",()=>{
+    const active=activeScreen();
+    if(active==="#screenBuy") return;
+    if(active==="#screenVideo") return;
+    play(seChoice);
+    if(active==="#screenSettlement"){
+      if(settledEpisode<totalEpisodes){ episode=settledEpisode+1; showBuy(); }
+      return;
+    }
+    showBuy();
+  });
+
+  $("#navStart").addEventListener("click",()=>{
+    const active=activeScreen();
+    if(active==="#screenRealTitle"){ play(seChoice); showPrologue(); }
+    else if(active==="#screenPrologue"){ play(seChoice); showBuy(); }
+    else if(active==="#screenBuy") startRaceFromBuy();
+    else if(active==="#screenVideo"){ play(seChoice); try{raceVideo.pause(); raceVideo.src="";}catch{} clearTaikoTimers(); showSettlement(); }
+    else if(active==="#screenSettlement") advanceFromSettlement();
+  });
+
   // ---- HUD ----
   function updateHUD(){
     const active=activeScreen();
@@ -1199,26 +956,10 @@
     hudEl.classList.toggle("hud-hidden", noHud);
     if(noHud) return;
     const ep=EPISODES[episode];
-    document.getElementById("hudRaceName").textContent=ep?`第${episode}レース ${ep.title}`:"";
+    document.getElementById("hudRaceName").textContent=ep?`第${episode}レース　${ep.title}`:"";
     document.getElementById("hudBankroll").textContent=yen(bankroll);
     const hudTickets=document.getElementById("hudTickets");
-    if(cart.length===0){
-      hudTickets.textContent="";
-    } else {
-      hudTickets.innerHTML=cart.map(c=>`<div>${c.type} ${c.label} ¥${yen(c.stake)}</div>`).join("");
-    }
-  }
-
-  // ---- A/B labels ----
-  function updateABLabels(){
-    const active=activeScreen();
-    const isPaused=raceVideo.paused||raceVideo.ended||raceVideo.readyState===0;
-    const aMap={"#screenRealTitle":"開始","#screenPrologue":"馬券購入","#screenBuy":"決定","#screenVideo":isPaused?"再生":"一時停止","#screenSettlement":"次へ","#screenOdds":"閉じる","#screenShinbun":"","#screenGameOver":"","#screenRate":"","#screenLoading":""};
-    const bMap={"#screenRealTitle":"","#screenPrologue":"","#screenBuy":"選択解除","#screenVideo":"スキップ","#screenSettlement":"","#screenOdds":"閉じる","#screenShinbun":"閉じる","#screenGameOver":"","#screenRate":"","#screenLoading":""};
-    const la=document.getElementById("labelA");
-    const lb=document.getElementById("labelB");
-    if(la) la.textContent=aMap[active]??"";
-    if(lb) lb.textContent=bMap[active]??"";
+    hudTickets.innerHTML=cart.length===0?"":cart.map(c=>`<div>${c.type} ${c.label} ¥${yen(c.stake)}</div>`).join("");
   }
 
   openRealTitle();
