@@ -187,7 +187,7 @@
     .lcd-hint { font-size: 9px; color: #555; padding: 2px 0; }
     .lcd-danger { color: #f77; font-size: 9px; }
 
-    .lcd-video { width: 100%; display: block; background: #000; flex: 1; object-fit: contain; }
+    .lcd-video { width: 100%; display: block; background: #000; flex: 1; min-height: 0; object-fit: contain; }
 
     .video-controls {
       flex: 0 0 54px;
@@ -1048,7 +1048,7 @@
   function enableDragScroll(el){
     let down=false, sy=0, st=0;
     el.addEventListener("pointerdown",e=>{
-      if(e.target.closest(".horse-row,button,a,input,select")) return;
+      if(e.target.closest(".horse-row,button,a,input,select,td,th")) return;
       down=true; sy=e.clientY; st=el.scrollTop;
       el.setPointerCapture(e.pointerId);
       el.style.cursor="grabbing";
@@ -1091,7 +1091,7 @@
     play(seChoice);
     episode=epNum; bankroll=money;
     shinbunPaid.clear();
-    showBuy(true);
+    showPrologue();
   });
 
   function showShinbun(){
