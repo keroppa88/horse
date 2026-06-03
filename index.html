@@ -1104,6 +1104,7 @@
     play(seChoice);
     episode=epNum; bankroll=money;
     shinbunPaid.clear();
+    purchasedTickets=[];
     showPrologue();
   });
 
@@ -1159,6 +1160,7 @@
       if(settledEpisode<totalEpisodes){ episode=settledEpisode+1; showBuy(true); }
       return;
     }
+    if(active==="#screenPrologue"){ showBuy(true); return; }
     showBuy();
   });
 
