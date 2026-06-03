@@ -241,7 +241,6 @@
     <div class="hud-left" id="hudRaceName"></div>
     <div class="hud-right">
       <div class="hud-bankroll">所持金 <span id="hudBankroll">0</span>円</div>
-      <div class="hud-tickets" id="hudTickets"></div>
     </div>
   </div>
 
@@ -303,7 +302,7 @@
       </div>
     </div>
     <div class="ls-foot">
-      <button class="lcd-btn-sm" id="btnShinbun">新聞</button>
+      <button class="lcd-btn-sm" id="btnViewCart">購入済馬券</button>
       <button class="lcd-btn-sm danger" id="btnCancelCart">取消</button>
       <button class="lcd-btn-sm primary" id="btnConfirm">決定</button>
     </div>
@@ -731,7 +730,11 @@
     if(selectedCartIdx<0){ limitHint.innerHTML=`<span class="lcd-danger">取消す馬券を選んでください</span>`; return; }
     play(seChoice); cart.splice(selectedCartIdx,1); selectedCartIdx=-1; limitHint.textContent=""; renderCart();
   });
-  $("#btnShinbun").addEventListener("click",showShinbun);
+  $("#btnViewCart").addEventListener("click",()=>{
+    play(seChoice);
+    const cartSection=document.querySelector(".buy-cart-section");
+    if(cartSection) cartSection.scrollIntoView({behavior:"smooth", block:"start"});
+  });
 
   // ---- Video ----
   const raceVideo=$("#raceVideo");
@@ -961,8 +964,6 @@
     document.getElementById("hudRaceName").textContent=ep?`${dateStr}　${ep.title}`:"";
 
     document.getElementById("hudBankroll").textContent=yen(bankroll);
-    const hudTickets=document.getElementById("hudTickets");
-    hudTickets.innerHTML=cart.length===0?"":cart.map(c=>`<div>${c.type} ${c.label} ¥${yen(c.stake)}</div>`).join("");
   }
 
   openRealTitle();
