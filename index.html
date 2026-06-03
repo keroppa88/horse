@@ -21,29 +21,39 @@
        TOP BAR (常時表示)
     ===================== */
     .top-bar {
-      flex: 0 0 58px;
+      flex: 0 0 auto;
+      min-height: 44px;
       background: #0a0a0a;
       border-bottom: 1px solid #252523;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 14px;
+      padding: 4px 14px;
+      flex-wrap: wrap;
+      row-gap: 1px;
     }
     .top-race-name {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
       color: #ccc;
-      max-width: 58%;
+      flex: 1;
+      min-width: 0;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .top-bankroll {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
       color: #fff;
-      text-align: right;
       white-space: nowrap;
+      flex-shrink: 0;
+      margin-left: 10px;
+    }
+    @media (max-width: 420px) {
+      .top-bar { padding: 4px 14px 3px; }
+      .top-race-name { flex: 0 0 100%; }
+      .top-bankroll { margin-left: auto; }
     }
 
     /* =====================
@@ -113,6 +123,20 @@
 
     #screenPrologue .ls-scroll { padding-left: 0; padding-right: 0; }
     #screenPrologue .pro-body { font-size: 17px; padding: 0 8px; }
+    .pro-foot { flex-shrink: 0; display: flex; justify-content: center; padding: 12px 14px 10px; }
+    .pro-start-btn {
+      background: #b0900a;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 22px;
+      font-weight: bold;
+      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans JP", sans-serif;
+      padding: 12px 48px;
+      cursor: pointer;
+      letter-spacing: 4px;
+    }
+    .pro-start-btn:active { background: #8a6e08; }
 
     /* ---- メニュー画面 ---- */
     .menu-section { padding: 18px 14px; border-bottom: 1px solid #2a2a28; }
@@ -338,6 +362,9 @@
     <img id="proImage" src="" alt="" style="width:100%;max-height:55%;display:none;object-fit:contain;flex-shrink:0;">
     <div class="ls-scroll" id="proScroll">
       <div class="pro-body" id="proText"></div>
+    </div>
+    <div class="pro-foot">
+      <button class="pro-start-btn" id="btnProStart">レース開始</button>
     </div>
   </div>
 
@@ -627,12 +654,13 @@
     if(active==="#screenRealTitle"||active==="#screenLoading"){
       document.getElementById("topRaceName").textContent="";
       document.getElementById("topBankroll").textContent="";
-      return;
+    } else {
+      const ep=EPISODES[episode];
+      const dateStr=RACE_DATES[episode]||"";
+      document.getElementById("topRaceName").textContent=ep?`${dateStr}　${ep.title}`:"";
+      document.getElementById("topBankroll").textContent=ep?`所持金 ${yen(bankroll)}円`:"";
     }
-    const ep=EPISODES[episode];
-    const dateStr=RACE_DATES[episode]||"";
-    document.getElementById("topRaceName").textContent=ep?`${dateStr}　${ep.title}`:"";
-    document.getElementById("topBankroll").textContent=ep?`所持金 ${yen(bankroll)}円`:"";
+    $("#navStart").textContent=active==="#screenSettlement"?"次へ":"レース開始";
   }
 
   // ---- 出走表 ----
@@ -955,8 +983,7 @@
     renderCart();
     limitHint.innerHTML=`<span style="color:#2a8a2a">購入しました（${yen(sum)}円）</span>`;
   }
-  function startRaceFromBuy(){
-    if(purchasedTickets.length===0){limitHint.innerHTML=`<span class="lcd-danger">馬券がありません（決定ボタンで購入してください）</span>`;return;}
+  function startRace(){
     play(seChoice); showScreen("#screenVideo");
     bgmStop();
     const ep=EPISODES[episode];
@@ -965,6 +992,10 @@
     raceVideo.src=ep.videoPath;
     raceVideo.play().then(()=>{ overlay.style.display="none"; })
       .catch(err=>{ showVideoOverlay(`${err.name}: ${err.message}\nsrc=${raceVideo.currentSrc||raceVideo.src} rs=${raceVideo.readyState}`); });
+  }
+  function startRaceFromBuy(){
+    if(purchasedTickets.length===0){limitHint.innerHTML=`<span class="lcd-danger">馬券がありません（決定ボタンで購入してください）</span>`;return;}
+    startRace();
   }
   btnConfirm.addEventListener("click",confirmBet);
 
@@ -1167,11 +1198,13 @@
   $("#navStart").addEventListener("click",()=>{
     const active=activeScreen();
     if(active==="#screenRealTitle"){ play(seChoice); showPrologue(); }
-    else if(active==="#screenPrologue"){ play(seChoice); showBuy(true); }
+    else if(active==="#screenPrologue") startRace();
     else if(active==="#screenBuy") startRaceFromBuy();
     else if(active==="#screenVideo"){ play(seChoice); try{raceVideo.pause(); raceVideo.src="";}catch{} clearTaikoTimers(); showSettlement(); }
     else if(active==="#screenSettlement") advanceFromSettlement();
   });
+
+  $("#btnProStart").addEventListener("click", startRace);
 
   openRealTitle();
   bindRealTitleStart();
