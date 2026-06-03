@@ -859,7 +859,7 @@
   // ---- Video controls ----
   const btnVidPlayPause=$("#btnVidPlayPause");
   function syncPlayPauseBtn(){
-    btnVidPlayPause.textContent=raceVideo.paused||raceVideo.ended?"▶":"⏸";
+    btnVidPlayPause.textContent=raceVideo.paused||raceVideo.ended?"▶":"停止";
   }
   raceVideo.addEventListener("play", syncPlayPauseBtn);
   raceVideo.addEventListener("pause", syncPlayPauseBtn);
