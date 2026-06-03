@@ -390,13 +390,11 @@
 
   <!-- 出走表 -->
   <div id="screenOdds" class="ls hidden">
-    <div class="pro-title" id="oddsTitle">出走表</div>
     <iframe id="oddsFrame" sandbox="allow-same-origin allow-scripts"></iframe>
   </div>
 
   <!-- 新聞 -->
   <div id="screenShinbun" class="ls hidden" style="background:#fff;color:#111">
-    <div class="pro-title" style="background:#fff;color:#111;border-bottom:2px solid #333">新聞</div>
     <div class="ls-scroll" style="background:#fff">
       <div id="shinbunContent" style="white-space:pre-wrap;font-size:16px;line-height:1.8;color:#111;padding:4px 0"></div>
     </div>
@@ -567,7 +565,6 @@
     if(!ep) return;
     oddsReturnScreen=activeScreen()||"#screenPrologue";
     showScreen("#screenOdds");
-    $("#oddsTitle").textContent=ep.title+"　出走表";
     const frame=$("#oddsFrame");
     frame.srcdoc=ep.entryHtml||"<html><body><p>（出走表なし）</p></body></html>";
   }
@@ -729,13 +726,13 @@
   }
   function resetBuyState(){
     mode="tanshoku"; selectedQu1=selectedQu2=selectedTan=null;
-    cart=[]; purchasedTickets=[]; selectedCartIdx=-1; limitHint.textContent=""; stakeTan.value="0"; stakeQu.value="0";
+    cart=[]; selectedCartIdx=-1; limitHint.textContent=""; stakeTan.value="0"; stakeQu.value="0";
     setMode("tanshoku");
   }
 
-  function showBuy(){
+  function showBuy(isNewEpisode=false){
     showScreen("#screenBuy");
-    episodeStartBankroll=bankroll;
+    if(isNewEpisode){ purchasedTickets=[]; episodeStartBankroll=bankroll; }
     bankrollLabel.textContent=yen(bankroll);
     resetBuyState();
     renderTanshokuList(); renderQuinellaList();
@@ -997,7 +994,7 @@
     if(active==="#screenVideo") return;
     play(seChoice);
     if(active==="#screenSettlement"){
-      if(settledEpisode<totalEpisodes){ episode=settledEpisode+1; showBuy(); }
+      if(settledEpisode<totalEpisodes){ episode=settledEpisode+1; showBuy(true); }
       return;
     }
     showBuy();
@@ -1006,7 +1003,7 @@
   $("#navStart").addEventListener("click",()=>{
     const active=activeScreen();
     if(active==="#screenRealTitle"){ play(seChoice); showPrologue(); }
-    else if(active==="#screenPrologue"){ play(seChoice); showBuy(); }
+    else if(active==="#screenPrologue"){ play(seChoice); showBuy(true); }
     else if(active==="#screenBuy") startRaceFromBuy();
     else if(active==="#screenVideo"){ play(seChoice); try{raceVideo.pause(); raceVideo.src="";}catch{} clearTaikoTimers(); showSettlement(); }
     else if(active==="#screenSettlement") advanceFromSettlement();
