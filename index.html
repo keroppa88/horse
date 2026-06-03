@@ -18,6 +18,35 @@
     }
 
     /* =====================
+       TOP BAR (常時表示)
+    ===================== */
+    .top-bar {
+      flex: 0 0 58px;
+      background: #0a0a0a;
+      border-bottom: 1px solid #252523;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+    }
+    .top-race-name {
+      font-size: 18px;
+      font-weight: bold;
+      color: #ccc;
+      max-width: 58%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .top-bankroll {
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    /* =====================
        GAME AREA
     ===================== */
     .game-area {
@@ -28,30 +57,6 @@
       min-height: 0;
       box-shadow: inset 0 0 28px rgba(0,0,0,0.9);
     }
-
-    /* ---- HUD overlay ---- */
-    .hud {
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding: 7px 12px;
-      z-index: 20;
-      pointer-events: none;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, transparent 100%);
-    }
-    .hud.hud-hidden { display: none; }
-    .hud-left {
-      font-size: 18px;
-      font-weight: bold;
-      color: #ccc;
-      max-width: 55%;
-      line-height: 1.3;
-    }
-    .hud-right { text-align: right; max-width: 44%; }
-    .hud-bankroll { font-size: 18px; font-weight: bold; color: #fff; }
-    .hud-tickets { margin-top: 3px; font-size: 12px; color: #999; line-height: 1.5; }
 
     /* ---- LCD screens ---- */
     .ls {
@@ -169,58 +174,91 @@
     .lcd-hint { font-size: 9px; color: #555; padding: 2px 0; }
     .lcd-danger { color: #f77; font-size: 9px; }
 
-    /* ---- Video screen ---- */
     .lcd-video { width: 100%; display: block; background: #000; flex: 1; object-fit: contain; }
 
-    /* ---- Settlement screen ---- */
     .settle-sum-line { font-size: 13px; font-weight: 800; color: #fff; padding: 2px 0; }
     .delta-plus { color: #5dba5d; }
     .delta-minus { color: #f77; }
     .badge-hit { display: inline-block; padding: 0 5px; border-radius: 99px; background: #1a4a1a; border: 1px solid #3a7a3a; color: #7df07d; font-size: 8px; margin-left: 3px; }
     .badge-lose { display: inline-block; padding: 0 5px; border-radius: 99px; background: #4a1a1a; border: 1px solid #7a3a3a; color: #f07d7d; font-size: 8px; margin-left: 3px; }
 
-    /* ---- Rate / End ---- */
     .lcd-rate { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
     .lcd-rate-num { font-size: 28px; font-weight: 900; color: #fff; }
     .lcd-rate-end { font-size: 16px; font-weight: 800; color: #888; }
     .lcd-rate-clear { font-size: 20px; font-weight: 900; color: #5dba5d; }
 
-    /* ---- Game Over ---- */
     .lcd-gameover { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 950; color: #f00; letter-spacing: 2px; background: #0a0000; }
 
-    /* ---- 出走表 iframe ---- */
     #oddsFrame { flex: 1; width: 100%; border: none; background: #fff; display: block; }
 
     /* =====================
-       NAV BAR (5 rectangle buttons)
+       NAV BAR (常時表示)
     ===================== */
     .nav-bar {
-      flex: 0 0 auto;
+      flex: 0 0 58px;
       display: flex;
-      background: #0e0e0c;
-      border-top: 1px solid #2a2a28;
+      background: #0a0a0a;
+      border-top: 1px solid #252523;
     }
     .nav-rect-btn {
       flex: 1;
-      padding: 10px 2px;
+      height: 58px;
       background: transparent;
       border: none;
-      border-right: 1px solid #2a2a28;
+      border-right: 1px solid #252523;
       color: #8a7d5a;
       font-size: 18px;
       font-weight: bold;
       font-family: -apple-system, BlinkMacSystemFont, "Noto Sans JP", sans-serif;
       cursor: pointer;
       text-align: center;
-      line-height: 1.25;
+      line-height: 1.2;
       transition: background 0.08s, color 0.08s;
       white-space: normal;
       word-break: keep-all;
+      padding: 4px 2px;
     }
     .nav-rect-btn:last-child { border-right: none; }
     .nav-rect-btn:hover { background: #1a1a18; }
     .nav-rect-btn:active { background: #252522; color: #b0a070; }
 
+    /* =====================
+       購入済馬券 ポップアップ
+    ===================== */
+    .cart-popup-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+    }
+    .cart-popup {
+      background: #fff;
+      color: #111;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 90%;
+      min-width: 260px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .cart-popup-title {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #333;
+      padding-bottom: 8px;
+    }
+    .cart-popup-item {
+      padding: 9px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    .cart-popup-item:last-child { border-bottom: none; }
+    .cart-popup-empty { color: #888; font-size: 16px; }
   </style>
 </head>
 <body>
@@ -233,16 +271,14 @@
 <audio id="taiko01" src="data/taiko01.mp3" preload="auto"></audio>
 <audio id="taiko02" src="data/taiko02.mp3" preload="auto"></audio>
 
+<!-- ========== TOP BAR ========== -->
+<div class="top-bar">
+  <div class="top-race-name" id="topRaceName"></div>
+  <div class="top-bankroll" id="topBankroll"></div>
+</div>
+
 <!-- ========== GAME AREA ========== -->
 <div class="game-area">
-
-  <!-- HUD overlay -->
-  <div class="hud hud-hidden" id="hud">
-    <div class="hud-left" id="hudRaceName"></div>
-    <div class="hud-right">
-      <div class="hud-bankroll">所持金 <span id="hudBankroll">0</span>円</div>
-    </div>
-  </div>
 
   <!-- 読み込み中 -->
   <div id="screenLoading" class="ls" style="align-items:center;justify-content:center;gap:10px;background:#0a0a0e;">
@@ -377,6 +413,14 @@
   <button class="nav-rect-btn" id="navStart">レース開始</button>
 </div>
 
+<!-- ========== 購入済馬券ポップアップ ========== -->
+<div class="cart-popup-overlay" id="cartPopupOverlay">
+  <div class="cart-popup">
+    <div class="cart-popup-title">購入済馬券</div>
+    <div id="cartPopupContent"></div>
+  </div>
+</div>
+
 <script>
 (async () => {
   const $ = (s) => document.querySelector(s);
@@ -403,19 +447,8 @@
 
   const ALL_SCREENS = ["#screenLoading","#screenRealTitle","#screenPrologue","#screenBuy","#screenVideo","#screenSettlement","#screenGameOver","#screenRate","#screenOdds","#screenShinbun"];
   function hideAllScreens(){ ALL_SCREENS.forEach(id=>$(id).classList.add("hidden")); }
-  function showScreen(id){ hideAllScreens(); $(id).classList.remove("hidden"); updateHUD(); }
+  function showScreen(id){ hideAllScreens(); $(id).classList.remove("hidden"); updateTopBar(); }
   function activeScreen(){ return ALL_SCREENS.find(s=>!$(s).classList.contains("hidden")); }
-
-  // ---- CSV ----
-  function parseCSV(text){
-    const lines = text.trim().split('\n').map(l=>l.trim()).filter(l=>l);
-    if(lines.length<2) return [];
-    const h = lines[0].split(',').map(x=>x.trim());
-    return lines.slice(1).map(line=>{
-      const v=line.split(',').map(x=>x.trim());
-      const o={}; h.forEach((k,i)=>{ o[k]=i<v.length?v[i]:''; }); return o;
-    });
-  }
 
   // ---- Race loader ----
   async function loadAllRaces(){
@@ -517,6 +550,16 @@
   let mode="tanshoku", selectedQu1=null, selectedQu2=null, selectedTan=null;
   let cart=[], settledEpisode=1, taikoTimer=null;
   let oddsReturnScreen="#screenPrologue";
+  const shinbunPaid=new Set();
+
+  // ---- Top bar ----
+  function updateTopBar(){
+    const ep=EPISODES[episode];
+    const now=new Date();
+    const dateStr=`${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
+    document.getElementById("topRaceName").textContent=ep?`${dateStr}　${ep.title}`:"";
+    document.getElementById("topBankroll").textContent=ep?`所持金 ${yen(bankroll)}円`:"";
+  }
 
   // ---- 出走表 ----
   function showOdds(){
@@ -679,7 +722,6 @@
       });
     }
     refreshTotals();
-    updateHUD();
   }
   function addToCart(item){
     if(cart.length>=5){ limitHint.innerHTML=`<span class="lcd-danger">最大5点まで</span>`; return; }
@@ -728,10 +770,23 @@
     if(selectedCartIdx<0){ limitHint.innerHTML=`<span class="lcd-danger">取消す馬券を選んでください</span>`; return; }
     play(seChoice); cart.splice(selectedCartIdx,1); selectedCartIdx=-1; limitHint.textContent=""; renderCart();
   });
-  $("#btnViewCart").addEventListener("click",()=>{
+
+  // ---- 購入済馬券ポップアップ ----
+  const cartPopupOverlay=document.getElementById("cartPopupOverlay");
+  cartPopupOverlay.addEventListener("click",(e)=>{
+    if(e.target===cartPopupOverlay) cartPopupOverlay.style.display="none";
+  });
+  document.getElementById("btnViewCart").addEventListener("click",()=>{
     play(seChoice);
-    const cartSection=document.querySelector(".buy-cart-section");
-    if(cartSection) cartSection.scrollIntoView({behavior:"smooth", block:"start"});
+    const content=document.getElementById("cartPopupContent");
+    if(cart.length===0){
+      content.innerHTML=`<div class="cart-popup-empty">購入した馬券はありません</div>`;
+    } else {
+      content.innerHTML=cart.map(c=>
+        `<div class="cart-popup-item">${c.type}　${c.label}<br>¥${yen(c.stake)} → 想定払戻 ¥${yen(Math.round(c.stake*c.odds))}</div>`
+      ).join("");
+    }
+    cartPopupOverlay.style.display="flex";
   });
 
   // ---- Video ----
@@ -854,7 +909,7 @@
       settleImg.style.display="none"; settleImg.src="";
     }
     play(seMoney); scheduleTaikoIfPlus(isPlus);
-    updateHUD();
+    updateTopBar();
   }
 
   function showRate(){
@@ -895,18 +950,25 @@
   let shinbunReturnScreen="#screenPrologue";
 
   function showShinbun(){
-    if(bankroll<1000){ return; }
+    const alreadyPaid=shinbunPaid.has(episode);
+    if(!alreadyPaid && bankroll<1000) return;
     play(seChoice);
     shinbunReturnScreen=activeScreen()||"#screenPrologue";
     const id=EPISODES[episode]?.id||String(episode).padStart(2,"0");
     fetch(`game/${id}/新聞.txt`).then(r=>r.ok?r.text():"").catch(()=>"").then(text=>{
       const content=document.getElementById("shinbunContent");
       if(!content) return;
-      if(!text.trim()){ content.textContent="（このレースの新聞はありません）"; }
-      else{
-        bankroll-=1000;
-        episodeStartBankroll=Math.min(episodeStartBankroll,bankroll);
-        bankrollLabel.textContent=yen(episodeStartBankroll); refreshTotals();
+      if(!text.trim()){
+        content.textContent="（このレースの新聞はありません）";
+      } else {
+        if(!alreadyPaid){
+          bankroll-=1000;
+          episodeStartBankroll=Math.min(episodeStartBankroll,bankroll);
+          bankrollLabel.textContent=yen(episodeStartBankroll);
+          refreshTotals();
+          shinbunPaid.add(episode);
+          updateTopBar();
+        }
         content.textContent=text.trim();
       }
       showScreen("#screenShinbun");
@@ -948,24 +1010,9 @@
     else if(active==="#screenSettlement") advanceFromSettlement();
   });
 
-  // ---- HUD ----
-  function updateHUD(){
-    const active=activeScreen();
-    const hudEl=document.getElementById("hud");
-    if(!hudEl) return;
-    const noHud=active==="#screenLoading"||active==="#screenRealTitle";
-    hudEl.classList.toggle("hud-hidden", noHud);
-    if(noHud) return;
-    const ep=EPISODES[episode];
-    const now=new Date();
-    const dateStr=`${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
-    document.getElementById("hudRaceName").textContent=ep?`${dateStr}　${ep.title}`:"";
-
-    document.getElementById("hudBankroll").textContent=yen(bankroll);
-  }
-
   openRealTitle();
   bindRealTitleStart();
+  updateTopBar();
 })();
 </script>
 </body>
