@@ -726,13 +726,13 @@
   }
   function resetBuyState(){
     mode="tanshoku"; selectedQu1=selectedQu2=selectedTan=null;
-    cart=[]; purchasedTickets=[]; selectedCartIdx=-1; limitHint.textContent=""; stakeTan.value="0"; stakeQu.value="0";
+    cart=[]; selectedCartIdx=-1; limitHint.textContent=""; stakeTan.value="0"; stakeQu.value="0";
     setMode("tanshoku");
   }
 
-  function showBuy(){
+  function showBuy(isNewEpisode=false){
     showScreen("#screenBuy");
-    episodeStartBankroll=bankroll;
+    if(isNewEpisode){ purchasedTickets=[]; episodeStartBankroll=bankroll; }
     bankrollLabel.textContent=yen(bankroll);
     resetBuyState();
     renderTanshokuList(); renderQuinellaList();
@@ -994,7 +994,7 @@
     if(active==="#screenVideo") return;
     play(seChoice);
     if(active==="#screenSettlement"){
-      if(settledEpisode<totalEpisodes){ episode=settledEpisode+1; showBuy(); }
+      if(settledEpisode<totalEpisodes){ episode=settledEpisode+1; showBuy(true); }
       return;
     }
     showBuy();
@@ -1003,7 +1003,7 @@
   $("#navStart").addEventListener("click",()=>{
     const active=activeScreen();
     if(active==="#screenRealTitle"){ play(seChoice); showPrologue(); }
-    else if(active==="#screenPrologue"){ play(seChoice); showBuy(); }
+    else if(active==="#screenPrologue"){ play(seChoice); showBuy(true); }
     else if(active==="#screenBuy") startRaceFromBuy();
     else if(active==="#screenVideo"){ play(seChoice); try{raceVideo.pause(); raceVideo.src="";}catch{} clearTaikoTimers(); showSettlement(); }
     else if(active==="#screenSettlement") advanceFromSettlement();
