@@ -552,10 +552,17 @@
   const shinbunPaid=new Set();
 
   // ---- Top bar ----
+  const RACE_DATES=["","1989年4月16日","1989年4月30日","1989年5月14日","1989年5月28日","1989年6月11日","1989年10月29日","1989年11月5日","1989年11月19日","1989年11月26日","1989年12月24日"];
+
   function updateTopBar(){
+    const active=activeScreen();
+    if(active==="#screenRealTitle"||active==="#screenLoading"){
+      document.getElementById("topRaceName").textContent="";
+      document.getElementById("topBankroll").textContent="";
+      return;
+    }
     const ep=EPISODES[episode];
-    const now=new Date();
-    const dateStr=`${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
+    const dateStr=RACE_DATES[episode]||"";
     document.getElementById("topRaceName").textContent=ep?`${dateStr}　${ep.title}`:"";
     document.getElementById("topBankroll").textContent=ep?`所持金 ${yen(bankroll)}円`:"";
   }
