@@ -178,6 +178,31 @@
 
     .lcd-video { width: 100%; display: block; background: #000; flex: 1; object-fit: contain; }
 
+    .video-controls {
+      flex: 0 0 54px;
+      display: flex;
+      background: #0a0a0a;
+      border-top: 1px solid #252523;
+    }
+    .video-ctrl-btn {
+      flex: 1;
+      height: 54px;
+      background: transparent;
+      border: none;
+      border-right: 1px solid #252523;
+      color: #8a7d5a;
+      font-size: 22px;
+      font-weight: bold;
+      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans JP", sans-serif;
+      cursor: pointer;
+      text-align: center;
+      line-height: 54px;
+      padding: 0;
+    }
+    .video-ctrl-btn:last-child { border-right: none; }
+    .video-ctrl-btn:active { background: #252522; color: #b0a070; }
+    .video-ctrl-skip { font-size: 16px; }
+
     .settle-sum-line { font-size: 13px; font-weight: 800; color: #fff; padding: 2px 0; }
     .delta-plus { color: #5dba5d; }
     .delta-minus { color: #f77; }
@@ -352,6 +377,12 @@
     <div id="videoPlayOverlay" style="display:none;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);color:#fff;font-size:22px;cursor:pointer;gap:12px">
       <span>▶ タップして再生</span>
       <span id="videoDebug" style="font-size:10px;color:#fa0;max-width:90%;word-break:break-all;text-align:center"></span>
+    </div>
+    <div class="video-controls">
+      <button class="video-ctrl-btn" id="btnVidRewind">◁◁</button>
+      <button class="video-ctrl-btn" id="btnVidPlayPause">▶</button>
+      <button class="video-ctrl-btn" id="btnVidForward">▷▷</button>
+      <button class="video-ctrl-btn video-ctrl-skip" id="btnVidSkip">スキップ</button>
     </div>
   </div>
 
@@ -823,6 +854,31 @@
   overlay.addEventListener("click",()=>{
     raceVideo.play().then(()=>{ overlay.style.display="none"; videoDebug.textContent=""; })
       .catch(err=>{ showVideoOverlay(`${err.name}: ${err.message}\nsrc=${raceVideo.currentSrc||raceVideo.src}`); });
+  });
+
+  // ---- Video controls ----
+  const btnVidPlayPause=$("#btnVidPlayPause");
+  function syncPlayPauseBtn(){
+    btnVidPlayPause.textContent=raceVideo.paused||raceVideo.ended?"▶":"⏸";
+  }
+  raceVideo.addEventListener("play", syncPlayPauseBtn);
+  raceVideo.addEventListener("pause", syncPlayPauseBtn);
+  raceVideo.addEventListener("ended", syncPlayPauseBtn);
+  $("#btnVidRewind").addEventListener("click",()=>{
+    raceVideo.currentTime=Math.max(0,raceVideo.currentTime-10);
+  });
+  btnVidPlayPause.addEventListener("click",()=>{
+    if(raceVideo.paused||raceVideo.ended||raceVideo.readyState===0)
+      raceVideo.play().then(()=>{ overlay.style.display="none"; }).catch(()=>{});
+    else raceVideo.pause();
+  });
+  $("#btnVidForward").addEventListener("click",()=>{
+    if(raceVideo.duration) raceVideo.currentTime=Math.min(raceVideo.duration,raceVideo.currentTime+10);
+  });
+  $("#btnVidSkip").addEventListener("click",()=>{
+    play(seChoice);
+    try{ raceVideo.pause(); raceVideo.src=""; }catch{}
+    clearTaikoTimers(); showSettlement();
   });
 
   function confirmBet(){
