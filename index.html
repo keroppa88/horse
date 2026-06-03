@@ -258,7 +258,6 @@
 
   <!-- プロローグ -->
   <div id="screenPrologue" class="ls hidden">
-    <div class="pro-title" id="proTitle"></div>
     <div class="ls-scroll">
       <div class="pro-body" id="proText"></div>
     </div>
@@ -549,7 +548,6 @@
   function showPrologue(){
     showScreen("#screenPrologue");
     const ep=EPISODES[episode];
-    $("#proTitle").textContent=ep.title;
     $("#proText").textContent=ep.comment;
     bgmPlay();
   }
