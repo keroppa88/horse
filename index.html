@@ -708,7 +708,7 @@
     } else {
       const ep=EPISODES[episode];
       const dateStr=RACE_DATES[episode]||"";
-      document.getElementById("topRaceName").textContent=ep?`${dateStr}　${ep.title}`:"";
+      document.getElementById("topRaceName").textContent=ep?`${dateStr}　${ep.raceTitle}`:"";
       document.getElementById("topBankroll").textContent=ep?`所持金 ${yen(bankroll)}円`:"";
     }
     if(active==="#screenSettlement") $("#navStart").textContent="次へ";
