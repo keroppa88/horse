@@ -717,6 +717,7 @@
     else if(active==="#screenVideo") $("#navStart").textContent="次へ";
     else if(active==="#screenResult") $("#navStart").textContent="精算";
     else if(active==="#screenEnding") $("#navStart").textContent="次へ";
+    else if(active==="#screenGameOver") $("#navStart").textContent="次へ";
     else $("#navStart").textContent="レース開始";
   }
 
@@ -1410,6 +1411,7 @@
     else if(active==="#screenResult"){ play(seChoice); showSettlement(); }
     else if(active==="#screenSettlement") advanceFromSettlement();
     else if(active==="#screenEnding"){ play(seChoice); const ev=$("#endingVideo"); try{ev.pause();ev.src="";}catch{} openRealTitle(); bindRealTitleStart(); }
+    else if(active==="#screenGameOver"){ play(seChoice); openRealTitle(); bindRealTitleStart(); }
   });
 
   $("#btnOpeningNext").addEventListener("click",()=>{
