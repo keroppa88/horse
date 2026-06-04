@@ -709,7 +709,7 @@
     } else {
       const ep=EPISODES[episode];
       const dateStr=RACE_DATES[episode]||"";
-      document.getElementById("topRaceName").textContent=ep?`${dateStr}　${ep.raceTitle}`:"";
+      document.getElementById("topRaceName").textContent=ep?`${dateStr}　${ep.raceTitle.replace(/^\d{4}年\s*/,'')}`:"";
       document.getElementById("topBankroll").textContent=ep?`所持金 ${yen(bankroll)}円`:"";
     }
     if(active==="#screenSettlement") $("#navStart").textContent="次へ";
@@ -1103,23 +1103,32 @@
     showScreen("#screenResult");
     const ep=EPISODES[episode];
     const dateStr=RACE_DATES[episode]||"";
-    $("#resultSub").textContent=dateStr?(dateStr+"　"+ep.raceTitle):ep.raceTitle;
+    const cleanTitle=ep.raceTitle.replace(/^\d{4}年\s*/,'');
+    $("#resultSub").textContent=dateStr?(dateStr+"　"+cleanTitle):cleanTitle;
     bgmPlay();
     const tbody=$("#resultRows");
     tbody.innerHTML="";
-    const lines=(ep.resultCsv||"").trim().split('\n').slice(1);
-    lines.forEach(line=>{
-      const cols=line.split(',').map(s=>s.trim());
-      const rank=parseInt(cols[0]);
-      if(isNaN(rank)||rank<1) return;
-      const tr=document.createElement("tr");
-      [cols[0],cols[1],cols[2],cols[3],cols[7]||"",cols[8]||""].forEach(txt=>{
-        const td=document.createElement("td");
-        td.textContent=txt;
-        tr.appendChild(td);
-      });
-      tbody.appendChild(tr);
-    });
+    fetch(`game/${ep.id}/着順.csv`)
+      .then(r=>r.arrayBuffer())
+      .then(buf=>{
+        let text;
+        try{ text=new TextDecoder('utf-8',{fatal:true}).decode(buf); }
+        catch{ text=new TextDecoder('shift-jis').decode(buf); }
+        const lines=text.trim().split('\n').slice(1);
+        lines.forEach(line=>{
+          const cols=line.split(',').map(s=>s.trim());
+          const rank=parseInt(cols[0]);
+          if(isNaN(rank)||rank<1) return;
+          const tr=document.createElement("tr");
+          [cols[0],cols[1],cols[2],cols[3],cols[7]||"",cols[8]||""].forEach(txt=>{
+            const td=document.createElement("td");
+            td.textContent=txt;
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+      })
+      .catch(()=>{});
   }
 
   function showSettlement(){
