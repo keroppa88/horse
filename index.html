@@ -1134,12 +1134,20 @@
   async function showOpening(){
     showScreen("#screenOpening");
     bgmStop();
+    let openingCommentText="";
     try{
-      const text=await fetch('game/opening/レースコメント.txt').then(r=>r.ok?r.text():'').catch(()=>'');
-      $("#openingText").textContent=text.trim();
+      openingCommentText=await fetch('game/opening/レースコメント.txt').then(r=>r.ok?r.text():'').catch(()=>'');
     }catch{}
+    $("#openingText").textContent="";
     const ov=$("#openingVideo");
     const scroll=$("#openingScroll");
+    let commentShown=false;
+    ov.ontimeupdate=()=>{
+      if(!commentShown && ov.currentTime>=11){
+        commentShown=true;
+        $("#openingText").textContent=openingCommentText.trim();
+      }
+    };
     ov.onloadedmetadata=()=>{
       const vw=ov.offsetWidth, vh=ov.offsetHeight;
       const nw=ov.videoWidth, nh=ov.videoHeight;
