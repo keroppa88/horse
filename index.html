@@ -123,20 +123,6 @@
 
     #screenPrologue .ls-scroll { padding-left: 0; padding-right: 0; }
     #screenPrologue .pro-body { font-size: 17px; padding: 0 8px; }
-    .pro-foot { flex-shrink: 0; display: flex; justify-content: center; padding: 12px 14px 10px; }
-    .pro-start-btn {
-      background: #b0900a;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 22px;
-      font-weight: bold;
-      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans JP", sans-serif;
-      padding: 12px 48px;
-      cursor: pointer;
-      letter-spacing: 4px;
-    }
-    .pro-start-btn:active { background: #8a6e08; }
 
     /* ---- メニュー画面 ---- */
     .menu-section { padding: 18px 14px; border-bottom: 1px solid #2a2a28; }
@@ -362,9 +348,6 @@
     <img id="proImage" src="" alt="" style="width:100%;max-height:55%;display:none;object-fit:contain;flex-shrink:0;">
     <div class="ls-scroll" id="proScroll">
       <div class="pro-body" id="proText"></div>
-    </div>
-    <div class="pro-foot">
-      <button class="pro-start-btn" id="btnProStart">レース開始</button>
     </div>
   </div>
 
@@ -1203,8 +1186,6 @@
     else if(active==="#screenVideo"){ play(seChoice); try{raceVideo.pause(); raceVideo.src="";}catch{} clearTaikoTimers(); showSettlement(); }
     else if(active==="#screenSettlement") advanceFromSettlement();
   });
-
-  $("#btnProStart").addEventListener("click", startRace);
 
   openRealTitle();
   bindRealTitleStart();
