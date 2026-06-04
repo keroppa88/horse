@@ -227,14 +227,37 @@
     .video-ctrl-btn:active { background: #252522; color: #b0a070; }
     .video-ctrl-skip { font-size: 16px; }
 
+    .vol-popup {
+      display: none;
+      position: absolute;
+      bottom: 54px;
+      width: 54px;
+      height: 160px;
+      background: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 8px 8px 0 0;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+    .vol-popup.open { display: flex; }
+    .vol-popup input[type=range] {
+      writing-mode: vertical-lr;
+      direction: rtl;
+      height: 130px;
+      width: 32px;
+      cursor: pointer;
+      accent-color: #b0a070;
+    }
+
     .settle-sum-line { font-size: 18px; font-weight: 800; color: #fff; padding: 3px 0; }
     .delta-plus { color: #5dba5d; }
     .delta-minus { color: #f77; }
     .badge-hit { display: inline-block; padding: 0 5px; border-radius: 99px; background: #1a4a1a; border: 1px solid #3a7a3a; color: #7df07d; font-size: 13px; margin-left: 3px; }
     .badge-lose { display: inline-block; padding: 0 5px; border-radius: 99px; background: #4a1a1a; border: 1px solid #7a3a3a; color: #f07d7d; font-size: 13px; margin-left: 3px; }
-    #screenResult .lcd-table { font-size: 15px; }
-    #screenResult .lcd-table th { font-size: 14px; padding: 5px 6px; }
-    #screenResult .lcd-table td { font-size: 15px; padding: 5px 6px; }
+    #screenResult .lcd-table { font-size: 30px; }
+    #screenResult .lcd-table th { font-size: 28px; padding: 6px 8px; }
+    #screenResult .lcd-table td { font-size: 30px; padding: 6px 8px; }
     #screenSettlement .lcd-table { font-size: 16px; }
     #screenSettlement .lcd-table th { font-size: 15px; padding: 5px 6px; }
     #screenSettlement .lcd-table td { font-size: 16px; padding: 6px 6px; }
@@ -410,7 +433,8 @@
         <span id="videoDebug" style="font-size:10px;color:#fa0;max-width:90%;word-break:break-all;text-align:center"></span>
       </div>
     </div>
-    <div class="video-controls">
+    <div class="video-controls" style="position:relative;">
+      <div class="vol-popup" id="volPopup"><input type="range" id="volSlider" min="0" max="100" value="70" step="5"></div>
       <button class="video-ctrl-btn" id="btnVidRewind">◁◁</button>
       <button class="video-ctrl-btn" id="btnVidPlayPause">▶</button>
       <button class="video-ctrl-btn" id="btnVidForward">▷▷</button>
@@ -421,7 +445,7 @@
 
   <!-- 着順 -->
   <div id="screenResult" class="ls hidden">
-    <div class="pro-title" id="resultSub">着順</div>
+    <div class="pro-title" id="resultSub" style="font-size:18px;padding:8px;"></div>
     <div class="ls-scroll">
       <table class="lcd-table" id="resultTable">
         <thead><tr><th>着</th><th>枠</th><th>馬番</th><th>馬名</th><th>タイム</th><th>着差</th></tr></thead>
@@ -995,15 +1019,20 @@
   $("#btnVidForward").addEventListener("click",()=>{
     if(raceVideo.duration) raceVideo.currentTime=Math.min(raceVideo.duration,raceVideo.currentTime+10);
   });
-  const VOL_STEPS=[1,0.5,0];
-  const VOL_ICONS=["🔊","🔉","🔇"];
-  let volIdx=0;
-  raceVideo.volume=VOL_STEPS[volIdx];
-  $("#btnVidVolume").addEventListener("click",()=>{
-    volIdx=(volIdx+1)%VOL_STEPS.length;
-    raceVideo.volume=VOL_STEPS[volIdx];
-    $("#btnVidVolume").textContent=VOL_ICONS[volIdx];
+  const volPopup=$("#volPopup");
+  const volSlider=$("#volSlider");
+  raceVideo.volume=0.7;
+  volSlider.addEventListener("input",()=>{
+    const v=Number(volSlider.value)/100;
+    raceVideo.volume=v;
+    $("#btnVidVolume").textContent=v===0?"🔇":v<0.4?"🔉":"🔊";
   });
+  $("#btnVidVolume").addEventListener("click",(e)=>{
+    e.stopPropagation();
+    volPopup.classList.toggle("open");
+  });
+  volPopup.addEventListener("click",(e)=>e.stopPropagation());
+  document.addEventListener("click",()=>{ volPopup.classList.remove("open"); });
 
   $("#btnVidSkip").addEventListener("click",()=>{
     play(seChoice);
@@ -1072,7 +1101,8 @@
   function showResult(){
     showScreen("#screenResult");
     const ep=EPISODES[episode];
-    $("#resultSub").textContent=`着順（${ep.title}）`;
+    const dateStr=RACE_DATES[episode]||"";
+    $("#resultSub").textContent=dateStr?(dateStr+"　"+ep.raceTitle):ep.raceTitle;
     bgmPlay();
     const tbody=$("#resultRows");
     tbody.innerHTML="";
