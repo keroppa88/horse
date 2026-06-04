@@ -439,7 +439,7 @@
       <button class="video-ctrl-btn" id="btnVidRewind">◁◁</button>
       <button class="video-ctrl-btn" id="btnVidPlayPause">▶</button>
       <button class="video-ctrl-btn" id="btnVidForward">▷▷</button>
-      <button class="video-ctrl-btn video-ctrl-skip" id="btnVidVolume">🔊</button>
+      <button class="video-ctrl-btn video-ctrl-skip" id="btnVidVolume">音量</button>
       <button class="video-ctrl-btn video-ctrl-skip" id="btnVidSkip">スキップ</button>
     </div>
     <div id="videoTickets" style="padding:4px 8px;background:#0a0a0a;border-top:1px solid #1e1e1e;overflow:hidden;font-size:15px;color:#fff;line-height:1.6;"></div>
@@ -1027,7 +1027,7 @@
   volSlider.addEventListener("input",()=>{
     const v=Number(volSlider.value)/100;
     raceVideo.volume=v;
-    $("#btnVidVolume").textContent=v===0?"🔇":v<0.4?"🔉":"🔊";
+    $("#btnVidVolume").textContent="音量";
   });
   $("#btnVidVolume").addEventListener("click",(e)=>{
     e.stopPropagation();
