@@ -1268,7 +1268,11 @@
   function advanceFromSettlement(){
     play(seChoice); clearTaikoTimers();
     if(bankroll<=0){ showGameOver(); return; }
-    if(settledEpisode<totalEpisodes){ episode=settledEpisode+1; showPrologue(); }
+    if(settledEpisode<totalEpisodes){
+      episode=settledEpisode+1;
+      purchasedTickets=[]; episodeStartBankroll=bankroll;
+      showPrologue();
+    }
     else showEnding();
   }
 
