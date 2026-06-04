@@ -231,6 +231,7 @@
       display: none;
       position: absolute;
       bottom: 54px;
+      right: 54px;
       width: 54px;
       height: 160px;
       background: #1a1a1a;
@@ -509,7 +510,7 @@
   </div>
 
   <!-- ゲームオーバー -->
-  <div id="screenGameOver" class="ls hidden" style="background:#0a0000;">
+  <div id="screenGameOver" class="ls hidden" style="background:#000;">
     <div class="lcd-gameover" style="flex:0 0 80px;">GAME OVER</div>
     <div class="ls-scroll">
       <div class="pro-body" id="gameoverText" style="color:#bbb;"></div>
@@ -1180,6 +1181,10 @@
     try{
       const text=await fetch('game/gameover/レースコメント.txt').then(r=>r.ok?r.text():'').catch(()=>'');
       $("#gameoverText").textContent=text.trim();
+    }catch{}
+    try{
+      const goAudio=new Audio('game/gameover/move.m4a');
+      goAudio.play().catch(()=>{});
     }catch{}
   }
 
