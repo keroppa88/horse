@@ -453,9 +453,35 @@
     </div>
   </div>
 
+  <!-- オープニング -->
+  <div id="screenOpening" class="ls hidden" style="background:#000;">
+    <div style="width:100%;background:#000;flex-shrink:0;">
+      <video id="openingVideo" class="lcd-video" playsinline preload="auto" style="width:100%;max-height:45dvh;display:block;object-fit:contain;"></video>
+    </div>
+    <div class="ls-scroll">
+      <div class="pro-body" id="openingText" style="color:#ddd;"></div>
+    </div>
+    <div class="ls-foot" style="justify-content:flex-end;">
+      <button class="lcd-btn-sm primary" id="btnOpeningNext" style="font-size:16px;padding:8px 20px;">次へ</button>
+    </div>
+  </div>
+
   <!-- ゲームオーバー -->
-  <div id="screenGameOver" class="ls hidden">
-    <div class="lcd-gameover">GAME OVER</div>
+  <div id="screenGameOver" class="ls hidden" style="background:#0a0000;">
+    <div class="lcd-gameover" style="flex:0 0 80px;">GAME OVER</div>
+    <div class="ls-scroll">
+      <div class="pro-body" id="gameoverText" style="color:#bbb;"></div>
+    </div>
+  </div>
+
+  <!-- エンディング -->
+  <div id="screenEnding" class="ls hidden" style="background:#000;">
+    <div style="width:100%;background:#000;flex-shrink:0;">
+      <video id="endingVideo" class="lcd-video" playsinline preload="auto" style="width:100%;max-height:45dvh;display:block;object-fit:contain;"></video>
+    </div>
+    <div class="ls-scroll">
+      <div class="pro-body" id="endingText" style="color:#ddd;"></div>
+    </div>
   </div>
 
   <!-- 達成率 -->
@@ -522,7 +548,7 @@
   function yen(n){ return (n??0).toLocaleString("ja-JP"); }
   function f1(n){ return (Math.round(n*10)/10).toFixed(1); }
 
-  const ALL_SCREENS = ["#screenLoading","#screenRealTitle","#screenPrologue","#screenBuy","#screenVideo","#screenSettlement","#screenGameOver","#screenRate","#screenOdds","#screenShinbun","#screenMenu"];
+  const ALL_SCREENS = ["#screenLoading","#screenRealTitle","#screenOpening","#screenPrologue","#screenBuy","#screenVideo","#screenSettlement","#screenGameOver","#screenEnding","#screenRate","#screenOdds","#screenShinbun","#screenMenu"];
   function hideAllScreens(){ ALL_SCREENS.forEach(id=>$(id).classList.add("hidden")); }
   function showScreen(id){ hideAllScreens(); $(id).classList.remove("hidden"); updateTopBar(); }
   function activeScreen(){ return ALL_SCREENS.find(s=>!$(s).classList.contains("hidden")); }
@@ -634,7 +660,7 @@
 
   function updateTopBar(){
     const active=activeScreen();
-    if(active==="#screenRealTitle"||active==="#screenLoading"){
+    if(active==="#screenRealTitle"||active==="#screenLoading"||active==="#screenOpening"||active==="#screenEnding"||active==="#screenGameOver"){
       document.getElementById("topRaceName").textContent="";
       document.getElementById("topBankroll").textContent="";
     } else {
@@ -666,7 +692,7 @@
     const once=()=>{
       if(started) return; started=true;
       rt.removeEventListener("click",once);
-      play(seChoice); showPrologue();
+      play(seChoice); showOpening();
     };
     rt.addEventListener("click",once);
   }
@@ -1064,11 +1090,44 @@
     if(rate===100){ try{taiko01.currentTime=0;taiko01.play();}catch{} }
   }
 
+  async function showGameOver(){
+    stopAllAudio();
+    showScreen("#screenGameOver");
+    try{
+      const text=await fetch('game/gameover/レースコメント.txt').then(r=>r.ok?r.text():'').catch(()=>'');
+      $("#gameoverText").textContent=text.trim();
+    }catch{}
+  }
+
+  async function showEnding(){
+    showScreen("#screenEnding");
+    bgmStop();
+    try{
+      const text=await fetch('game/ending/レースコメント.txt').then(r=>r.ok?r.text():'').catch(()=>'');
+      $("#endingText").textContent=text.trim();
+    }catch{}
+    const ev=$("#endingVideo");
+    ev.src='game/ending/move.mp4';
+    ev.play().catch(()=>{});
+  }
+
+  async function showOpening(){
+    showScreen("#screenOpening");
+    bgmStop();
+    try{
+      const text=await fetch('game/opening/レースコメント.txt').then(r=>r.ok?r.text():'').catch(()=>'');
+      $("#openingText").textContent=text.trim();
+    }catch{}
+    const ov=$("#openingVideo");
+    ov.src='game/opening/move.mp4';
+    ov.play().catch(()=>{});
+  }
+
   function advanceFromSettlement(){
     play(seChoice); clearTaikoTimers();
-    if(bankroll<=0){ stopAllAudio(); showScreen("#screenGameOver"); return; }
+    if(bankroll<=0){ showGameOver(); return; }
     if(settledEpisode<totalEpisodes){ episode=settledEpisode+1; showPrologue(); }
-    else showRate();
+    else showEnding();
   }
 
   // ---- マウスドラッグスクロール ----
@@ -1180,11 +1239,18 @@
 
   $("#navStart").addEventListener("click",()=>{
     const active=activeScreen();
-    if(active==="#screenRealTitle"){ play(seChoice); showPrologue(); }
+    if(active==="#screenRealTitle"){ play(seChoice); showOpening(); }
     else if(active==="#screenPrologue") startRace();
     else if(active==="#screenBuy") startRaceFromBuy();
     else if(active==="#screenVideo"){ play(seChoice); try{raceVideo.pause(); raceVideo.src="";}catch{} clearTaikoTimers(); showSettlement(); }
     else if(active==="#screenSettlement") advanceFromSettlement();
+  });
+
+  $("#btnOpeningNext").addEventListener("click",()=>{
+    play(seChoice);
+    const ov=$("#openingVideo");
+    try{ ov.pause(); ov.src=""; }catch{}
+    episode=1; showPrologue();
   });
 
   openRealTitle();
