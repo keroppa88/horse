@@ -710,6 +710,7 @@
     scroll.style.width="";
     scroll.style.marginLeft="";
     scroll.style.marginRight="";
+    $("#proText").textContent="";
     img.onload=()=>{
       img.style.display="block";
       const ew=img.offsetWidth, eh=img.offsetHeight;
@@ -722,10 +723,10 @@
           scroll.style.marginRight="auto";
         }
       }
+      $("#proText").textContent=ep.comment;
     };
-    img.onerror=()=>{ img.style.display="none"; };
+    img.onerror=()=>{ img.style.display="none"; $("#proText").textContent=ep.comment; };
     img.src=`game/${ep.id}/open.png`;
-    $("#proText").textContent=ep.comment;
     bgmPlay();
   }
 
@@ -1105,10 +1106,11 @@
   async function showEnding(){
     showScreen("#screenEnding");
     bgmStop();
+    let endingCommentText="";
     try{
-      const text=await fetch('game/ending/レースコメント.txt').then(r=>r.ok?r.text():'').catch(()=>'');
-      $("#endingText").textContent=text.trim();
+      endingCommentText=await fetch('game/ending/レースコメント.txt').then(r=>r.ok?r.text():'').catch(()=>'');
     }catch{}
+    $("#endingText").textContent="";
     const ev=$("#endingVideo");
     const scroll=$("#endingScroll");
     ev.onloadedmetadata=()=>{
@@ -1126,6 +1128,7 @@
           scroll.style.marginRight="";
         }
       }
+      $("#endingText").textContent=endingCommentText.trim();
     };
     ev.src='game/ending/move.mp4';
     ev.play().catch(()=>{});
