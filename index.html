@@ -673,7 +673,7 @@
       document.getElementById("topRaceName").textContent=ep?`${dateStr}　${ep.title}`:"";
       document.getElementById("topBankroll").textContent=ep?`所持金 ${yen(bankroll)}円`:"";
     }
-    $("#navStart").textContent=active==="#screenSettlement"?"次へ":"レース開始";
+    $("#navStart").textContent=active==="#screenSettlement"?"次へ":active==="#screenVideo"?"精算":"レース開始";
   }
 
   // ---- 出走表 ----
