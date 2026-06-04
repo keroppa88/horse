@@ -442,6 +442,7 @@
       <button class="video-ctrl-btn video-ctrl-skip" id="btnVidVolume">🔊</button>
       <button class="video-ctrl-btn video-ctrl-skip" id="btnVidSkip">スキップ</button>
     </div>
+    <div id="videoTickets" style="padding:4px 8px;background:#0a0a0a;border-top:1px solid #1e1e1e;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:13px;color:#888;min-height:22px;"></div>
   </div>
 
   <!-- 着順 -->
@@ -1059,6 +1060,9 @@
     const ep=EPISODES[episode];
     if(!ep||!ep.videoPath){ showVideoOverlay("videoPath未設定"); return; }
     videoDebug.textContent=""; overlay.style.display="none";
+    const sorted=[...purchasedTickets].sort((a,b)=>(b.stake||0)-(a.stake||0));
+    document.getElementById("videoTickets").textContent=
+      sorted.map(t=>t.label).join("　　");
     raceVideo.src=ep.videoPath;
     raceVideo.play().then(()=>{ overlay.style.display="none"; })
       .catch(err=>{ showVideoOverlay(`${err.name}: ${err.message}\nsrc=${raceVideo.currentSrc||raceVideo.src} rs=${raceVideo.readyState}`); });
