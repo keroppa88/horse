@@ -442,7 +442,7 @@
       <button class="video-ctrl-btn video-ctrl-skip" id="btnVidVolume">🔊</button>
       <button class="video-ctrl-btn video-ctrl-skip" id="btnVidSkip">スキップ</button>
     </div>
-    <div id="videoTickets" style="padding:4px 8px;background:#0a0a0a;border-top:1px solid #1e1e1e;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:13px;color:#888;min-height:22px;"></div>
+    <div id="videoTickets" style="padding:4px 8px;background:#0a0a0a;border-top:1px solid #1e1e1e;overflow:hidden;font-size:15px;color:#fff;line-height:1.6;"></div>
   </div>
 
   <!-- 着順 -->
@@ -716,6 +716,7 @@
     if(active==="#screenSettlement") $("#navStart").textContent="次へ";
     else if(active==="#screenVideo") $("#navStart").textContent="次へ";
     else if(active==="#screenResult") $("#navStart").textContent="精算";
+    else if(active==="#screenEnding") $("#navStart").textContent="次へ";
     else $("#navStart").textContent="レース開始";
   }
 
@@ -1061,8 +1062,8 @@
     if(!ep||!ep.videoPath){ showVideoOverlay("videoPath未設定"); return; }
     videoDebug.textContent=""; overlay.style.display="none";
     const sorted=[...purchasedTickets].sort((a,b)=>(b.stake||0)-(a.stake||0));
-    document.getElementById("videoTickets").textContent=
-      sorted.map(t=>t.label).join("　　");
+    document.getElementById("videoTickets").innerHTML=
+      sorted.map(t=>`<div>${t.type}　${t.label}</div>`).join("");
     raceVideo.src=ep.videoPath;
     raceVideo.play().then(()=>{ overlay.style.display="none"; })
       .catch(err=>{ showVideoOverlay(`${err.name}: ${err.message}\nsrc=${raceVideo.currentSrc||raceVideo.src} rs=${raceVideo.readyState}`); });
@@ -1394,6 +1395,7 @@
     else if(active==="#screenVideo"){ play(seChoice); try{raceVideo.pause(); raceVideo.src="";}catch{} clearTaikoTimers(); showResult(); }
     else if(active==="#screenResult"){ play(seChoice); showSettlement(); }
     else if(active==="#screenSettlement") advanceFromSettlement();
+    else if(active==="#screenEnding"){ play(seChoice); const ev=$("#endingVideo"); try{ev.pause();ev.src="";}catch{} openRealTitle(); bindRealTitleStart(); }
   });
 
   $("#btnOpeningNext").addEventListener("click",()=>{
