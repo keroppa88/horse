@@ -1061,9 +1061,23 @@
     const ep=EPISODES[episode];
     if(!ep||!ep.videoPath){ showVideoOverlay("videoPath未設定"); return; }
     videoDebug.textContent=""; overlay.style.display="none";
+    const hName=num=>(ep.horseList?.find(h=>h.num===num)?.name)||"";
     const sorted=[...purchasedTickets].sort((a,b)=>(b.stake||0)-(a.stake||0));
-    document.getElementById("videoTickets").innerHTML=
-      sorted.map(t=>`<div>${t.type}　${t.label}</div>`).join("");
+    document.getElementById("videoTickets").innerHTML=sorted.map(t=>{
+      let line=t.type+"　";
+      const mTan=t.key?.match(/^TAN:(\d+)$/);
+      const mQu=t.key?.match(/^QU:(\d+)>(\d+)$/);
+      if(mTan){
+        const n=Number(mTan[1]);
+        line+=`${n}　${hName(n)}`;
+      } else if(mQu){
+        const n1=Number(mQu[1]),n2=Number(mQu[2]);
+        line+=`${n1}←→${n2}　${hName(n1)}、${hName(n2)}`;
+      } else {
+        line+=t.label;
+      }
+      return `<div>${line}</div>`;
+    }).join("");
     raceVideo.src=ep.videoPath;
     raceVideo.play().then(()=>{ overlay.style.display="none"; })
       .catch(err=>{ showVideoOverlay(`${err.name}: ${err.message}\nsrc=${raceVideo.currentSrc||raceVideo.src} rs=${raceVideo.readyState}`); });
