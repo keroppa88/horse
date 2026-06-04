@@ -411,6 +411,7 @@
       <button class="video-ctrl-btn" id="btnVidRewind">◁◁</button>
       <button class="video-ctrl-btn" id="btnVidPlayPause">▶</button>
       <button class="video-ctrl-btn" id="btnVidForward">▷▷</button>
+      <button class="video-ctrl-btn video-ctrl-skip" id="btnVidVolume">🔊</button>
       <button class="video-ctrl-btn video-ctrl-skip" id="btnVidSkip">スキップ</button>
     </div>
   </div>
@@ -961,7 +962,7 @@
   // ---- Video controls ----
   const btnVidPlayPause=$("#btnVidPlayPause");
   function syncPlayPauseBtn(){
-    btnVidPlayPause.textContent=raceVideo.paused||raceVideo.ended?"▶":"停止";
+    btnVidPlayPause.textContent=raceVideo.paused||raceVideo.ended?"▶":"■";
   }
   raceVideo.addEventListener("play", syncPlayPauseBtn);
   raceVideo.addEventListener("pause", syncPlayPauseBtn);
@@ -977,6 +978,16 @@
   $("#btnVidForward").addEventListener("click",()=>{
     if(raceVideo.duration) raceVideo.currentTime=Math.min(raceVideo.duration,raceVideo.currentTime+10);
   });
+  const VOL_STEPS=[1,0.5,0];
+  const VOL_ICONS=["🔊","🔉","🔇"];
+  let volIdx=0;
+  raceVideo.volume=VOL_STEPS[volIdx];
+  $("#btnVidVolume").addEventListener("click",()=>{
+    volIdx=(volIdx+1)%VOL_STEPS.length;
+    raceVideo.volume=VOL_STEPS[volIdx];
+    $("#btnVidVolume").textContent=VOL_ICONS[volIdx];
+  });
+
   $("#btnVidSkip").addEventListener("click",()=>{
     play(seChoice);
     try{ raceVideo.pause(); raceVideo.src=""; }catch{}
