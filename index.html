@@ -232,6 +232,9 @@
     .delta-minus { color: #f77; }
     .badge-hit { display: inline-block; padding: 0 5px; border-radius: 99px; background: #1a4a1a; border: 1px solid #3a7a3a; color: #7df07d; font-size: 13px; margin-left: 3px; }
     .badge-lose { display: inline-block; padding: 0 5px; border-radius: 99px; background: #4a1a1a; border: 1px solid #7a3a3a; color: #f07d7d; font-size: 13px; margin-left: 3px; }
+    #screenResult .lcd-table { font-size: 15px; }
+    #screenResult .lcd-table th { font-size: 14px; padding: 5px 6px; }
+    #screenResult .lcd-table td { font-size: 15px; padding: 5px 6px; }
     #screenSettlement .lcd-table { font-size: 16px; }
     #screenSettlement .lcd-table th { font-size: 15px; padding: 5px 6px; }
     #screenSettlement .lcd-table td { font-size: 16px; padding: 6px 6px; }
@@ -416,6 +419,17 @@
     </div>
   </div>
 
+  <!-- 着順 -->
+  <div id="screenResult" class="ls hidden">
+    <div class="pro-title" id="resultSub">着順</div>
+    <div class="ls-scroll">
+      <table class="lcd-table" id="resultTable">
+        <thead><tr><th>着</th><th>枠</th><th>馬番</th><th>馬名</th><th>タイム</th><th>着差</th></tr></thead>
+        <tbody id="resultRows"></tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- 清算 -->
   <div id="screenSettlement" class="ls hidden">
     <div class="pro-title" id="settleSub">清算</div>
@@ -552,7 +566,7 @@
   function yen(n){ return (n??0).toLocaleString("ja-JP"); }
   function f1(n){ return (Math.round(n*10)/10).toFixed(1); }
 
-  const ALL_SCREENS = ["#screenLoading","#screenRealTitle","#screenOpening","#screenPrologue","#screenBuy","#screenVideo","#screenSettlement","#screenGameOver","#screenEnding","#screenRate","#screenOdds","#screenShinbun","#screenMenu"];
+  const ALL_SCREENS = ["#screenLoading","#screenRealTitle","#screenOpening","#screenPrologue","#screenBuy","#screenVideo","#screenResult","#screenSettlement","#screenGameOver","#screenEnding","#screenRate","#screenOdds","#screenShinbun","#screenMenu"];
   function hideAllScreens(){ ALL_SCREENS.forEach(id=>$(id).classList.add("hidden")); }
   function showScreen(id){ hideAllScreens(); $(id).classList.remove("hidden"); updateTopBar(); }
   function activeScreen(){ return ALL_SCREENS.find(s=>!$(s).classList.contains("hidden")); }
@@ -644,7 +658,7 @@
       const title=lines2[0]?lines2[0].trim():`レース ${id}`;
 
       EPISODES[epNum]={ id, title, raceTitle, comment:commentText, videoPath, entryHtml, horseList,
-        horses:[...horseSet].sort((a,b)=>a-b), exactaMap, quinellaMap, result,
+        horses:[...horseSet].sort((a,b)=>a-b), exactaMap, quinellaMap, result, resultCsv:resultText,
         shinbunPath:`${base}/新聞.txt` };
       epNum++;
     }
@@ -673,7 +687,10 @@
       document.getElementById("topRaceName").textContent=ep?`${dateStr}　${ep.title}`:"";
       document.getElementById("topBankroll").textContent=ep?`所持金 ${yen(bankroll)}円`:"";
     }
-    $("#navStart").textContent=active==="#screenSettlement"?"次へ":active==="#screenVideo"?"精算":"レース開始";
+    if(active==="#screenSettlement") $("#navStart").textContent="次へ";
+    else if(active==="#screenVideo") $("#navStart").textContent="次へ";
+    else if(active==="#screenResult") $("#navStart").textContent="精算";
+    else $("#navStart").textContent="レース開始";
   }
 
   // ---- 出走表 ----
@@ -991,7 +1008,7 @@
   $("#btnVidSkip").addEventListener("click",()=>{
     play(seChoice);
     try{ raceVideo.pause(); raceVideo.src=""; }catch{}
-    clearTaikoTimers(); showSettlement();
+    clearTaikoTimers(); showResult();
   });
 
   function confirmBet(){
@@ -1050,6 +1067,28 @@
         taiko01.onended=async()=>{ try{taiko02.currentTime=0;await taiko02.play();}catch{} };
       }catch{}
     },5000);
+  }
+
+  function showResult(){
+    showScreen("#screenResult");
+    const ep=EPISODES[episode];
+    $("#resultSub").textContent=`着順（${ep.title}）`;
+    bgmPlay();
+    const tbody=$("#resultRows");
+    tbody.innerHTML="";
+    const lines=(ep.resultCsv||"").trim().split('\n').slice(1);
+    lines.forEach(line=>{
+      const cols=line.split(',').map(s=>s.trim());
+      const rank=parseInt(cols[0]);
+      if(isNaN(rank)||rank<1) return;
+      const tr=document.createElement("tr");
+      [cols[0],cols[1],cols[2],cols[3],cols[7]||"",cols[8]||""].forEach(txt=>{
+        const td=document.createElement("td");
+        td.textContent=txt;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
   }
 
   function showSettlement(){
@@ -1301,7 +1340,8 @@
     if(active==="#screenRealTitle"){ play(seChoice); showOpening(); }
     else if(active==="#screenPrologue") startRace();
     else if(active==="#screenBuy") startRaceFromBuy();
-    else if(active==="#screenVideo"){ play(seChoice); try{raceVideo.pause(); raceVideo.src="";}catch{} clearTaikoTimers(); showSettlement(); }
+    else if(active==="#screenVideo"){ play(seChoice); try{raceVideo.pause(); raceVideo.src="";}catch{} clearTaikoTimers(); showResult(); }
+    else if(active==="#screenResult"){ play(seChoice); showSettlement(); }
     else if(active==="#screenSettlement") advanceFromSettlement();
   });
 
