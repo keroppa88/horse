@@ -1301,31 +1301,35 @@
     $("#openingText").textContent="";
     const ov=$("#openingVideo");
     const scroll=$("#openingScroll");
-    let commentShown=false;
-    ov.ontimeupdate=()=>{
-      if(!commentShown && ov.currentTime>=11){
-        commentShown=true;
-        $("#openingText").textContent=openingCommentText.trim();
-      }
-    };
-    ov.onloadedmetadata=()=>{
-      const vw=ov.offsetWidth, vh=ov.offsetHeight;
-      const nw=ov.videoWidth, nh=ov.videoHeight;
-      if(nw>0&&nh>0&&vw>0&&vh>0){
-        const renderW=(vw/vh>=nw/nh)?vh*(nw/nh):vw;
-        if(renderW<vw-1){
-          scroll.style.width=renderW+"px";
-          scroll.style.marginLeft="auto";
-          scroll.style.marginRight="auto";
-        } else {
-          scroll.style.width="";
-          scroll.style.marginLeft="";
-          scroll.style.marginRight="";
+    ov.src='';
+    // 3秒黒画面・無音の後に動画開始
+    setTimeout(()=>{
+      let commentShown=false;
+      ov.ontimeupdate=()=>{
+        if(!commentShown && ov.currentTime>=11){
+          commentShown=true;
+          $("#openingText").textContent=openingCommentText.trim();
         }
-      }
-    };
-    ov.src='game/opening/move.mp4';
-    ov.play().catch(()=>{});
+      };
+      ov.onloadedmetadata=()=>{
+        const vw=ov.offsetWidth, vh=ov.offsetHeight;
+        const nw=ov.videoWidth, nh=ov.videoHeight;
+        if(nw>0&&nh>0&&vw>0&&vh>0){
+          const renderW=(vw/vh>=nw/nh)?vh*(nw/nh):vw;
+          if(renderW<vw-1){
+            scroll.style.width=renderW+"px";
+            scroll.style.marginLeft="auto";
+            scroll.style.marginRight="auto";
+          } else {
+            scroll.style.width="";
+            scroll.style.marginLeft="";
+            scroll.style.marginRight="";
+          }
+        }
+      };
+      ov.src='game/opening/move.mp4';
+      ov.play().catch(()=>{});
+    }, 3000);
   }
 
   function advanceFromSettlement(){
