@@ -1247,7 +1247,6 @@
           scroll.style.marginRight="";
         }
       }
-      $("#endingText").textContent=endingCommentText.trim();
     };
     ev.onended=()=>{
       setTimeout(()=>{
@@ -1267,8 +1266,10 @@
       }, 5000);
     };
     ev.src='game/ending/move.mp4';
-    setTimeout(()=>{ ev.play().catch(()=>{}); }, 5000);
-    ev.play().catch(()=>{});
+    setTimeout(()=>{
+      ev.play().catch(()=>{});
+      $("#endingText").textContent=endingCommentText.trim();
+    }, 5000);
   }
 
   async function showOpening(){
