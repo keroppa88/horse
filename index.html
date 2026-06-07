@@ -351,6 +351,7 @@
 <audio id="seMoney" src="data/money.mp3" preload="auto"></audio>
 <audio id="taiko01" src="data/taiko01.mp3" preload="auto"></audio>
 <audio id="taiko02" src="data/taiko02.mp3" preload="auto"></audio>
+<audio id="endthemeAudio" src="game/ending/endtheme.m4a" preload="auto"></audio>
 
 <!-- ========== TOP BAR ========== -->
 <div class="top-bar">
@@ -1338,9 +1339,9 @@
       purchasedTickets=[]; episodeStartBankroll=bankroll;
       showPrologue();
     } else {
-      // 同期関数内（ユーザージェスチャー直下）でAudioをアンロック
-      const th=new Audio('game/ending/endtheme.m4a');
-      th.volume=0.25;
+      // DOM要素を同期関数内（ユーザージェスチャー直下）でアンロック
+      const th=$("#endthemeAudio");
+      th.volume=0.25; th.currentTime=0;
       th.play().then(()=>{ th.pause(); th.currentTime=0; }).catch(()=>{});
       showEnding(th);
     }
