@@ -1478,13 +1478,6 @@
   updateTopBar();
 
   // iOS PWA用：初回タップで全audioをアンロック
-  // iOS AudioContext unlock（audio要素を再生せず無音でアンロック）
-  document.addEventListener("touchstart", ()=>{
-    try{
-      const ctx=new (window.AudioContext||window.webkitAudioContext)();
-      ctx.resume().then(()=>ctx.close()).catch(()=>{});
-    }catch{}
-  }, {once:true});
 })();
 </script>
 </body>
