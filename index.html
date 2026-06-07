@@ -1234,6 +1234,15 @@
   async function showEnding(){
     showScreen("#screenEnding");
     bgmStop();
+
+    // awaitより前にAudioをアンロック（awaitを挟むとiOSのジェスチャー文脈が切れる）
+    const th=new Audio('game/ending/endtheme.m4a');
+    th.volume=0.25;
+    th.onended=()=>{
+      try{ bgm.currentTime=0; bgm.loop=true; bgm.play().catch(()=>{}); }catch{}
+    };
+    th.play().then(()=>{ th.pause(); th.currentTime=0; }).catch(()=>{});
+
     let endingCommentText="";
     try{
       endingCommentText=await fetch('game/ending/レースコメント.txt').then(r=>r.ok?r.text():'').catch(()=>'');
@@ -1243,14 +1252,6 @@
     blackout.style.display="none"; blackout.style.opacity="0";
     const ev=$("#endingVideo");
     const scroll=$("#endingScroll");
-
-    // ユーザー操作の文脈でAudioをアンロックしておく（iOS対策）
-    const th=new Audio('game/ending/endtheme.m4a');
-    th.volume=0.25;
-    th.onended=()=>{
-      try{ bgm.currentTime=0; bgm.loop=true; bgm.play().catch(()=>{}); }catch{}
-    };
-    th.play().then(()=>{ th.pause(); th.currentTime=0; }).catch(()=>{});
 
     ev.onloadedmetadata=()=>{
       const vw=ev.offsetWidth, vh=ev.offsetHeight;
