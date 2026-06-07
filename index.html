@@ -1265,8 +1265,9 @@
         }catch{}
       }, 5000);
     };
-    ev.src='game/ending/move.mp4';
+    ev.src='';
     setTimeout(()=>{
+      ev.src='game/ending/move.mp4';
       ev.play().catch(()=>{});
       $("#endingText").textContent=endingCommentText.trim();
     }, 5000);
