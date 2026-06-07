@@ -1252,7 +1252,16 @@
     ev.onended=()=>{
       try{
         const th=new Audio('game/ending/endtheme.m4a');
-        th.loop=true; th.volume=0.7;
+        th.volume=0.7;
+        let playCount=0;
+        th.onended=()=>{
+          playCount++;
+          if(playCount<2){
+            th.currentTime=0; th.play().catch(()=>{});
+          } else {
+            try{ bgm.currentTime=0; bgm.loop=true; bgm.play().catch(()=>{}); }catch{}
+          }
+        };
         th.play().catch(()=>{});
         const blackout=$("#endingBlackout");
         setTimeout(()=>{
