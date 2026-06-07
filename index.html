@@ -351,6 +351,7 @@
 <audio id="seMoney" src="data/money.mp3" preload="auto"></audio>
 <audio id="taiko01" src="data/taiko01.mp3" preload="auto"></audio>
 <audio id="taiko02" src="data/taiko02.mp3" preload="auto"></audio>
+<audio id="endthemeAudio" src="game/ending/endtheme.m4a" preload="auto"></audio>
 
 <!-- ========== TOP BAR ========== -->
 <div class="top-bar">
@@ -1235,13 +1236,12 @@
     showScreen("#screenEnding");
     bgmStop();
 
-    // awaitより前にAudioをアンロック（awaitを挟むとiOSのジェスチャー文脈が切れる）
-    const th=new Audio('game/ending/endtheme.m4a');
+    const th=$("#endthemeAudio");
     th.volume=0.25;
+    th.currentTime=0;
     th.onended=()=>{
       try{ bgm.currentTime=0; bgm.loop=true; bgm.play().catch(()=>{}); }catch{}
     };
-    th.play().then(()=>{ th.pause(); th.currentTime=0; }).catch(()=>{});
 
     let endingCommentText="";
     try{
@@ -1472,6 +1472,13 @@
   openRealTitle();
   bindRealTitleStart();
   updateTopBar();
+
+  // iOS PWA用：初回タップで全audioをアンロック
+  document.addEventListener("touchstart", ()=>{
+    document.querySelectorAll("audio").forEach(a=>{
+      a.play().then(()=>{ a.pause(); a.currentTime=0; }).catch(()=>{});
+    });
+  }, {once:true});
 })();
 </script>
 </body>
