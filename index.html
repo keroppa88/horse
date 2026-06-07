@@ -1248,7 +1248,7 @@
       $("#endingText").textContent=endingCommentText.trim();
     };
     ev.onended=()=>{
-      try{ const th=new Audio('game/ending/endtheme.m4a'); th.play().catch(()=>{}); }catch{}
+      try{ const th=new Audio('game/ending/endtheme.m4a'); th.loop=true; th.play().catch(()=>{}); }catch{}
     };
     ev.src='game/ending/move.mp4';
     ev.play().catch(()=>{});
