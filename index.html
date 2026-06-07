@@ -1250,27 +1250,24 @@
       $("#endingText").textContent=endingCommentText.trim();
     };
     ev.onended=()=>{
-      try{
-        const th=new Audio('game/ending/endtheme.m4a');
-        th.volume=0.5;
-        let playCount=0;
-        th.onended=()=>{
-          playCount++;
-          if(playCount<2){
-            th.currentTime=0; th.play().catch(()=>{});
-          } else {
+      setTimeout(()=>{
+        try{
+          const th=new Audio('game/ending/endtheme.m4a');
+          th.volume=0.25;
+          th.onended=()=>{
             try{ bgm.currentTime=0; bgm.loop=true; bgm.play().catch(()=>{}); }catch{}
-          }
-        };
-        th.play().catch(()=>{});
-        const blackout=$("#endingBlackout");
-        setTimeout(()=>{
-          blackout.style.display="flex";
-          requestAnimationFrame(()=>requestAnimationFrame(()=>{ blackout.style.opacity="1"; }));
-        }, 30000);
-      }catch{}
+          };
+          th.play().catch(()=>{});
+          const blackout=$("#endingBlackout");
+          setTimeout(()=>{
+            blackout.style.display="flex";
+            requestAnimationFrame(()=>requestAnimationFrame(()=>{ blackout.style.opacity="1"; }));
+          }, 30000);
+        }catch{}
+      }, 5000);
     };
     ev.src='game/ending/move.mp4';
+    setTimeout(()=>{ ev.play().catch(()=>{}); }, 5000);
     ev.play().catch(()=>{});
   }
 
