@@ -515,6 +515,9 @@
     <div class="ls-scroll">
       <div class="pro-body" id="gameoverText" style="color:#bbb;"></div>
     </div>
+    <div class="ls-foot" style="justify-content:flex-end;">
+      <button class="lcd-btn-sm primary" id="btnGameoverNext" style="font-size:16px;padding:8px 20px;">次へ</button>
+    </div>
   </div>
 
   <!-- エンディング -->
@@ -1269,6 +1272,7 @@
           setTimeout(()=>{
             blackout.style.display="flex";
             requestAnimationFrame(()=>requestAnimationFrame(()=>{ blackout.style.opacity="1"; }));
+            blackout.addEventListener("click",()=>{ stopAllAudio(); openRealTitle(); bindRealTitleStart(); },{once:true});
           }, 30000);
         }catch{}
       }, 5000);
@@ -1448,6 +1452,10 @@
     else if(active==="#screenSettlement") advanceFromSettlement();
     else if(active==="#screenEnding"){ play(seChoice); const ev=$("#endingVideo"); try{ev.pause();ev.src="";}catch{} openRealTitle(); bindRealTitleStart(); }
     else if(active==="#screenGameOver"){ play(seChoice); openRealTitle(); bindRealTitleStart(); }
+  });
+
+  $("#btnGameoverNext").addEventListener("click",()=>{
+    play(seChoice); stopAllAudio(); openRealTitle(); bindRealTitleStart();
   });
 
   $("#btnOpeningNext").addEventListener("click",()=>{
