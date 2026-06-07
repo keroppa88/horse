@@ -1269,7 +1269,9 @@
     setTimeout(()=>{
       ev.src='game/ending/move.mp4';
       ev.play().catch(()=>{});
-      $("#endingText").textContent=endingCommentText.trim();
+      setTimeout(()=>{
+        $("#endingText").textContent=endingCommentText.trim();
+      }, 1000);
     }, 5000);
   }
 
