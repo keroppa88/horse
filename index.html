@@ -751,7 +751,7 @@
     const once=()=>{
       if(started) return; started=true;
       rt.removeEventListener("click",once);
-      play(seChoice); showOpening();
+      clearTaikoTimers(); showOpening();
     };
     rt.addEventListener("click",once);
   }
@@ -1479,7 +1479,7 @@
 
   // iOS PWA用：初回タップで全audioをアンロック
   document.addEventListener("touchstart", ()=>{
-    document.querySelectorAll("audio").forEach(a=>{
+    document.querySelectorAll("audio:not(#taiko01):not(#taiko02)").forEach(a=>{
       const v=a.volume; a.volume=0;
       a.play().then(()=>{ a.pause(); a.currentTime=0; a.volume=v; }).catch(()=>{ a.volume=v; });
     });
