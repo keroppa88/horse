@@ -1476,7 +1476,8 @@
   // iOS PWA用：初回タップで全audioをアンロック
   document.addEventListener("touchstart", ()=>{
     document.querySelectorAll("audio").forEach(a=>{
-      a.play().then(()=>{ a.pause(); a.currentTime=0; }).catch(()=>{});
+      const v=a.volume; a.volume=0;
+      a.play().then(()=>{ a.pause(); a.currentTime=0; a.volume=v; }).catch(()=>{ a.volume=v; });
     });
   }, {once:true});
 })();
