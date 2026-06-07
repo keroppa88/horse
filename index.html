@@ -526,7 +526,7 @@
       <div class="pro-body" id="endingText"></div>
     </div>
     <div id="endingBlackout" style="display:none;position:absolute;inset:0;background:#000;align-items:center;justify-content:center;opacity:0;transition:opacity 2s ease;z-index:10;">
-      <div style="color:#fff;font-size:18px;letter-spacing:2px;">-------To Be Continued-------</div>
+      <div style="color:#fff;font-size:18px;letter-spacing:2px;">To Be Continued</div>
     </div>
   </div>
 
@@ -1252,7 +1252,7 @@
     ev.onended=()=>{
       try{
         const th=new Audio('game/ending/endtheme.m4a');
-        th.volume=0.7;
+        th.volume=0.5;
         let playCount=0;
         th.onended=()=>{
           playCount++;
