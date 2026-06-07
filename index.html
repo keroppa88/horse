@@ -351,7 +351,6 @@
 <audio id="seMoney" src="data/money.mp3" preload="auto"></audio>
 <audio id="taiko01" src="data/taiko01.mp3" preload="auto"></audio>
 <audio id="taiko02" src="data/taiko02.mp3" preload="auto"></audio>
-<audio id="endthemeAudio" src="game/ending/endtheme.m4a" preload="auto"></audio>
 
 <!-- ========== TOP BAR ========== -->
 <div class="top-bar">
@@ -752,9 +751,6 @@
       if(started) return; started=true;
       rt.removeEventListener("click",once);
       play(seChoice); clearTaikoTimers();
-      // endthemeAudioをユーザー操作の文脈で無音アンロック（iOS PWA対策）
-      const th=$("#endthemeAudio"); th.volume=0;
-      th.play().then(()=>{ th.pause(); th.currentTime=0; th.volume=0.25; }).catch(()=>{ th.volume=0.25; });
       showOpening();
     };
     rt.addEventListener("click",once);
@@ -1240,12 +1236,13 @@
     showScreen("#screenEnding");
     bgmStop();
 
-    const th=$("#endthemeAudio");
+    // awaitより前（ユーザー操作の文脈）でAudioを作成・アンロック
+    const th=new Audio('game/ending/endtheme.m4a');
     th.volume=0.25;
-    th.currentTime=0;
     th.onended=()=>{
       try{ bgm.currentTime=0; bgm.loop=true; bgm.play().catch(()=>{}); }catch{}
     };
+    th.play().then(()=>{ th.pause(); th.currentTime=0; }).catch(()=>{});
 
     let endingCommentText="";
     try{
