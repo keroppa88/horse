@@ -524,9 +524,9 @@
     </div>
     <div class="ls-scroll" id="endingScroll">
       <div class="pro-body" id="endingText"></div>
-      <div style="text-align:center;padding:20px 0 8px;">
-        <button id="btnEndingTitle" class="lcd-btn-sm primary" style="font-size:17px;padding:12px 24px;">タイトル画面へ戻る</button>
-      </div>
+    </div>
+    <div id="endingBlackout" style="display:none;position:absolute;inset:0;background:#000;align-items:center;justify-content:center;opacity:0;transition:opacity 2s ease;z-index:10;">
+      <div style="color:#fff;font-size:18px;letter-spacing:2px;">-------To Be Continued-------</div>
     </div>
   </div>
 
@@ -1228,6 +1228,8 @@
       endingCommentText=await fetch('game/ending/レースコメント.txt').then(r=>r.ok?r.text():'').catch(()=>'');
     }catch{}
     $("#endingText").textContent="";
+    const blackout=$("#endingBlackout");
+    blackout.style.display="none"; blackout.style.opacity="0";
     const ev=$("#endingVideo");
     const scroll=$("#endingScroll");
     ev.onloadedmetadata=()=>{
@@ -1248,18 +1250,29 @@
       $("#endingText").textContent=endingCommentText.trim();
     };
     ev.onended=()=>{
-      try{ const th=new Audio('game/ending/endtheme.m4a'); th.loop=true; th.play().catch(()=>{}); }catch{}
+      try{
+        const th=new Audio('game/ending/endtheme.m4a');
+        th.volume=0.7;
+        let playCount=0;
+        th.onended=()=>{
+          playCount++;
+          if(playCount<2){
+            th.currentTime=0; th.play().catch(()=>{});
+          } else {
+            try{ bgm.currentTime=0; bgm.loop=true; bgm.play().catch(()=>{}); }catch{}
+          }
+        };
+        th.play().catch(()=>{});
+        const blackout=$("#endingBlackout");
+        setTimeout(()=>{
+          blackout.style.display="flex";
+          requestAnimationFrame(()=>requestAnimationFrame(()=>{ blackout.style.opacity="1"; }));
+        }, 30000);
+      }catch{}
     };
     ev.src='game/ending/move.mp4';
     ev.play().catch(()=>{});
   }
-
-  $("#btnEndingTitle").addEventListener("click",()=>{
-    play(seChoice);
-    const ev=$("#endingVideo");
-    try{ ev.pause(); ev.src=""; }catch{}
-    openRealTitle(); bindRealTitleStart();
-  });
 
   async function showOpening(){
     showScreen("#screenOpening");
