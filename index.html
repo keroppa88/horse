@@ -701,7 +701,7 @@
 
   let episode=1, bankroll=startBankroll, episodeStartBankroll=startBankroll;
   let mode="tanshoku", selectedQu1=null, selectedQu2=null, selectedTan=null;
-  let cart=[], purchasedTickets=[], settledEpisode=1, taikoTimer=null;
+  let cart=[], purchasedTickets=[], settledEpisode=1, taikoTimer=null, openingTimer=null;
   let oddsReturnScreen="#screenPrologue";
   const shinbunPaid=new Set();
 
@@ -1306,8 +1306,9 @@
     const ov=$("#openingVideo");
     const scroll=$("#openingScroll");
     ov.src='';
+    if(openingTimer){ clearTimeout(openingTimer); openingTimer=null; }
     // 3秒黒画面・無音の後に動画開始
-    setTimeout(()=>{
+    openingTimer=setTimeout(()=>{
       let commentShown=false;
       ov.ontimeupdate=()=>{
         if(!commentShown && ov.currentTime>=11){
@@ -1472,7 +1473,9 @@
 
   $("#btnOpeningNext").addEventListener("click",()=>{
     play(seChoice);
+    if(openingTimer){ clearTimeout(openingTimer); openingTimer=null; }
     const ov=$("#openingVideo");
+    ov.ontimeupdate=null; ov.onloadedmetadata=null;
     try{ ov.pause(); ov.src=""; }catch{}
     episode=1; showPrologue();
   });
