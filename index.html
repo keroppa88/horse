@@ -1341,8 +1341,8 @@
     } else {
       // DOM要素を同期関数内（ユーザージェスチャー直下）でアンロック
       const th=$("#endthemeAudio");
-      th.volume=0.25; th.currentTime=0;
-      th.play().then(()=>{ th.pause(); th.currentTime=0; }).catch(()=>{});
+      th.volume=0; th.currentTime=0;
+      th.play().then(()=>{ th.pause(); th.currentTime=0; th.volume=0.25; }).catch(()=>{ th.volume=0.25; });
       showEnding(th);
     }
   }
