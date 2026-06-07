@@ -751,7 +751,7 @@
     const once=()=>{
       if(started) return; started=true;
       rt.removeEventListener("click",once);
-      clearTaikoTimers(); showOpening();
+      play(seChoice); clearTaikoTimers(); showOpening();
     };
     rt.addEventListener("click",once);
   }
