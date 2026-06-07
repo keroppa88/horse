@@ -1232,17 +1232,13 @@
     }catch{}
   }
 
-  async function showEnding(){
+  async function showEnding(th){
     showScreen("#screenEnding");
     bgmStop();
 
-    // awaitより前（ユーザー操作の文脈）でAudioを作成・アンロック
-    const th=new Audio('game/ending/endtheme.m4a');
-    th.volume=0.25;
     th.onended=()=>{
       try{ bgm.currentTime=0; bgm.loop=true; bgm.play().catch(()=>{}); }catch{}
     };
-    th.play().then(()=>{ th.pause(); th.currentTime=0; }).catch(()=>{});
 
     let endingCommentText="";
     try{
@@ -1341,8 +1337,13 @@
       episode=settledEpisode+1;
       purchasedTickets=[]; episodeStartBankroll=bankroll;
       showPrologue();
+    } else {
+      // 同期関数内（ユーザージェスチャー直下）でAudioをアンロック
+      const th=new Audio('game/ending/endtheme.m4a');
+      th.volume=0.25;
+      th.play().then(()=>{ th.pause(); th.currentTime=0; }).catch(()=>{});
+      showEnding(th);
     }
-    else showEnding();
   }
 
   // ---- マウスドラッグスクロール ----
